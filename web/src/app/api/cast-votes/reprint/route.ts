@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "@/lib/auth/auth-utils";
+import { API_BASE_URL } from "@/lib/constants/api.constants";
+
+// GET handler for reprinting cast votes
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const controlNumber = searchParams.get("controlNumber") || "";
+
+    // Get auth token
+    const token = await getToken();
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Construct URL with query parameters
+    const url = `${API_BASE_URL}/cast-vote/reprint?controlNumber=${encodeURIComponent(
+      controlNumber
+    )}`;
+    // Forward the request to the external API
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 0 }, // District caching
+    });
+
+    if (!response.ok) {
+      // Try to parse the error body as JSON
+      let errorBody;
+      try {
+        errorBody = await response.json();
+      } catch {
+        errorBody = {
+          error: `Failed to reprint cast vote: ${response.statusText}`,
+        };
+      }
+      return NextResponse.json(errorBody, { status: response.status });
+    }
+
+    // Parse and return the response
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
+  }
+}

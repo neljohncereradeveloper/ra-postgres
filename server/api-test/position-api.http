@@ -1,0 +1,52 @@
+
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibmVsIiwic3ViIjoyLCJ1c2VyUm9sZXMiOiJBZG1pbiIsImFwcGxpY2F0aW9uQWNjZXNzIjoiRWxlY3Rpb24gTWFuYWdlbWVudCBNb2R1bGUiLCJpYXQiOjE3NDcxODczNzUsImV4cCI6MTc0NzIxNjE3NX0.DYAdXwxckf4LBh7yGM0YjJE6IhJjONIZahoPhzvSLOU
+@baseurl=http://localhost:3090/api/v1
+
+# Test Create Client
+POST {{baseurl}}/positions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "desc1": "BOD DISTRICT 1",
+  "maxCandidates": 2,
+  "termLimit": "2 years"
+}
+
+###
+# UPDATE 
+PATCH  {{baseurl}}/positions/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+ "desc1": "BOD DISTRICT 1",
+  "maxCandidates": 2,
+  "termLimit": "2 years"
+}
+
+###
+# DELETE 
+DELETE  {{baseurl}}/positions/delete/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  {{baseurl}}/positions/restore/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET POSITIONS 
+GET  {{baseurl}}/positions?term=&page=1&limit=50
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET COMBOBOX POSITIONS 
+GET  {{baseurl}}/positions/combobox
+Content-Type: application/json
+Authorization: Bearer {{token}}

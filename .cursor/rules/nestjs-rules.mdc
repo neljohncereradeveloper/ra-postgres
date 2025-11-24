@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure Rules (NestJS, DDD, Clean Architecture)
+
+## 1. Domain Layer
+- Contains: repositories, models, policies, ports, exceptions.
+- The domain layer holds all business logic, domain entities, business rules, and abstractions (interfaces/ports).
+- It must not depend on any other layer.
+- No infrastructure or application logic should be present here.
+
+## 2. Shared Layer
+- Contains: utils, constants, interfaces.
+- The shared layer is for generic, reusable code (utilities, constants, and common interfaces) that can be used across all layers.
+- It must not contain business logic or infrastructure-specific code.
+
+## 3. Infrastructure Layer
+- Contains: modules, filters, logger, middlewares, database.
+- The infrastructure layer implements technical details and external integrations (e.g., database, logging, middleware).
+- It should only implement abstractions (ports) defined in the domain layer.
+- It must not contain business logic.
+
+## 4. Application Layer
+- Contains: use-cases, commands.
+- The application layer orchestrates use cases and commands, coordinating between the domain and infrastructure layers.
+- It should not contain direct business rules (which belong in the domain) or technical implementation details (which belong in infrastructure).
+
+## General Rules
+- Each layer has a single, clear responsibility.
+- The domain layer is the core and must remain independent.
+- The shared layer is for cross-cutting, reusable code only.
+- The infrastructure layer implements details and never business logic.
+- The application layer coordinates, but does not implement, business or technical details.
+- Dependency direction: Only inward (infrastructure and application depend on domain, not vice versa).

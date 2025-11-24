@@ -1,0 +1,18 @@
+1. ready all the files in the development along with the latest codebase.
+   make sure there is no errors in running.
+2. make sure that the project directory is inside anywhere in the C Drive.
+3. exit all the running scripts and make sure there is none any npm or yarn start up , dev or prod 
+   that is running.
+4. backup the production database.
+5. update the .env file with production setup ( note: no script running ).
+6. make sure that the synchronize mode in the typeorm setup is off ( note: no script running ).
+7. run
+   - yarn migration:generate src/infrastructure/database/typeorm/mysql/migrations/files/build1000
+   
+8. after successfull migration, check the migration file for checking the changes 
+   that will override the database (note make sure that the database is backup before migration).
+
+9. to run the migration, and override the databse
+   - yarn migration:run
+
+10. put comments in the migration file for the detailes of the updated database schema

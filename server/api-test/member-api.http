@@ -1,0 +1,66 @@
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjEsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUiLCJpYXQiOjE3Mzg3MjMwNDUsImV4cCI6MTczODc1MTg0NX0.OgZUNk0t-Zff_I3Ym1RfUeh90d7IUR9FLkKXUjeYN-I
+# Upload members
+POST http://localhost:3000/v1/members/upload
+Content-Type: multipart/form-data
+Authorization: Bearer {{token}}
+
+# The file is attached without manually specifying the boundary
+file=@C:/Users/neljo/Downloads/attendance_d1.xlsx;type=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+###
+# Test Create Client
+POST http://localhost:3000/v1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "branch": "Main Branch",
+  "event": "District Assembly 2024",
+  "accountId": "ACC123456",
+  "accountName": "John Doe",
+  "age": 30,
+  "balance": 1000.50,
+  "loanStatus": "active",
+  "mevStatus": "good",
+  "clientType": "VIP",
+  "address": "123 Main St, Cityville",
+  "tell": "",
+  "cell": "+639171234567",
+  "dateOpened": "2025-01-30T10:00:00Z",
+  "birthDate": "1995-01-30T00:00:00Z"
+}
+
+###
+# UPDATE 
+PATCH  http://localhost:3000/v1/members/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+"district": "test",
+"name": "District Assembly 2024 update",
+"desc1": "update",
+"address": "Obrero Davao City update",
+"isActive": false,
+"startTime": "2025-01-30T10:00:00Z",
+"endTime": "2025-01-30T16:00:00Z"
+}
+
+###
+# DELETE 
+DELETE  http://localhost:3000/v1/members/delete/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# RESTORE 
+PATCH  http://localhost:3000/v1/members/restore/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET members 
+GET  http://localhost:3000/v1/members?term=&page=1&limit=2&isDeleted=false
+Content-Type: application/json
+Authorization: Bearer {{token}}

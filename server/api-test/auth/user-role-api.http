@@ -1,0 +1,47 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWFyayIsInN1YiI6MiwidXNlclJvbGVzIjoiQWRtaW4iLCJhcHBsaWNhdGlvbkFjY2VzcyI6IkF0dGVuZGFuY2UgTW9kdWxlIiwiaWF0IjoxNzM4NTcyNzI3LCJleHAiOjE3Mzg2MDE1Mjd9.LjqU7FuK6Ut_s_hl2b4kdvRgTP3mcnB4Hj7dvb_1edk
+
+
+# Test Create Client
+POST http://localhost:3000/v1/userroles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "desc1": "Admin"
+}
+
+###
+# UPDATE 
+PATCH  http://localhost:3000/v1/userroles/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "desc1": "Admin udpate"
+}
+
+###
+# DELETE 
+DELETE  http://localhost:3000/v1/userroles/delete/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  http://localhost:3000/v1/userroles/restore/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET userroles 
+GET  http://localhost:3000/v1/userroles?term=&page=1&limit=2&isDeleted=false
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# GET COMBOBOX userroles 
+GET  http://localhost:3090/api/v1/userroles/combobox
+Content-Type: application/json
+Authorization: Bearer {{token}}

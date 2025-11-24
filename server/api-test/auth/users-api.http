@@ -1,0 +1,52 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjEsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUsIEVsZWN0aW9uIE1hbmFnZW1lbnQgTW9kdWxlIiwiaWF0IjoxNzQ3MjkxODEzLCJleHAiOjE3NDczMjA2MTN9.rMDffnRDyBcKdDiccur11oMDYYuTMX2gk5kKbiiuTN4
+
+# Test Create Client
+POST http://localhost:3090/api/v1/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullName": "teller",
+  "branch": "DEFAULT",
+  "department": "DEFAULT",
+  "designation": "DEFAULT",
+  "applicationAccess": "Cast Vote Management Module",
+  "userRoles": "Voter",
+  "userName": "teller1",
+  "password": "teller1" 
+}
+
+###
+# UPDATE 
+PATCH  http://localhost:3090/api/v1/users/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullName": "MARK DOE update",
+  "branch": "HEAD OFFICE update",
+  "department": "IT DEPARTMENT update",
+  "designation": "IT SPECIALIST update",
+  "applicationAccess": "Attendance Module",
+  "userRoles": "Admin"
+}
+
+###
+# DELETE 
+DELETE  http://localhost:3000/v1/users/delete/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  http://localhost:3000/v1/users/restore/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET users 
+GET  http://localhost:3090/api/v1/users?term=&page=1&limit=2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+

@@ -1,0 +1,48 @@
+
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjIsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUsIEVsZWN0aW9uIE1hbmFnZW1lbnQgTW9kdWxlIiwiaWF0IjoxNzQ3MTkxMDAxLCJleHAiOjE3NDcyMTk4MDF9.lQqjYv8PbwTPKx1zLRMQqH-Dvs9tmkcDvZYfJuX10Ss
+@baseurl=http://localhost:3090/api/v1
+
+# Test Create Client
+POST {{baseurl}}/districts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "desc1": "DISTRICT 3"
+}
+
+###
+# UPDATE 
+PATCH  {{baseurl}}/districts/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "desc1": "District test update"
+}
+
+###
+# DELETE 
+DELETE  {{baseurl}}/districts/delete/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  {{baseurl}}/districts/restore/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET DISTRICTS 
+GET  {{baseurl}}/districts?term=&page=1&limit=50
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET COMBOBOX DISTRICTS 
+GET  {{baseurl}}/districts/combobox
+Content-Type: application/json
+Authorization: Bearer {{token}}

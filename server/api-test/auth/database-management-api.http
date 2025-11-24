@@ -1,0 +1,7 @@
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjEsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUiLCJpYXQiOjE3Mzg3Mzc0OTUsImV4cCI6MTczODc2NjI5NX0.R8YAo53ZD1ox50tvRz-0059gz7zOS22zMbz7sZHYdxE
+
+# Test Create Client
+POST http://localhost:3000/v1/database-management/backup
+Content-Type: application/json
+Authorization: Bearer {{token}}

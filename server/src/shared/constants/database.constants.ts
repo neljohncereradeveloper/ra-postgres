@@ -1,0 +1,15 @@
+export const DATABASE_CONSTANTS = {
+  MODELNAME_DISTRICT: 'districts',
+  MODELNAME_POSITION: 'positions',
+  MODELNAME_CANDIDATE: 'candidates',
+  MODELNAME_ACTIVITYLOG: 'activitylogs',
+  MODELNAME_ELECTION: 'elections',
+  MODELNAME_DELEGATE: 'delegates',
+  MODELNAME_USER: 'users',
+  MODELNAME_USERROLE: 'useroles',
+  MODELNAME_APPLICATIONACCESS: 'applicationaccess',
+  MODELNAME_SETTING: 'settings',
+  MODELNAME_CAST_VOTE: 'cast_votes',
+  MODELNAME_BALLOT: 'ballots',
+  MODELNAME_PRECINCT: 'precincts',
+};

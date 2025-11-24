@@ -1,0 +1,60 @@
+
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibmVsIiwic3ViIjoyLCJ1c2VyUm9sZXMiOiJBZG1pbiIsImFwcGxpY2F0aW9uQWNjZXNzIjoiRWxlY3Rpb24gTWFuYWdlbWVudCBNb2R1bGUiLCJpYXQiOjE3NDcxODczNzUsImV4cCI6MTc0NzIxNjE3NX0.DYAdXwxckf4LBh7yGM0YjJE6IhJjONIZahoPhzvSLOU
+@baseurl=http://localhost:3090/api/v1
+
+# Test Create Client
+POST {{baseurl}}/candidates
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "John Doe",
+  "position": "BOD DISTRICT 1",
+  "district": "DISTRICT 1",
+  "balance": 500000,
+  "address": "123 Main St",
+  "tell": "1234567890",
+  "cell": "1234567890"
+}
+
+###
+# UPDATE 
+PATCH  {{baseurl}}/candidates/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "John Doe update",
+  "position": "BOD DISTRICT 1",
+  "district": "DISTRICT 1",
+  "balance": 1000000,
+  "address": "123 Main St update",
+  "tell": "1234567890 update",
+  "cell": "1234567890 update"
+}
+
+###
+# DELETE 
+DELETE  {{baseurl}}/candidates/delete/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  {{baseurl}}/candidates/restore/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET CANDIDATES 
+GET  {{baseurl}}/candidates?term=&page=1&limit=50
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET COMBOBOX CANDIDATES 
+GET  {{baseurl}}/candidates/combobox
+Content-Type: application/json
+Authorization: Bearer {{token}}

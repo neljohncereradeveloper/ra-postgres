@@ -1,0 +1,68 @@
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjIsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUsIEVsZWN0aW9uIE1hbmFnZW1lbnQgTW9kdWxlIiwiaWF0IjoxNzQ3MTkwMTU1LCJleHAiOjE3NDcyMTg5NTV9._35peU4PKgFefZCJ2-hNO7k7qmlg8TYL2e0p8R5hQr4
+@baseurl=http://localhost:3090/api/v1
+
+# Test Create Client
+POST {{baseurl}}/elections
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+"name": "Representative Assembly 2025",
+"desc1": "Board of Directors Election",
+"address": "The Ritz Hotel, Davao City",
+"date": "2025-05-25"
+}
+
+###
+# UPDATE 
+PATCH  {{baseurl}}/elections/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+"name": "Representative Assembly 2025",
+"desc1": "Board of Directors Election",
+"address": "The Ritz Hotel, Davao City",
+"date": "2025-05-25"
+}
+
+###
+# DELETE 
+DELETE  {{baseurl}}/elections/delete/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  {{baseurl}}/elections/restore/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# START EVENT 
+PATCH  {{baseurl}}/elections/start
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# CLOSE EVENT 
+PATCH  {{baseurl}}/elections/close/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET elections 
+GET  {{baseurl}}/elections?term=&page=1&limit=50
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# GET COMBOBOX elections 
+GET  {{baseurl}}/elections/combobox
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+

@@ -1,0 +1,47 @@
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjEsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUiLCJpYXQiOjE3Mzg3Mzc0OTUsImV4cCI6MTczODc2NjI5NX0.R8YAo53ZD1ox50tvRz-0059gz7zOS22zMbz7sZHYdxE
+
+
+# Test Create Client
+POST http://localhost:3000/v1/applicationaccess
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "desc1": "Attendance Module"
+}
+
+###
+# UPDATE 
+PATCH  http://localhost:3000/v1/applicationaccess/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "desc1": "Attendance Module"
+}
+
+###
+# DELETE 
+DELETE  http://localhost:3000/v1/applicationaccess/delete/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# RESTORE 
+PATCH  http://localhost:3000/v1/applicationaccess/restore/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET applicationaccess 
+GET  http://localhost:3000/v1/applicationaccess?term=&page=1&limit=2&isDeleted=false
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+# GET COMBOBOX applicationaccess 
+GET  http://localhost:3000/v1/applicationaccess/combobox
+Content-Type: application/json
+Authorization: Bearer {{token}}

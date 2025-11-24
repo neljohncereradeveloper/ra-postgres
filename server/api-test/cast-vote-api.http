@@ -1,0 +1,20 @@
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjIsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUsIEVsZWN0aW9uIE1hbmFnZW1lbnQgTW9kdWxlIiwiaWF0IjoxNzQ3MjY4MTU3LCJleHAiOjE3NDcyOTY5NTd9.oMhx5knUYWeHG37TRg90tJ4cK8La4PvJuVYz4b67TuE
+@baseurl=http://localhost:3090/api/v1
+
+### Cast Vote
+POST {{baseurl}}/cast-vote
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+     "controlNumber": "1",
+     "candidates": [
+          {
+               "id": 4,
+               "displayName": "John Doe. update",
+          }
+     ]
+}
+
+

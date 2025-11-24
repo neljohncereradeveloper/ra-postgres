@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "C:\\Windows\\System32\\cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "mysql": {
+      "command": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/c", "npx", "-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "localhost",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "root",
+        "MYSQL_PASS": "LGJXRKFeSPsB527DZfx3tv",
+        "MYSQL_DB": "representativeassembly"
+      }
+    },
+
+    "context7": {
+      "command": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp@latest"]
+    },
+    "excel-mcp": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@negokaz/excel-mcp-server",
+        "--key",
+        "2e7850c2-57ee-4864-b628-ae31ff8343ce"
+      ]
+    }
+  }
+}
