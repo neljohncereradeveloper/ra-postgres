@@ -32,9 +32,21 @@ export class DistrictEntity {
   @Index()
   deletedAt: Date | null; // For soft delete
 
+  @Column({
+    name: 'created_by',
+    comment: 'username of the user who created the district',
+    nullable: true,
+  })
+  createdBy: string;
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Column({
+    name: 'updated_by',
+    comment: 'username of the user who updated the district',
+    nullable: true,
+  })
+  updatedBy: string;
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 

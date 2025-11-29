@@ -43,12 +43,14 @@ export class CreateDistrictUseCase {
         // Can only add district if election is scheduled
         election.validate();
 
-        const newDistrict = new District({
+        // Create and validate district using domain method
+        const district = District.create({
           electionId: activeElection.electionId,
           desc1: dto.desc1,
+          createdBy: userId.toString(),
         });
-        const district = await this.districtRepository.create(
-          newDistrict,
+        const savedDistrict = await this.districtRepository.create(
+          district,
           manager,
         );
 
@@ -56,16 +58,16 @@ export class CreateDistrictUseCase {
           LOG_ACTION_CONSTANTS.CREATE_DISTRICT,
           DATABASE_CONSTANTS.MODELNAME_DISTRICT,
           JSON.stringify({
-            id: district.id,
+            id: savedDistrict.id,
             election: election.name,
-            desc1: district.desc1,
+            desc1: savedDistrict.desc1,
           }),
           new Date(),
           userId,
         );
         await this.activityLogRepository.create(activityLog, manager);
 
-        return district;
+        return savedDistrict;
       },
     );
   }

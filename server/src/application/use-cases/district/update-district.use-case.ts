@@ -50,19 +50,16 @@ export class UpdateDistrictUseCase {
         election.validate();
 
         // validate district existence
-        const districtResult = await this.districtRepository.findById(
+        const district = await this.districtRepository.findById(
           id,
           manager,
         );
-        if (!districtResult) {
+        if (!district) {
           throw new NotFoundException('District not found');
         }
 
-        // Update the district
-        const district = new District({
-          electionId: activeElection.electionId,
-          desc1: dto.desc1,
-        });
+        // Update the district (validation is done inside update method)
+        district.update(dto, userId.toString());
         const updateSuccessfull = await this.districtRepository.update(
           id,
           district,
