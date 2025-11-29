@@ -1,8 +1,8 @@
-import { ELECTION_STATUS_CONSTANTS } from '@shared/constants/election.constants';
 import { ElectionCancelPolicy } from '@domain/policies/election/election-cancel.policy';
-import { ElectionClosePolicy } from '@domain/policies/election/election-end.policy';
+import { ElectionClosePolicy } from '@domain/policies/election/election-close.policy';
 import { ElectionStartPolicy } from '@domain/policies/election/election-start.policy';
 import { ElectionLockPolicy } from '@domain/policies/election/election-lock.policy';
+import { ElectionStatus } from '@domain/enums/index';
 
 export class Election {
   id: number;
@@ -11,7 +11,7 @@ export class Election {
   address: string;
   date: Date;
   maxAttendees: number;
-  status: string;
+  electionStatus: ElectionStatus;
   startTime?: Date;
   endTime?: Date;
   deletedAt?: Date | null;
@@ -24,7 +24,7 @@ export class Election {
     startTime?: Date;
     endTime?: Date;
     maxAttendees?: number;
-    status?: string;
+    electionStatus?: ElectionStatus;
     date?: Date;
     deletedAt?: Date | null;
   }) {
@@ -36,9 +36,17 @@ export class Election {
     this.startTime = params.startTime;
     this.endTime = params.endTime;
     this.maxAttendees = params.maxAttendees;
-    this.status = params.status;
+    this.electionStatus = params.electionStatus;
     this.deletedAt = params.deletedAt;
   }
+
+  /**
+   * Start the election
+   * @param delegatesCount - The number of delegates in the election
+   * @param districtCount - The number of districts in the election
+   * @param positionCount - The number of positions in the election
+   * @param candidateCount - The number of candidates in the election
+   */
 
   startEvent(
     delegatesCount: number,
@@ -46,6 +54,7 @@ export class Election {
     positionCount: number,
     candidateCount: number,
   ): void {
+    // Validate if the election can be started
     new ElectionStartPolicy().validateElectionStart(
       this,
       delegatesCount,
@@ -53,23 +62,39 @@ export class Election {
       positionCount,
       candidateCount,
     );
+    // set election data
     this.startTime = new Date();
-    this.status = ELECTION_STATUS_CONSTANTS.STARTED;
+    this.electionStatus = ElectionStatus.STARTED;
   }
 
-  closeEvent(delegatesCount: number): void {
-    new ElectionClosePolicy().validateElectionClose(this, delegatesCount);
+  /**
+   * Close the election
+   */
+  closeEvent(): void {
+    // Validate if the election can be closed
+    new ElectionClosePolicy().validateElectionClose(this);
+    // set election data
     this.endTime = new Date();
-    this.status = ELECTION_STATUS_CONSTANTS.ENDED;
+    this.electionStatus = ElectionStatus.CLOSED;
   }
 
-  cancelEvent(): void {
+  /**
+   * Cancel the election
+   */
+
+  cancelEvent(description: string): void {
+    // Validate if the election can be cancelled
     new ElectionCancelPolicy().validateElectionCancel(this);
+    // set election data
+    this.desc1 = description;
     this.startTime = null;
     this.endTime = null;
-    this.status = ELECTION_STATUS_CONSTANTS.CANCELLED; // Update the event status to canceled
+    this.electionStatus = ElectionStatus.CANCELLED;
   }
 
+  /**
+   * Update the election details
+   */
   updateDetails(dto: Partial<Election>): void {
     this.name = dto.name;
     this.desc1 = dto.desc1;
@@ -78,7 +103,10 @@ export class Election {
     this.date = dto.date;
   }
 
-  validateMutationAllowed(): void {
-    new ElectionLockPolicy().validateMutationAllowed(this);
+  /**
+   * Validate the election
+   */
+  validate(): void {
+    new ElectionLockPolicy().validate(this);
   }
 }

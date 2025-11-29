@@ -15,6 +15,7 @@
       "@application/commands/*": ["src/application/commands/*"],
       "@domain/constants/*": ["src/domain/constants/*"],
       "@domain/models/*": ["src/domain/models/*"],
+      "@domain/enums/*": ["src/domain/enums/*"],
       "@domain/policies/*": ["src/domain/policies/*"],
       "@domain/ports/*": ["src/domain/ports/*"],
       "@domains/repositories/*": ["src/domain/repositories/*"],

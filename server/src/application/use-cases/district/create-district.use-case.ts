@@ -41,7 +41,7 @@ export class CreateDistrictUseCase {
           manager,
         );
         // Can only add district if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         const newDistrict = new District({
           electionId: activeElection.electionId,

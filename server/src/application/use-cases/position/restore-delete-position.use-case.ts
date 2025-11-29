@@ -40,7 +40,7 @@ export class RestoreDeletePositionUseCase {
           manager,
         );
         // Can only restore deleted position if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         const success = await this.positionRepository.restoreDeleted(
           id,

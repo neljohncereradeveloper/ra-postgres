@@ -47,7 +47,7 @@ export class UpdatePositionUseCase {
           manager,
         );
         // Can only update position if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         // validate position existence
         const positionResult = await this.positionRepository.findById(

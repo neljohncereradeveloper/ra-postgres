@@ -60,7 +60,7 @@ export class UpdateUserUseCase {
           manager,
         );
         // Can only add user if election is schedule
-        election.validateMutationAllowed();
+        election.validate();
 
         const precinct = await this.precinctRepository.findByDescription(
           dto.precinct,

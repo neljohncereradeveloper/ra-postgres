@@ -40,7 +40,7 @@ export class RestoreDeleteDistrictUseCase {
           manager,
         );
         // Can only restore deleted district if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         const success = await this.districtRepository.restoreDeleted(
           id,

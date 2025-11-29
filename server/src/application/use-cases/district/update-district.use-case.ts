@@ -47,7 +47,7 @@ export class UpdateDistrictUseCase {
           manager,
         );
         // Can only update district if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         // validate district existence
         const districtResult = await this.districtRepository.findById(

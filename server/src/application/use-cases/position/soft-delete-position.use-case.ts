@@ -40,7 +40,7 @@ export class SoftDeletePositionUseCase {
           manager,
         );
         // Can only soft delete position if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         const success = await this.positionRepository.softDelete(id, manager);
         if (!success) {

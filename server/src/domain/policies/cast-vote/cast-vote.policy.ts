@@ -7,7 +7,7 @@ import { Candidate } from '@domain/models/candidate.model';
 import { Position } from '@domain/models/position.model';
 import { CastVoteValidationException } from '@domains/exceptions/election/cast-vote.exception';
 import { BALLOT_STATUS_CONSTANTS } from '@shared/constants/ballot.constants';
-import { ELECTION_STATUS_CONSTANTS } from '@shared/constants/election.constants';
+import { ElectionStatus } from '@domain/enums/index';
 
 /**
  * CastVotePolicy
@@ -26,17 +26,22 @@ export class CastVotePolicy {
       throw new CastVoteValidationException('Election not found');
     }
 
-    if (election.status === ELECTION_STATUS_CONSTANTS.ENDED) {
-      throw new CastVoteValidationException('Election has already ended');
-    }
-
-    if (election.status === ELECTION_STATUS_CONSTANTS.CANCELLED) {
-      throw new CastVoteValidationException('Election has been cancelled');
-    }
-
-    if (election.status === ELECTION_STATUS_CONSTANTS.SCHEDULED) {
+    // Validate if the election is not closed
+    if (election.electionStatus === ElectionStatus.CLOSED) {
       throw new CastVoteValidationException(
-        `Cannot cast votes when election is NOT started.`,
+        'Election has already been closed.',
+      );
+    }
+
+    // Validate if the election is not cancelled
+    if (election.electionStatus === ElectionStatus.CANCELLED) {
+      throw new CastVoteValidationException('Election has been cancelled.');
+    }
+
+    // Validate if the election has started
+    if (election.electionStatus === ElectionStatus.SCHEDULED) {
+      throw new CastVoteValidationException(
+        'Cannot cast votes. Election has not started.',
       );
     }
   }
@@ -52,9 +57,10 @@ export class CastVotePolicy {
       throw new CastVoteValidationException('Delegate not found');
     }
 
+    // Validate if the delegate has not already voted
     if (delegate.hasVoted) {
       throw new CastVoteValidationException(
-        'Delegate has already voted in this election',
+        'Delegate has already voted in this election.',
       );
     }
 
@@ -75,6 +81,7 @@ export class CastVotePolicy {
       throw new CastVoteValidationException('Ballot not found');
     }
 
+    // Validate if the ballot is in issued status
     if (ballot.status !== BALLOT_STATUS_CONSTANTS.ISSUED) {
       throw new CastVoteValidationException(
         `Ballot is in invalid state: ${ballot.status}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
@@ -94,14 +101,16 @@ export class CastVotePolicy {
       throw new CastVoteValidationException('Candidate not found');
     }
 
+    // Validate if the candidate belongs to the active election
     if (candidate.electionId !== electionId) {
       throw new CastVoteValidationException(
-        `Candidate ${candidate.displayName} does not belong to the active election`,
+        `Candidate ${candidate.displayName} does not belong to the active election.`,
       );
     }
 
+    // Validate if the candidate has not been removed
     if (candidate.deletedAt) {
-      throw new CastVoteValidationException('Candidate has been removed');
+      throw new CastVoteValidationException('Candidate has been removed.');
     }
   }
 
@@ -119,15 +128,17 @@ export class CastVotePolicy {
     for (const [positionId, count] of candidatesPerPosition.entries()) {
       const position = positions.get(positionId);
 
+      // Validate if the position exists
       if (!position) {
         throw new CastVoteValidationException(
-          `Position with ID ${positionId} not found`,
+          `Position with ID ${positionId} not found.`,
         );
       }
 
+      // Validate if votes per position are within allowed limits
       if (position.maxCandidates && count > position.maxCandidates) {
         throw new CastVoteValidationException(
-          `Maximum votes allowed for position ${position.desc1} is ${position.maxCandidates}, but ${count} votes were cast`,
+          `Maximum votes allowed for position ${position.desc1} is ${position.maxCandidates}, but ${count} votes were cast.`,
         );
       }
     }
@@ -159,12 +170,12 @@ export class CastVotePolicy {
     // Validate ballot
     this.validateBallot(ballot);
 
-    // If no candidates selected, that's now allowed - simply return
+    // If no candidates selected, that's allowed - simply return
     if (candidates.length === 0) {
       return;
     }
 
-    // Ensure candidates belong to the active election
+    // Validate that candidates belong to the active election
     for (const candidate of candidates) {
       this.validateCandidate(candidate, election.id);
     }

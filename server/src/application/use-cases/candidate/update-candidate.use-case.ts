@@ -56,7 +56,7 @@ export class UpdateCandidateUseCase {
           manager,
         );
         // Can only update candidate if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         const delegate = await this.delegateRepository.findById(
           dto.delegateId,

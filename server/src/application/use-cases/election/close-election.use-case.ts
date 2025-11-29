@@ -6,7 +6,6 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { SettingsRepository } from '@domains/repositories/setting.repository';
-import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { Election } from '@domain/models/election.model';
 
@@ -21,8 +20,6 @@ export class CloseElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
     @Inject(REPOSITORY_TOKENS.SETTING)
     private readonly settingsRepository: SettingsRepository,
-    @Inject(REPOSITORY_TOKENS.DELEGATE)
-    private readonly memberRepository: DelegateRepository,
     // @Inject(REPOSITORY_TOKENS.BALLOT)
     // private readonly ballotRepository: BallotRepository,
   ) {}
@@ -40,12 +37,8 @@ export class CloseElectionUseCase {
           activeElection.electionId,
           manager,
         );
-        const membersCount = await this.memberRepository.countByElectionId(
-          activeElection.electionId,
-          manager,
-        );
         // Apply business logic to end the event (state modification)
-        election.closeEvent(membersCount);
+        election.closeEvent();
 
         await this.electionRepository.update(
           activeElection.electionId,

@@ -32,7 +32,7 @@ export class UpdateElectionUseCase {
         const election = await this.electionRepository.findById(id, manager);
         if (!election) throw new ElectionNotFoundException();
 
-        election.validateMutationAllowed();
+        election.validate();
         election.updateDetails(dto);
 
         await this.electionRepository.update(id, election, manager);

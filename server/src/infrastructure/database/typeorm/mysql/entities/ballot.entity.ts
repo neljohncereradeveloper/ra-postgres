@@ -11,13 +11,7 @@ import {
 } from 'typeorm';
 import { ElectionEntity } from './election.entity';
 import { DelegateEntity } from './delegate.entity';
-
-export enum BallotStatus {
-  PENDING = 'pending',
-  ISSUED = 'issued',
-  CAST = 'cast',
-  VOID = 'void',
-}
+import { BallotStatus } from '@domain/enums/index';
 
 @Entity('ballots')
 @Unique(['ballot_number', 'election_id'])
@@ -41,9 +35,10 @@ export class BallotEntity {
     type: 'enum',
     enum: BallotStatus,
     default: BallotStatus.PENDING,
+    name: 'ballot_status',
   })
   @Index()
-  status: BallotStatus;
+  ballotStatus: BallotStatus;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -17,13 +17,7 @@ import { PositionEntity } from './position.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 import { BallotEntity } from './ballot.entity';
 import { CandidateEntity } from './candidate.entity';
-
-export enum ElectionStatus {
-  SCHEDULED = 'scheduled',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-}
+import { ElectionStatus } from '@domain/enums/index';
 
 @Entity('elections')
 @Unique(['name'])
@@ -56,9 +50,10 @@ export class ElectionEntity {
     type: 'enum',
     enum: ElectionStatus,
     default: ElectionStatus.SCHEDULED,
+    name: 'election_status',
   })
   @Index()
-  status: ElectionStatus;
+  electionStatus: ElectionStatus;
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()

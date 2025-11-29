@@ -1,37 +1,35 @@
-// domain/policies/event-lock.policy.ts
-
+import { ElectionStatus } from '@domain/enums/index';
 import { Election } from '@domain/models/election.model';
 import { ElectionMutationLockedException } from '@domains/exceptions/election/election-lock.exception';
-import { ELECTION_STATUS_CONSTANTS } from '@shared/constants/election.constants';
 
 /**
  * ElectionLockPolicy
  *
- * This policy enforces data lock rules when an election is in progress or ended.
+ * This policy enforces data lock rules when an election is closed or cancelled.
+ *
+ * @param election - The election to validate
+ * @throws ElectionMutationLockedException - If the election is closed or cancelled
  */
 export class ElectionLockPolicy {
-  /**
-   * Determines if mutations are allowed for the election.
-   *
-   * @param election - The election to validate.
-   * @throws ElectionMutationLockedException - Thrown if the election is in a locked state.
-   */
-  validateMutationAllowed(election: Election): void {
-    if (election.status === ELECTION_STATUS_CONSTANTS.ENDED) {
+  validate(election: Election): void {
+    // Validate if the election is not closed
+    if (election.electionStatus === ElectionStatus.CLOSED) {
       throw new ElectionMutationLockedException(
-        'Updating system data is not allowed. Election has already ended.',
+        'Cannot update election. Election has already closed.',
       );
     }
 
-    if (election.status === ELECTION_STATUS_CONSTANTS.CANCELLED) {
+    // Validate if the election is not cancelled
+    if (election.electionStatus === ElectionStatus.CANCELLED) {
       throw new ElectionMutationLockedException(
-        'Updating system data is not allowed. Updating system data is not allowed. Election has already cancelled.',
+        'Cannot update election. Election is already cancelled.',
       );
     }
 
-    if (election.status === ELECTION_STATUS_CONSTANTS.STARTED) {
+    // Validate if the election is not started
+    if (election.electionStatus === ElectionStatus.STARTED) {
       throw new ElectionMutationLockedException(
-        'Updating system data is not allowed. Election has already started.',
+        'Cannot update election. Election has already started.',
       );
     }
   }

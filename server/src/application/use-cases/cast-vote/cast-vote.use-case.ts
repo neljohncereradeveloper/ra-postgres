@@ -2,7 +2,7 @@ import { CastVoteCommand } from '@application/commands/cast-vote/cast-vote.comma
 import { ActivityLog } from '@domain/models/activitylog,model';
 import { CastVote } from '@domain/models/cast-vote.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { CastVotePolicy } from '@domain/policies/election/cast-vote.policy';
+import { CastVotePolicy } from '@domain/policies/cast-vote/cast-vote.policy';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';

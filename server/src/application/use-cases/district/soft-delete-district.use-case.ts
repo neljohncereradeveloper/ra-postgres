@@ -40,7 +40,7 @@ export class SoftDeleteDistrictUseCase {
           manager,
         );
         // Can only soft delete district if election is scheduled
-        election.validateMutationAllowed();
+        election.validate();
 
         const success = await this.districtRepository.softDelete(id, manager);
         if (!success) {
