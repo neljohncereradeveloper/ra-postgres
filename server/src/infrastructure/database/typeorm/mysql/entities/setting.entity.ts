@@ -14,10 +14,10 @@ export class SettingEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ name: 'setup_code', length: 100, nullable: true })
   setupCode: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'election_id', nullable: true })
   @Index()
   electionId: number;
 
@@ -26,6 +26,6 @@ export class SettingEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionId' }) // Specifies the foreign key column
+  @JoinColumn({ name: 'election_id' }) // Specifies the foreign key column
   election: ElectionEntity; // This defines the OneToOne relationship
 }

@@ -20,20 +20,20 @@ export enum BallotStatus {
 }
 
 @Entity('ballots')
-@Unique(['ballotNumber', 'electionId'])
+@Unique(['ballot_number', 'election_id'])
 export class BallotEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ name: 'ballot_number', length: 100 })
   @Index()
   ballotNumber: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'delegate_id', nullable: true })
   @Index()
   delegateId: number;
 
-  @Column()
+  @Column({ name: 'election_id' })
   @Index()
   electionId: number;
 
@@ -45,23 +45,23 @@ export class BallotEntity {
   @Index()
   status: BallotStatus;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @ManyToOne(() => ElectionEntity, (election) => election.ballots, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionId' })
+  @JoinColumn({ name: 'election_id' })
   election: ElectionEntity;
 
   @ManyToOne(() => DelegateEntity, (delegate) => delegate.ballots, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'delegateId' })
+  @JoinColumn({ name: 'delegate_id' })
   delegate: DelegateEntity;
 }

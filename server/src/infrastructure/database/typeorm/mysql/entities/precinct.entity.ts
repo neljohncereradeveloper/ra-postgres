@@ -20,14 +20,14 @@ export class PrecinctEntity {
   @Column({ length: 255 })
   desc1: string;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @OneToMany(() => UserEntity, (user) => user.precinct)

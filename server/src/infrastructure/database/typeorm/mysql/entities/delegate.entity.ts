@@ -17,29 +17,29 @@ import { CandidateEntity } from './candidate.entity';
 import { BallotEntity } from './ballot.entity';
 
 @Entity('delegates')
-@Unique(['accountId', 'electionId'])
-@Unique(['electionId', 'controlNumber'])
+@Unique(['account_id', 'election_id'])
+@Unique(['election_id', 'control_number'])
 export class DelegateEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'election_id' })
   @Index()
   electionId: number;
 
   @Column({ length: 100 })
   branch: string;
 
-  @Column({ length: 100 })
+  @Column({ name: 'account_id', length: 100 })
   accountId: string;
 
-  @Column({ length: 255 })
+  @Column({ name: 'account_name', length: 255 })
   accountName: string;
 
   @Column({ nullable: true })
   age: number; // Note: Add CHECK constraint in migration: age >= 0 OR age IS NULL
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ name: 'birth_date', type: 'date', nullable: true })
   birthDate?: Date;
 
   @Column({ type: 'text', nullable: true })
@@ -51,41 +51,41 @@ export class DelegateEntity {
   @Column({ length: 50, nullable: true })
   cell?: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ name: 'date_opened', type: 'date', nullable: true })
   dateOpened?: Date;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ name: 'client_type', length: 100, nullable: true })
   clientType?: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ name: 'loan_status', length: 100, nullable: true })
   loanStatus: string;
 
   @Column({ type: 'numeric', precision: 15, scale: 2 })
   balance: number;
 
-  @Column({ length: 100 })
+  @Column({ name: 'mev_status', length: 100 })
   mevStatus: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ name: 'has_voted', type: 'boolean', default: false })
   hasVoted: boolean;
 
-  @Column()
+  @Column({ name: 'control_number' })
   controlNumber: string;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt?: Date | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @ManyToOne(() => ElectionEntity, (election) => election.members, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionId' })
+  @JoinColumn({ name: 'election_id' })
   election: ElectionEntity;
 
   @OneToMany(() => BallotEntity, (ballot) => ballot.delegate)

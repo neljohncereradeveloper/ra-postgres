@@ -43,14 +43,14 @@ export class ElectionEntity {
   @Column({ type: 'date', nullable: true })
   date: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'start_time', type: 'timestamp', nullable: true })
   startTime: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'end_time', type: 'timestamp', nullable: true })
   endTime: Date;
 
-  @Column({ nullable: true })
-  maxAttendees: number; // Note: Add CHECK constraint in migration: maxAttendees > 0 OR maxAttendees IS NULL
+  @Column({ name: 'max_attendees', nullable: true })
+  maxAttendees: number; // Note: Add CHECK constraint in migration: max_attendees > 0 OR max_attendees IS NULL
 
   @Column({
     type: 'enum',
@@ -60,14 +60,14 @@ export class ElectionEntity {
   @Index()
   status: ElectionStatus;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   /** One to many */

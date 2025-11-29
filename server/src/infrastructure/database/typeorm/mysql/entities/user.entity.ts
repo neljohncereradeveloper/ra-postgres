@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity('users')
-@Unique(['userName'])
+@Unique(['user_name'])
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,25 +21,25 @@ export class UserEntity {
   @Column({ length: 100 })
   watcher: string;
 
-  @Column({ length: 100 })
+  @Column({ name: 'application_access', length: 100 })
   applicationAccess: string;
 
-  @Column({ length: 100 })
+  @Column({ name: 'user_roles', length: 100 })
   userRoles: string;
 
-  @Column({ length: 100 })
+  @Column({ name: 'user_name', length: 100 })
   userName: string;
 
   @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt?: Date | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

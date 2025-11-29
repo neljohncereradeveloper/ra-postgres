@@ -16,33 +16,33 @@ import { CandidateEntity } from './candidate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 
 @Entity('districts')
-@Unique(['electionId', 'desc1'])
+@Unique(['election_id', 'desc1'])
 export class DistrictEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'election_id' })
   @Index()
   electionId: number;
 
   @Column({ length: 255 })
   desc1: string;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @ManyToOne(() => ElectionEntity, (election) => election.districts, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionId' })
+  @JoinColumn({ name: 'election_id' })
   election: ElectionEntity;
 
   @OneToMany(() => CandidateEntity, (candidate) => candidate.district)

@@ -16,39 +16,39 @@ import { CandidateEntity } from './candidate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 
 @Entity('positions')
-@Unique(['electionId', 'desc1'])
+@Unique(['election_id', 'desc1'])
 export class PositionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'election_id' })
   @Index()
   electionId: number;
 
   @Column({ length: 255 })
   desc1: string;
 
-  @Column({ nullable: true })
-  maxCandidates: number; // Note: Add CHECK constraint in migration: maxCandidates > 0 OR maxCandidates IS NULL
+  @Column({ name: 'max_candidates', nullable: true })
+  maxCandidates: number; // Note: Add CHECK constraint in migration: max_candidates > 0 OR max_candidates IS NULL
 
-  @Column({ length: 100, nullable: true })
+  @Column({ name: 'term_limit', length: 100, nullable: true })
   termLimit: string;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @ManyToOne(() => ElectionEntity, (election) => election.positions, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionId' })
+  @JoinColumn({ name: 'election_id' })
   election: ElectionEntity;
 
   @OneToMany(() => CandidateEntity, (candidate) => candidate.position)
