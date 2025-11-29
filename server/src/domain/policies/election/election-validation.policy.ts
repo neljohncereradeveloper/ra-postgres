@@ -14,10 +14,13 @@ export class ElectionValidationPolicy {
    * This method enforces domain validation rules such as:
    * - Election must not be null
    * - Name must be provided and meet length requirements (2-255 characters)
-   * - Address must be provided and not empty
+   * - Description (desc1) must meet length requirements if provided
+   * - Address must be provided and meet length requirements
    * - Date must be provided and valid
    * - Election status must be a valid enum value
    * - Max attendees must be positive if provided
+   * - Start time and end time must be valid dates if provided
+   * - End time must be after start time if both are provided
    *
    * @param election - The election to validate
    * @throws ElectionValidationException - If election validation fails
@@ -48,10 +51,27 @@ export class ElectionValidationPolicy {
       );
     }
 
+    // Validate if desc1 length is within limits (if provided)
+    if (election.desc1 !== undefined && election.desc1 !== null) {
+      if (election.desc1.length > 65535) {
+        // TEXT type can hold up to 65,535 characters
+        throw new ElectionValidationException(
+          'Election description must not exceed 65535 characters.',
+        );
+      }
+    }
+
     // Validate if address is provided
     if (!election.address || election.address.trim().length === 0) {
       throw new ElectionValidationException(
         'Election address is required and cannot be empty.',
+      );
+    }
+
+    // Validate if address length is within reasonable limits (65535 characters max for TEXT type)
+    if (election.address.length > 65535) {
+      throw new ElectionValidationException(
+        'Election address must not exceed 65535 characters.',
       );
     }
 
@@ -66,6 +86,36 @@ export class ElectionValidationPolicy {
     if (!(election.date instanceof Date) || isNaN(election.date.getTime())) {
       throw new ElectionValidationException(
         'Election date must be a valid date.',
+      );
+    }
+
+    // Validate if startTime is a valid date if provided
+    if (
+      election.startTime !== undefined &&
+      election.startTime !== null &&
+      (!(election.startTime instanceof Date) ||
+        isNaN(election.startTime.getTime()))
+    ) {
+      throw new ElectionValidationException('Start time must be a valid date.');
+    }
+
+    // Validate if endTime is a valid date if provided
+    if (
+      election.endTime !== undefined &&
+      election.endTime !== null &&
+      (!(election.endTime instanceof Date) || isNaN(election.endTime.getTime()))
+    ) {
+      throw new ElectionValidationException('End time must be a valid date.');
+    }
+
+    // Validate if endTime is after startTime when both are provided
+    if (
+      election.startTime &&
+      election.endTime &&
+      election.endTime < election.startTime
+    ) {
+      throw new ElectionValidationException(
+        'End time must be after start time.',
       );
     }
 

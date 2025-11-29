@@ -3,7 +3,7 @@ import { MysqlDatabaseModule } from '@infrastructure/database/typeorm-mysql/mysq
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/activity-log.repository.impl';
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
-import { SettingsRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/setting.repository.impl';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 import { CastVoteController } from './controller/cast-vote.controller';
 import { CastVoteUseCase } from '@application/use-cases/cast-vote/cast-vote.use-case';
 import { CastVoteRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/cast-vote.repository.impl';
@@ -27,7 +27,10 @@ import { ReprintCastVoteUseCase } from '@application/use-cases/cast-vote/reprint
     { provide: REPOSITORY_TOKENS.DELEGATE, useClass: DelegateRepositoryImpl },
     { provide: REPOSITORY_TOKENS.BALLOT, useClass: BallotRepositoryImpl },
     { provide: REPOSITORY_TOKENS.CANDIDATE, useClass: CandidateRepositoryImpl },
-    { provide: REPOSITORY_TOKENS.SETTING, useClass: SettingsRepositoryImpl },
+    {
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
+    },
     { provide: REPOSITORY_TOKENS.ELECTION, useClass: ElectionRepositoryImpl },
     { provide: REPOSITORY_TOKENS.POSITION, useClass: PositionRepositoryImpl },
     {

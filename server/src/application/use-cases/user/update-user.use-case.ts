@@ -5,7 +5,7 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ApplicationAccessRepository } from '@domains/repositories/application-access.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { UserRepository } from '@domains/repositories/user.repository';
 import {
@@ -35,8 +35,8 @@ export class UpdateUserUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
     @Inject(REPOSITORY_TOKENS.ELECTION)
     private readonly electionRepository: ElectionRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.PRECINCT)
     private readonly precinctRepository: PrecinctRepository,
   ) {}
@@ -50,7 +50,7 @@ export class UpdateUserUseCase {
       LOG_ACTION_CONSTANTS.UPDATE_USER,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

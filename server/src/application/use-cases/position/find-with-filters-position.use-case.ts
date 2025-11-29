@@ -5,7 +5,7 @@ import { PositionRepository } from '@domains/repositories/position.repository';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 
 @Injectable()
 export class FindPositionsWithFiltersUseCase {
@@ -14,8 +14,8 @@ export class FindPositionsWithFiltersUseCase {
     private readonly positionRepository: PositionRepository,
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
   ) {}
 
   /**
@@ -54,7 +54,7 @@ export class FindPositionsWithFiltersUseCase {
         }
 
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

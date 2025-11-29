@@ -8,7 +8,7 @@ export const DATABASE_CONSTANTS = {
   MODELNAME_USER: 'users',
   MODELNAME_USERROLE: 'useroles',
   MODELNAME_APPLICATIONACCESS: 'applicationaccess',
-  MODELNAME_SETTING: 'settings',
+  MODELNAME_ACTIVE_ELECTION: 'active_election',
   MODELNAME_CAST_VOTE: 'cast_votes',
   MODELNAME_BALLOT: 'ballots',
   MODELNAME_PRECINCT: 'precincts',

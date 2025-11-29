@@ -10,7 +10,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 
 @Injectable()
@@ -22,8 +22,8 @@ export class UpdatePositionUseCase {
     private readonly positionRepository: PositionRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.ELECTION)
     private readonly electionRepository: ElectionRepository,
   ) {}
@@ -37,7 +37,7 @@ export class UpdatePositionUseCase {
       LOG_ACTION_CONSTANTS.UPDATE_POSITION,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

@@ -11,7 +11,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DistrictRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/district.repository.impl';
 import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/activity-log.repository.impl';
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
-import { SettingsRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/setting.repository.impl';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
 
 @Module({
@@ -24,7 +24,10 @@ import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/r
       useClass: TransactionAdapter,
     },
     { provide: REPOSITORY_TOKENS.DISTRICT, useClass: DistrictRepositoryImpl },
-    { provide: REPOSITORY_TOKENS.SETTING, useClass: SettingsRepositoryImpl },
+    {
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
+    },
     { provide: REPOSITORY_TOKENS.ELECTION, useClass: ElectionRepositoryImpl },
 
     {

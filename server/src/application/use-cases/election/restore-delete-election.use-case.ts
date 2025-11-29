@@ -1,5 +1,7 @@
 import { ActivityLog } from '@domain/models/activitylog,model';
+import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { Inject, Injectable } from '@nestjs/common';
@@ -22,7 +24,30 @@ export class RestoreDeleteElectionUseCase {
     return this.transactionHelper.executeTransaction(
       LOG_ACTION_CONSTANTS.RESTORE_DELETE_ELECTION,
       async (manager) => {
-        await this.electionRepository.restoreDeleted(id, manager);
+        // First try to restore using repository method to find deleted election
+        const restoreSuccess = await this.electionRepository.restoreDeleted(
+          id,
+          manager,
+        );
+        if (!restoreSuccess) {
+          throw new NotFoundException(
+            `Election with ID ${id} not found or already restored.`,
+          );
+        }
+
+        // Load the restored election and use domain method to ensure consistency
+        const election = await this.electionRepository.findById(id, manager);
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${id} could not be restored.`,
+          );
+        }
+
+        // Use domain method to restore (ensures deletedBy is cleared)
+        election.restore();
+
+        // Save the restored election
+        await this.electionRepository.update(id, election, manager);
 
         const activityLog = new ActivityLog(
           LOG_ACTION_CONSTANTS.RESTORE_DELETE_ELECTION,

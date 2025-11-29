@@ -4,7 +4,7 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { DistrictRepository } from '@domains/repositories/district.repository';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
@@ -20,8 +20,8 @@ export class RestoreDeleteDistrictUseCase {
     private readonly districtRepository: DistrictRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.ELECTION)
     private readonly electionRepository: ElectionRepository,
   ) {}
@@ -31,7 +31,7 @@ export class RestoreDeleteDistrictUseCase {
       LOG_ACTION_CONSTANTS.RESTORE_DELETE_DISTRICT,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

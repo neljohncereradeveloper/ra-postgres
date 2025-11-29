@@ -8,7 +8,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { UpdateCandidateCommand } from '@application/commands/candidate/update-candidate.command';
 import { Candidate } from '@domain/models/candidate.model';
@@ -25,8 +25,8 @@ export class UpdateCandidateUseCase {
     private readonly candidateRepository: CandidateRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.POSITION)
     private readonly positionRepository: PositionRepository,
     @Inject(REPOSITORY_TOKENS.DISTRICT)
@@ -46,7 +46,7 @@ export class UpdateCandidateUseCase {
       LOG_ACTION_CONSTANTS.UPDATE_CANDIDATE,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

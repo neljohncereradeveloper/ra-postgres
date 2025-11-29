@@ -10,7 +10,7 @@ import { DatabaseManagementModule } from '@infrastructure/modules/database-manag
 import { DistrictModule } from '@infrastructure/modules/district/district.module';
 import { ElectionModule } from '@infrastructure/modules/election/election.module';
 import { DelegateModule } from '@infrastructure/modules/delegate/delegate.module';
-import { SettingModule } from '@infrastructure/modules/setting/setting.module';
+import { ActiveElectionModule } from '@infrastructure/modules/active-election/active-election.module';
 import { UserRoleModule } from '@infrastructure/modules/user-role/user-role.module';
 import { UserModule } from '@infrastructure/modules/user/user.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -37,7 +37,7 @@ import { GatewayModule } from '@infrastructure/modules/gateway/gateway.module';
     UserModule,
     AuthModule,
     DatabaseManagementModule,
-    SettingModule,
+    ActiveElectionModule,
     CastVoteModule,
     PrecinctModule,
     ReportsModule,

@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { DelegateEntity } from './delegate.entity';
 import { DistrictEntity } from './district.entity';
-import { SettingEntity } from './setting.entity';
+import { ActiveElectionEntity } from './active-election.entity';
 import { PositionEntity } from './position.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 import { BallotEntity } from './ballot.entity';
@@ -69,10 +69,10 @@ export class ElectionEntity {
   @OneToMany(() => DelegateEntity, (member) => member.election)
   members: DelegateEntity[];
 
-  @OneToOne(() => SettingEntity, (setting) => setting.election, {
+  @OneToOne(() => ActiveElectionEntity, (activeElection) => activeElection.election, {
     nullable: true,
   })
-  setting: SettingEntity; // Reverse relationship (optional)
+  activeElection: ActiveElectionEntity; // Reverse relationship (optional)
 
   @OneToMany(() => PositionEntity, (position) => position.election)
   positions: PositionEntity[];

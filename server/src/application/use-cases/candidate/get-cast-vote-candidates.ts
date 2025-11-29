@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { BadRequestException } from '@nestjs/common';
 
@@ -12,8 +12,8 @@ export class GetCastVoteCandidatesUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.CANDIDATE)
     private readonly candidateRepository: CandidateRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
   ) {}
@@ -23,7 +23,7 @@ export class GetCastVoteCandidatesUseCase {
       LOG_ACTION_CONSTANTS.RETRIEVE_CAST_VOTE_CANDIDATES,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

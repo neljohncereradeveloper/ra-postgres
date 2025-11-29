@@ -10,8 +10,8 @@ import { ApplicationAccessEntity } from '../entities/application-access.entity';
 import { DistrictEntity } from '../entities/district.entity';
 import { ElectionEntity } from '../entities/election.entity';
 import { DelegateEntity } from '../entities/delegate.entity';
-import { SettingEntity } from '../entities/setting.entity';
-import { SeedSettings } from './create-default-settings.seed';
+import { ActiveElectionEntity } from '../entities/active-election.entity';
+import { SeedActiveElection } from './create-default-active-election.seed';
 import { PositionEntity } from '../entities/position.entity';
 import { CastVoteEntity } from '../entities/cast-vote.entity';
 import { ActivityLogEntity } from '../entities/activity-log.entity';
@@ -38,7 +38,7 @@ const dataSource = new DataSource({
     BallotEntity,
     ElectionEntity,
     DelegateEntity,
-    SettingEntity,
+    ActiveElectionEntity,
     UserRoleEntity,
     UserEntity,
     CastVoteEntity,
@@ -70,12 +70,12 @@ class SeedRunner {
         queryRunner.manager,
       );
       const userSeeder = new SeedUsers(queryRunner.manager);
-      const seedSettings = new SeedSettings(queryRunner.manager);
+      const seedActiveElection = new SeedActiveElection(queryRunner.manager);
 
       await userRoleSeeder.run();
       await applicationAccessSeeder.run();
       await userSeeder.run();
-      await seedSettings.run();
+      await seedActiveElection.run();
 
       // Commit the transaction if all seeds succeed
       await queryRunner.commitTransaction();

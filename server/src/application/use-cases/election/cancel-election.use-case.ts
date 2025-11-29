@@ -3,7 +3,7 @@ import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
@@ -18,8 +18,8 @@ export class CancelElectionUseCase {
     private readonly electionRepository: ElectionRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
   ) {}
 
   async execute(userId: number): Promise<Election> {
@@ -27,7 +27,7 @@ export class CancelElectionUseCase {
       LOG_ACTION_CONSTANTS.CANCEL_ELECTION,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }
@@ -36,8 +36,8 @@ export class CancelElectionUseCase {
           manager,
         );
 
-        // Apply business logic to end the event (state modification)
-        election.cancelEvent();
+        // Apply business logic to cancel the event (state modification)
+        election.cancelEvent(`Election ${election.name} cancelled`);
 
         await this.electionRepository.update(
           activeElection.electionId,
@@ -45,7 +45,7 @@ export class CancelElectionUseCase {
           manager,
         );
         // reset the active election
-        await this.settingsRepository.resetElection(manager);
+        await this.activeElectionRepository.resetElection(manager);
 
         const activityLog = new ActivityLog(
           LOG_ACTION_CONSTANTS.CANCEL_ELECTION,

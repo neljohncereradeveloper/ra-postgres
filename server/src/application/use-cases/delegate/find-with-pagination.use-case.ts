@@ -5,7 +5,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 
 @Injectable()
 export class FindWithPaginationUseCase {
@@ -14,8 +14,8 @@ export class FindWithPaginationUseCase {
     private readonly transactionHelper: TransactionPort,
     @Inject(REPOSITORY_TOKENS.DELEGATE)
     private readonly delegateRepository: DelegateRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
   ) {}
 
   /**
@@ -46,7 +46,7 @@ export class FindWithPaginationUseCase {
       LOG_ACTION_CONSTANTS.RETRIEVE_DELEGATES_BY_ACTIVE_ELECTION,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

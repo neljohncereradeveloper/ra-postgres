@@ -196,6 +196,22 @@ export class Election {
   }
 
   /**
+   * Archives (soft deletes) the election
+   */
+  archive(deletedBy: string): void {
+    this.deletedAt = new Date();
+    this.deletedBy = deletedBy;
+  }
+
+  /**
+   * Restores a previously archived election
+   */
+  restore(): void {
+    this.deletedAt = null;
+    this.deletedBy = null;
+  }
+
+  /**
    * Validates the election against business rules
    *
    * This method enforces domain validation rules such as:

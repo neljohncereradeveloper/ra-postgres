@@ -11,7 +11,7 @@ import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysq
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
 import { PositionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/position.repository.impl';
 import { SoftDeletePositionUseCase } from '@application/use-cases/position/soft-delete-position.use-case';
-import { SettingsRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/setting.repository.impl';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
 
 @Module({
@@ -24,7 +24,10 @@ import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/r
       useClass: TransactionAdapter,
     },
     { provide: REPOSITORY_TOKENS.POSITION, useClass: PositionRepositoryImpl },
-    { provide: REPOSITORY_TOKENS.SETTING, useClass: SettingsRepositoryImpl },
+    {
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
+    },
     { provide: REPOSITORY_TOKENS.ELECTION, useClass: ElectionRepositoryImpl },
     {
       provide: REPOSITORY_TOKENS.ACTIVITYLOGS,

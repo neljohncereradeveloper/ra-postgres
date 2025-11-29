@@ -1,6 +1,6 @@
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { DistrictRepository } from '@domains/repositories/district.repository';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
@@ -10,8 +10,8 @@ export class RetrieveComboboxDistrictUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.DISTRICT)
     private readonly districtRepository: DistrictRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
   ) {}
@@ -21,7 +21,7 @@ export class RetrieveComboboxDistrictUseCase {
       LOG_ACTION_CONSTANTS.RETRIEVE_DISTRICTS_COMBOBOX,
       async (manager) => {
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

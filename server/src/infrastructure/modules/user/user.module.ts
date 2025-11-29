@@ -15,7 +15,7 @@ import { ApplicationAccessRepositoryImpl } from '@infrastructure/database/typeor
 import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/activity-log.repository.impl';
 import { PrecinctRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/precinct.repository.impl';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
-import { SettingsRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/setting.repository.impl';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 
 @Module({
   imports: [MysqlDatabaseModule],
@@ -41,8 +41,8 @@ import { SettingsRepositoryImpl } from '@infrastructure/database/typeorm-mysql/r
       useClass: ElectionRepositoryImpl,
     },
     {
-      provide: REPOSITORY_TOKENS.SETTING,
-      useClass: SettingsRepositoryImpl,
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
     },
     {
       provide: REPOSITORY_TOKENS.PRECINCT,

@@ -7,7 +7,7 @@ import { DelegateRepositoryImpl } from '@infrastructure/database/typeorm-mysql/r
 import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/activity-log.repository.impl';
 import { UploadDelegatesFileUseCase } from '@application/use-cases/delegate/upload-delegates-file.use-case';
 import { ExcelParserAdapter } from './adapters/excel-parser.adapter';
-import { SettingsRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/setting.repository.impl';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
 import { ElectionLockPolicy } from '@domain/policies/election/election-lock.policy';
 import { FindWithPaginationUseCase } from '@application/use-cases/delegate/find-with-pagination.use-case';
@@ -30,7 +30,10 @@ import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/rep
     },
     { provide: REPOSITORY_TOKENS.DELEGATE, useClass: DelegateRepositoryImpl },
     { provide: REPOSITORY_TOKENS.ELECTION, useClass: ElectionRepositoryImpl },
-    { provide: REPOSITORY_TOKENS.SETTING, useClass: SettingsRepositoryImpl },
+    {
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
+    },
     { provide: REPOSITORY_TOKENS.BALLOT, useClass: BallotRepositoryImpl },
     {
       provide: REPOSITORY_TOKENS.UUIDGENERATORPORT,

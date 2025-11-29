@@ -14,7 +14,7 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { ActivityLog } from '@domain/models/activitylog,model';
 import { UploadedFileInput } from '@domains/repositories/file.repository';
 import { ExcelParserPort } from '@domain/ports/excel-parser.port';
-import { SettingsRepository } from '@domains/repositories/setting.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { UUIDGeneratorPort } from '@domain/ports/uuid-generator';
@@ -51,8 +51,8 @@ export class UploadDelegatesFileUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
     @Inject(REPOSITORY_TOKENS.ELECTION)
     private readonly electionRepository: ElectionRepository,
-    @Inject(REPOSITORY_TOKENS.SETTING)
-    private readonly settingsRepository: SettingsRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.BALLOT)
     private readonly ballotRepository: BallotRepository,
     @Inject(REPOSITORY_TOKENS.UUIDGENERATORPORT)
@@ -74,7 +74,7 @@ export class UploadDelegatesFileUseCase {
         const rows: any = await this.excelParserPort.parse(file.buffer, schema);
 
         const activeElection =
-          await this.settingsRepository.retrieveActiveElection(manager);
+          await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }

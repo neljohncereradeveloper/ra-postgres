@@ -33,8 +33,8 @@ export const REPOSITORY_TOKENS = {
   APPLICATIONACCESS: 'ApplicationAccessRoleRepository',
   /** DATABAEMANAGEMENT Repository Interface*/
   DATABASEMANAGEMENT: 'DatabaseManagementRepository',
-  /** SettingRepository Interface*/
-  SETTING: 'SettingRepository',
+  /** ActiveElectionRepository Interface*/
+  ACTIVE_ELECTION: 'ActiveElectionRepository',
   /** CAST_VOTE Repository Interface*/
   CAST_VOTE: 'CastVoteRepository',
   /** REPORTS Repository Interface*/
