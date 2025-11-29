@@ -53,7 +53,7 @@ export class CreateCandidateUseCase {
           manager,
         );
         // Can only add candidate if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
         const delegate = await this.delegateRepository.findById(
           dto.delegateId,

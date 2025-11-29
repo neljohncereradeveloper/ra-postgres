@@ -1,4 +1,5 @@
 import { ActivityLog } from '@domain/models/activitylog,model';
+import { District } from '@domain/models/district.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
@@ -40,13 +41,28 @@ export class SoftDeleteDistrictUseCase {
           manager,
         );
         // Can only soft delete district if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
-        const success = await this.districtRepository.softDelete(id, manager);
-        if (!success) {
-          // If the entity wasn't found, throw a 404 error
+        // Load district and use domain method to archive
+        const district = await this.districtRepository.findById(id, manager);
+        if (!district) {
           throw new NotFoundException(
             `District with ID ${id} not found or already deleted.`,
+          );
+        }
+
+        // Use domain method to archive (soft delete)
+        district.archive(userId.toString());
+
+        // Save the updated district
+        const success = await this.districtRepository.update(
+          id,
+          district,
+          manager,
+        );
+        if (!success) {
+          throw new NotFoundException(
+            `Failed to delete district with ID ${id}.`,
           );
         }
 

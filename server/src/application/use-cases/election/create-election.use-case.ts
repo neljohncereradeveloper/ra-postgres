@@ -25,16 +25,17 @@ export class CreateElectionUseCase {
     return this.transactionHelper.executeTransaction(
       LOG_ACTION_CONSTANTS.CREATE_ELECTION,
       async (manager) => {
-        const newElection = new Election({
+        // Create and validate election using domain method
+        const election = Election.create({
           name: dto.name,
           desc1: dto.desc1,
           address: dto.address,
-          status: ELECTION_STATUS_CONSTANTS.SCHEDULED,
           date: dto.date,
+          createdBy: userId.toString(),
         });
 
-        const election = await this.electionRepository.create(
-          newElection,
+        const savedElection = await this.electionRepository.create(
+          election,
           manager,
         );
 
@@ -42,7 +43,7 @@ export class CreateElectionUseCase {
           LOG_ACTION_CONSTANTS.CREATE_ELECTION,
           DATABASE_CONSTANTS.MODELNAME_ELECTION,
           JSON.stringify({
-            id: election.id,
+            id: savedElection.id,
             name: dto.name,
             desc1: dto.desc1,
             address: dto.address,
@@ -54,7 +55,7 @@ export class CreateElectionUseCase {
         );
         await this.activityLogRepository.create(activityLog, manager);
 
-        return election;
+        return savedElection;
       },
     );
   }

@@ -26,7 +26,10 @@ export class CreateDistrictUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(dto: CreateDistrictCommand, userId: number): Promise<District> {
+  async execute(
+    dto: CreateDistrictCommand,
+    username: string,
+  ): Promise<District> {
     return this.transactionHelper.executeTransaction(
       LOG_ACTION_CONSTANTS.CREATE_DISTRICT,
       async (manager) => {
@@ -41,16 +44,15 @@ export class CreateDistrictUseCase {
           manager,
         );
         // Can only add district if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
-        // Create and validate district using domain method
-        const district = District.create({
+        const newDistrict = District.create({
           electionId: activeElection.electionId,
           desc1: dto.desc1,
-          createdBy: userId.toString(),
+          createdBy: username,
         });
-        const savedDistrict = await this.districtRepository.create(
-          district,
+        const district = await this.districtRepository.create(
+          newDistrict,
           manager,
         );
 
@@ -58,16 +60,16 @@ export class CreateDistrictUseCase {
           LOG_ACTION_CONSTANTS.CREATE_DISTRICT,
           DATABASE_CONSTANTS.MODELNAME_DISTRICT,
           JSON.stringify({
-            id: savedDistrict.id,
+            id: district.id,
             election: election.name,
-            desc1: savedDistrict.desc1,
+            desc1: district.desc1,
           }),
           new Date(),
-          userId,
+          username,
         );
         await this.activityLogRepository.create(activityLog, manager);
 
-        return savedDistrict;
+        return district;
       },
     );
   }

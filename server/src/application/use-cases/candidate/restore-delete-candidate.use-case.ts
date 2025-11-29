@@ -40,7 +40,7 @@ export class RestoreDeleteCandidateUseCase {
           manager,
         );
         // Can only restore deleted candidate if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
         const success = await this.candidateRepository.restoreDeleted(
           id,

@@ -10,6 +10,7 @@ export class District {
   id: number;
   electionId: number;
   desc1: string;
+  deletedBy?: string;
   deletedAt?: Date | null;
   createdBy?: string;
   createdAt?: Date;
@@ -20,6 +21,7 @@ export class District {
     id?: number;
     electionId: number;
     desc1: string;
+    deletedBy?: string;
     deletedAt?: Date | null;
     createdBy?: string;
     createdAt?: Date;
@@ -29,6 +31,7 @@ export class District {
     this.id = params.id;
     this.electionId = params.electionId;
     this.desc1 = params.desc1;
+    this.deletedBy = params.deletedBy;
     this.deletedAt = params.deletedAt;
     this.createdBy = params.createdBy;
     this.createdAt = params.createdAt;
@@ -73,11 +76,11 @@ export class District {
    * It validates the new state before applying changes to ensure the district
    * remains in a valid state. If validation fails, no changes are applied.
    *
-   * @param dto - Partial district data containing fields to update
-   * @param updatedBy - Username of the user performing the update
+   * @param dto - District data containing fields to update (desc1 is required)
+   * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws DistrictValidationException - If validation fails
    */
-  update(dto: Partial<District>, updatedBy?: string): void {
+  update(dto: { desc1: string }, updatedBy: string): void {
     // Create a temporary district with the new values to validate before applying
     const tempDistrict = new District({
       id: this.id,
@@ -87,19 +90,18 @@ export class District {
     // Validate the new state before applying changes
     tempDistrict.validate();
 
-    // Apply changes only if validation passes (reuse the validated value)
-    this.desc1 = dto.desc1 ?? this.desc1;
-    if (updatedBy !== undefined) {
-      this.updatedBy = updatedBy;
-    }
+    // Apply changes only if validation passes (data is already validated)
+    this.desc1 = dto.desc1;
+    this.updatedBy = updatedBy;
     this.updatedAt = new Date();
   }
 
   /**
    * Archives (soft deletes) the district
    */
-  archive(): void {
+  archive(deletedBy: string): void {
     this.deletedAt = new Date();
+    this.deletedBy = deletedBy;
   }
 
   /**
@@ -107,6 +109,7 @@ export class District {
    */
   restore(): void {
     this.deletedAt = null;
+    this.deletedBy = null;
   }
 
   /**

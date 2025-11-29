@@ -32,8 +32,10 @@ export class UpdateElectionUseCase {
         const election = await this.electionRepository.findById(id, manager);
         if (!election) throw new ElectionNotFoundException();
 
-        election.validate();
-        election.updateDetails(dto);
+        // Validate if election can be updated (not locked)
+        election.validateForUpdate();
+        // Update the election (validation is done inside update method)
+        election.update(dto, userId.toString());
 
         await this.electionRepository.update(id, election, manager);
 

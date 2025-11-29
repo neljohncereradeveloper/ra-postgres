@@ -1,5 +1,3 @@
-// domain/exceptions/district/district-validation.exception.ts
-
 import { DomainException } from '../domain.exception';
 
 /**

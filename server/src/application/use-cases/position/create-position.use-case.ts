@@ -41,7 +41,7 @@ export class CreatePositionUseCase {
           manager,
         );
         // Can only add position if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
         const newPosition = new Position({
           electionId: activeElection.electionId,

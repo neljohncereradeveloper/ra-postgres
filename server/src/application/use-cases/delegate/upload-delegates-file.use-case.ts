@@ -84,7 +84,7 @@ export class UploadDelegatesFileUseCase {
         );
 
         // Can only upload delegates if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
         if (rows.rows.length === 0 || rows.rows.length < 0) {
           throw new BadRequestException('Empty sheet.');

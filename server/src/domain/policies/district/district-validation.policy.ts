@@ -12,6 +12,12 @@ export class DistrictValidationPolicy {
   /**
    * Validates district data
    *
+   * This method enforces domain validation rules such as:
+   * - District must not be null
+   * - Election ID must be provided and greater than zero
+   * - District name must be provided and meet length requirements (3-255 characters)
+   * - District name cannot be empty or just whitespace
+   *
    * @param district - The district to validate
    * @throws DistrictValidationException - If district validation fails
    */
@@ -20,9 +26,11 @@ export class DistrictValidationPolicy {
       throw new DistrictValidationException('District not found');
     }
 
-    // Validate if electionId is provided
-    if (!district.electionId) {
-      throw new DistrictValidationException('Election ID is required.');
+    // Validate if electionId is provided (foreign key reference to Election primary key)
+    if (!district.electionId || district.electionId <= 0) {
+      throw new DistrictValidationException(
+        'Election ID is required and must be a valid positive integer.',
+      );
     }
 
     // Validate if desc1 is provided
@@ -32,10 +40,10 @@ export class DistrictValidationPolicy {
       );
     }
 
-    // Validate if desc1 length is within limits (100 characters max)
-    if (district.desc1.length > 100) {
+    // Validate if desc1 length is within limits (255 characters max based on entity)
+    if (district.desc1.length > 255) {
       throw new DistrictValidationException(
-        'District name must not exceed 100 characters.',
+        'District name must not exceed 255 characters.',
       );
     }
 

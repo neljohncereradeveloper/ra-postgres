@@ -28,6 +28,13 @@ export class DistrictEntity {
   @Column({ length: 255 })
   desc1: string;
 
+  @Column({
+    name: 'deleted_by',
+    comment: 'username of the user who deleted the district',
+    nullable: true,
+  })
+  deletedBy: string;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
@@ -38,6 +45,7 @@ export class DistrictEntity {
     nullable: true,
   })
   createdBy: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -47,6 +55,7 @@ export class DistrictEntity {
     nullable: true,
   })
   updatedBy: string;
+
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 

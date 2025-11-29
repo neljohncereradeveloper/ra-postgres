@@ -39,7 +39,7 @@ export class SoftDeleteCandidateUseCase {
           manager,
         );
         // Can only soft delete candidate if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
         const success = await this.candidateRepository.softDelete(id, manager);
         if (!success) {

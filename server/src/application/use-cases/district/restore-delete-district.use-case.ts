@@ -1,4 +1,5 @@
 import { ActivityLog } from '@domain/models/activitylog,model';
+import { District } from '@domain/models/district.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
@@ -40,17 +41,34 @@ export class RestoreDeleteDistrictUseCase {
           manager,
         );
         // Can only restore deleted district if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
-        const success = await this.districtRepository.restoreDeleted(
+        // First try to restore using repository method to find deleted district
+        // Then load and use domain method
+        const restoreSuccess = await this.districtRepository.restoreDeleted(
           id,
           manager,
         );
-        if (!success) {
+        if (!restoreSuccess) {
           throw new NotFoundException(
             `District with ID ${id} not found or already restored.`,
           );
         }
+
+        // Load the restored district and use domain method to ensure consistency
+        const district = await this.districtRepository.findById(id, manager);
+        if (!district) {
+          // If still not found after restore, something went wrong
+          throw new NotFoundException(
+            `District with ID ${id} could not be restored.`,
+          );
+        }
+
+        // Use domain method to restore (ensures deletedBy is cleared)
+        district.restore();
+
+        // Save the restored district
+        await this.districtRepository.update(id, district, manager);
 
         // Log the creation
         const log = new ActivityLog(

@@ -58,7 +58,7 @@ export class CreateUserUseCase {
           manager,
         );
         // Can only add user if election is scheduled
-        election.validate();
+        election.validateForUpdate();
 
         const precinct = await this.precinctRepository.findByDescription(
           dto.precinct,
