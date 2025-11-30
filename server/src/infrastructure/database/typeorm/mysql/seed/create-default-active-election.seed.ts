@@ -20,9 +20,9 @@ export class SeedActiveElection {
       this.dataSource.getRepository(ActiveElectionEntity);
 
     await activeElectionRepository.insert({
-      setupCode: '001',
+      id: 1,
     });
-    this.logger.log(`Active election setupCode : 001 created successfully.`);
+    this.logger.log(`Active election record (id: 1) created successfully.`);
   }
 }
 

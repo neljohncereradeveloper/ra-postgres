@@ -1,5 +1,5 @@
 import { CreateDistrictCommand } from '@application/commands/district/create-district.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { District } from '@domain/models/district.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';

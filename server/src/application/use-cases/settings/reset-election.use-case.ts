@@ -1,6 +1,6 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception copy';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { SettingsRepository } from '@domains/repositories/setting.repository';
 import { Inject, Injectable } from '@nestjs/common';

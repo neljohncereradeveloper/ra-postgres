@@ -1,5 +1,5 @@
 import { CreatePositionCommand } from '@application/commands/position/create-position.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { Position } from '@domain/models/position.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';

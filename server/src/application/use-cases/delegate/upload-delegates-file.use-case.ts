@@ -11,13 +11,13 @@ import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { Delegate } from '@domain/models/delegate.model';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { UploadedFileInput } from '@domains/repositories/file.repository';
 import { ExcelParserPort } from '@domain/ports/excel-parser.port';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
-import { UUIDGeneratorPort } from '@domain/ports/uuid-generator';
+import { UUIDGeneratorPort } from '@domain/ports/uuid-generator.port';
 
 const schema = {
   branch: { prop: 'branch', type: String },

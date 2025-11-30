@@ -1,5 +1,5 @@
 import { UpdateUserRoleCommand } from '@application/commands/user-role/update-user-role.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { UserRole } from '@domain/models/user-role.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';

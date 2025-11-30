@@ -1,4 +1,4 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';

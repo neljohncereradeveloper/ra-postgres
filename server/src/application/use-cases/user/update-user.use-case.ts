@@ -1,5 +1,5 @@
 import { UpdateUserCommand } from '@application/commands/user/update-user.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { User } from '@domain/models/user.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';

@@ -5,12 +5,12 @@ import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysq
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
 import { PrecinctController } from './controller/precinct.controller';
 import { PrecinctRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/precinct.repository.impl';
-import { FindPrecinctsWithFiltersUseCase } from '@application/use-cases/precinct/find-with-filters-precinct.use-case';
+import { PaginatedPrecinctListUseCase } from '@application/use-cases/precinct/paginated-precinct-list.use-case';
 import { CreatePrecinctUseCase } from '@application/use-cases/precinct/create-precinct.use-case';
-import { SoftDeletePrecinctUseCase } from '@application/use-cases/precinct/soft-delete-precinct.use-case';
+import { ArchivePrecinctUseCase } from '@application/use-cases/precinct/archive-precinct.use-case';
 import { UpdatePrecinctUseCase } from '@application/use-cases/precinct/update-precinct.use-case';
-import { RestoreDeletePrecinctUseCase } from '@application/use-cases/precinct/restore-delete-precinct.use-case';
-import { RetrieveComboboxPrecinctUseCase } from '@application/use-cases/precinct/retrieve-combobox-precinct.use-case';
+import { RestorePrecinctUseCase } from '@application/use-cases/precinct/restore-precinct.use-case';
+import { ComboboxPrecinctUseCase } from '@application/use-cases/precinct/combobox-precinct.use-case';
 
 @Module({
   imports: [MysqlDatabaseModule],
@@ -29,18 +29,18 @@ import { RetrieveComboboxPrecinctUseCase } from '@application/use-cases/precinct
     }, // Dependency Injection
     CreatePrecinctUseCase,
     UpdatePrecinctUseCase,
-    FindPrecinctsWithFiltersUseCase,
-    SoftDeletePrecinctUseCase,
-    RestoreDeletePrecinctUseCase,
-    RetrieveComboboxPrecinctUseCase,
+    PaginatedPrecinctListUseCase,
+    ArchivePrecinctUseCase,
+    RestorePrecinctUseCase,
+    ComboboxPrecinctUseCase,
   ],
   exports: [
     CreatePrecinctUseCase,
     UpdatePrecinctUseCase,
-    FindPrecinctsWithFiltersUseCase,
-    SoftDeletePrecinctUseCase,
-    RestoreDeletePrecinctUseCase,
-    RetrieveComboboxPrecinctUseCase,
+    PaginatedPrecinctListUseCase,
+    ArchivePrecinctUseCase,
+    RestorePrecinctUseCase,
+    ComboboxPrecinctUseCase,
   ],
 })
 export class PrecinctModule {}

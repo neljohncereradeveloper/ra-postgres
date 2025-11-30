@@ -1,8 +1,8 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 
 export interface ActivityLogRepository<Context = unknown> {
   // Create with transaction activity log entry
-  create(log: ActivityLog, context?: Context): Promise<ActivityLog>;
+  create(log: ActivityLog, context: Context): Promise<ActivityLog>;
 
   // Find all activity logs
   findAll(): Promise<ActivityLog[]>;

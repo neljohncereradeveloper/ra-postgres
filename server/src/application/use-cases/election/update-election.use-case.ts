@@ -1,5 +1,5 @@
 import { UpdateElectionCommand } from '@application/commands/election/update-election.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ElectionNotFoundException } from '@domains/exceptions/election/eelction-not-found.exception';

@@ -1,8 +1,8 @@
 // domain/policies/event-cancellation.policy.ts
 
+import { ElectionStatus } from '@domain/enums/index';
 import { Election } from '@domain/models/election.model';
 import { ElectionCancellationNotAllowedException } from '@domains/exceptions/election/election-cancellation.exception';
-import { ElectionStatus } from '@domain/enums/index';
 
 /**
  * ElectionCancelPolicy

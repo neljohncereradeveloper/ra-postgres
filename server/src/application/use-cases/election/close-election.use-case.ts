@@ -1,4 +1,4 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -46,7 +46,7 @@ export class CloseElectionUseCase {
           manager,
         );
         // reset the active event
-        await this.activeElectionRepository.resetElection(manager);
+        await this.activeElectionRepository.reset(manager);
 
         // Remove all delegate links in the ballot
         // await this.ballotRepository.unlinkBallot(

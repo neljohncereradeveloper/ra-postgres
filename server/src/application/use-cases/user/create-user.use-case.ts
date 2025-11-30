@@ -1,5 +1,5 @@
 import { CreateUserCommand } from '@application/commands/user/create-user.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { User } from '@domain/models/user.model';
 import { PasswordEncryptionPort } from '@domain/ports/password-encryption.port';
 import { TransactionPort } from '@domain/ports/transaction-port';

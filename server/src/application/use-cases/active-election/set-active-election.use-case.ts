@@ -1,7 +1,7 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
-import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception copy';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
@@ -37,15 +37,14 @@ export class SetActiveElectionUseCase {
         }
 
         // Update the active election
-        const updateSuccessfull = await this.activeElectionRepository.update(
-          election.id,
-          manager,
-        );
+        const updateSuccessfull =
+          await this.activeElectionRepository.setActiveElection(
+            election.id,
+            manager,
+          );
 
         if (!updateSuccessfull) {
-          throw new SomethinWentWrongException(
-            'Active election update failed',
-          );
+          throw new SomethinWentWrongException('Active election update failed');
         }
 
         const updateResult =
@@ -67,4 +66,3 @@ export class SetActiveElectionUseCase {
     );
   }
 }
-

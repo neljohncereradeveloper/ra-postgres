@@ -1,5 +1,5 @@
 import { UpdateApplicationAccessCommand } from '@application/commands/application-access/update-application-access.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { ApplicationAccess } from '@domain/models/application-access.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';

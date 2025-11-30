@@ -15,9 +15,6 @@ export class ActiveElectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'setup_code', length: 100, nullable: true })
-  setupCode: string;
-
   @Column({ name: 'election_id', nullable: true })
   @Index()
   electionId: number;
@@ -50,4 +47,3 @@ export class ActiveElectionEntity {
   @JoinColumn({ name: 'election_id' }) // Specifies the foreign key column
   election: ElectionEntity; // This defines the OneToOne relationship
 }
-

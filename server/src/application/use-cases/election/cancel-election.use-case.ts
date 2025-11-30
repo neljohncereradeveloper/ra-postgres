@@ -1,4 +1,4 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
@@ -45,7 +45,7 @@ export class CancelElectionUseCase {
           manager,
         );
         // reset the active election
-        await this.activeElectionRepository.resetElection(manager);
+        await this.activeElectionRepository.reset(manager);
 
         const activityLog = new ActivityLog(
           LOG_ACTION_CONSTANTS.CANCEL_ELECTION,

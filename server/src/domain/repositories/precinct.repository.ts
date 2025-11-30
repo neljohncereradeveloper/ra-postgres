@@ -4,18 +4,15 @@ export interface PrecinctRepository<Context = unknown> {
   create(precinct: Precinct, context?: Context): Promise<Precinct>;
   update(
     id: number,
-    updateData: Partial<Precinct>,
+    dto: Partial<Precinct>,
     context?: Context,
   ): Promise<boolean>;
-  softDelete(id: number, context?: Context): Promise<boolean>;
-  restoreDeleted(id: number, context?: Context): Promise<boolean>;
-  findById(id: number, context?: Context): Promise<Precinct>;
+  findById(id: number, context?: Context): Promise<Precinct | null>;
   findPaginatedList(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
-    context?: Context,
+    isArchived: boolean,
   ): Promise<{
     data: Precinct[];
     meta: {
@@ -28,5 +25,5 @@ export interface PrecinctRepository<Context = unknown> {
     };
   }>;
   findByDescription(desc1: string, context?: Context): Promise<Precinct | null>;
-  findAll(context?: Context): Promise<Precinct[]>;
+  combobox(): Promise<Precinct[]>;
 }

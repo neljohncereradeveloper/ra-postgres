@@ -14,7 +14,7 @@ import { ElectionStatus } from '@domain/enums/index';
  *
  * This policy enforces business rules for casting votes in an election.
  */
-export class CastVotePolicy {
+export class CastVoteValidationPolicy {
   /**
    * Validates the election state for voting
    *

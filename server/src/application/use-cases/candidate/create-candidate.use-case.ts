@@ -1,5 +1,5 @@
 import { CreateCandidateCommand } from '@application/commands/candidate/create-candidate.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { Candidate } from '@domain/models/candidate.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';

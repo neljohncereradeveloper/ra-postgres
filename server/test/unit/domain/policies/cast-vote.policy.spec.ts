@@ -1,13 +1,13 @@
-import { CastVotePolicy } from '../../../../src/domain/policies/cast-vote/cast-vote.policy';
+import { CastVoteValidationPolicy } from '../../../../src/domain/policies/cast-vote/cast-vote-validation.policy';
 import { CastVoteValidationException } from '../../../../src/domain/exceptions/election/cast-vote.exception';
 import { BALLOT_STATUS_CONSTANTS } from '../../../../src/shared/constants/ballot.constants';
 import { ELECTION_STATUS_CONSTANTS } from '../../../../src/shared/constants/election.constants';
 
 describe('CastVotePolicy', () => {
-  let policy: CastVotePolicy;
+  let policy: CastVoteValidationPolicy;
 
   beforeEach(() => {
-    policy = new CastVotePolicy();
+    policy = new CastVoteValidationPolicy();
   });
 
   describe('validateElectionState', () => {

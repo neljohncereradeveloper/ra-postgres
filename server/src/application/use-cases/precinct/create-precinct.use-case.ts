@@ -1,12 +1,13 @@
 import { CreatePrecinctCommand } from '@application/commands/precinct/create-precinct.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
-import { Precinct } from '@domain/models/precinct.model';
-import { TransactionPort } from '@domain/ports/transaction-port';
-import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
-import { PrecinctRepository } from '@domains/repositories/precinct.repository';
+import { PRECINCT_ACTIONS } from '@domain/constants/index';
+import { ActivityLog, Precinct } from '@domain/models/index';
+import { TransactionPort } from '@domain/ports/index';
+import {
+  ActivityLogRepository,
+  PrecinctRepository,
+} from '@domains/repositories/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 
 @Injectable()
@@ -20,30 +21,40 @@ export class CreatePrecinctUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(dto: CreatePrecinctCommand, userId: number): Promise<Precinct> {
+  async execute(
+    dto: CreatePrecinctCommand,
+    userName: string,
+  ): Promise<Precinct> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_PRECINCT,
+      PRECINCT_ACTIONS.CREATE,
       async (manager) => {
-        const newPrecinct = new Precinct({
+        // Use domain model factory method to create and validate
+        const precinct = Precinct.create({
           desc1: dto.desc1,
+          createdBy: userName,
         });
-        const precinct = await this.precinctRepository.create(
-          newPrecinct,
+
+        // Create the precinct in the database
+        const createdPrecinct = await this.precinctRepository.create(
+          precinct,
           manager,
         );
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_PRECINCT,
-          DATABASE_CONSTANTS.MODELNAME_PRECINCT,
-          JSON.stringify({
-            desc1: precinct.desc1,
+        // Log the creation
+        const log = ActivityLog.create({
+          action: PRECINCT_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,
+          details: JSON.stringify({
+            id: createdPrecinct.id,
+            desc1: createdPrecinct.desc1,
+            createdBy: userName,
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: userName,
+        });
+        await this.activityLogRepository.create(log, manager);
 
-        return precinct;
+        // Return the created precinct
+        return createdPrecinct;
       },
     );
   }

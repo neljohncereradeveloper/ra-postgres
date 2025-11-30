@@ -1,7 +1,7 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
-import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception copy';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { SettingsRepository } from '@domains/repositories/setting.repository';

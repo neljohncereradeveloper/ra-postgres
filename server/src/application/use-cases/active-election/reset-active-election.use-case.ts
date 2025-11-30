@@ -1,6 +1,6 @@
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception copy';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { Inject, Injectable } from '@nestjs/common';
@@ -25,12 +25,10 @@ export class ResetActiveElectionUseCase {
       async (manager) => {
         // Reset the active election
         const updateSuccessfull =
-          await this.activeElectionRepository.resetElection(manager);
+          await this.activeElectionRepository.reset(manager);
 
         if (!updateSuccessfull) {
-          throw new SomethinWentWrongException(
-            'Active election reset failed',
-          );
+          throw new SomethinWentWrongException('Active election reset failed');
         }
 
         const updateResult =
@@ -56,4 +54,3 @@ export class ResetActiveElectionUseCase {
     );
   }
 }
-

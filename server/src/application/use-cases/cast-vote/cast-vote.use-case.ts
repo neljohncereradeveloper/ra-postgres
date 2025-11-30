@@ -1,8 +1,8 @@
 import { CastVoteCommand } from '@application/commands/cast-vote/cast-vote.comman';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { CastVote } from '@domain/models/cast-vote.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { CastVotePolicy } from '@domain/policies/cast-vote/cast-vote.policy';
+import { CastVoteValidationPolicy } from '@domain/policies/cast-vote/cast-vote-validation.policy';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
@@ -22,7 +22,7 @@ import { GatewayGateway } from '@infrastructure/modules/gateway/gateway.gateway'
 
 @Injectable()
 export class CastVoteUseCase {
-  private readonly castVotePolicy: CastVotePolicy;
+  private readonly castVotePolicy: CastVoteValidationPolicy;
 
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
@@ -44,7 +44,7 @@ export class CastVoteUseCase {
     @Inject(REPOSITORY_TOKENS.ELECTION)
     private readonly electionRepository: ElectionRepository,
   ) {
-    this.castVotePolicy = new CastVotePolicy();
+    this.castVotePolicy = new CastVoteValidationPolicy();
   }
 
   async execute(

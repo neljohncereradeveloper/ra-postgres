@@ -5,7 +5,7 @@ import { ActiveElectionRepository } from '@domains/repositories/active-election.
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { ReportsRepository } from '@domains/repositories/reports.repository';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';

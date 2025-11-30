@@ -1,9 +1,9 @@
 import { UpdateDistrictCommand } from '@application/commands/district/update-district.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { District } from '@domain/models/district.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
-import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception copy';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { DistrictRepository } from '@domains/repositories/district.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';

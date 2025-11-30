@@ -3,17 +3,21 @@ import { EntityManager, UpdateResult } from 'typeorm';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ActiveElectionEntity } from '../entities/active-election.entity';
 import { ActiveElection } from '@domain/models/active-election.model';
-import { SEEDERS_CONSTANTS } from '@shared/constants/seeders.constants';
 
 @Injectable()
 export class ActiveElectionRepositoryImpl
   implements ActiveElectionRepository<EntityManager>
 {
-  async update(electionId: number, manager: EntityManager): Promise<boolean> {
+  private readonly ACTIVE_ELECTION_ID = 1;
+
+  async setActiveElection(
+    electionId: number,
+    manager: EntityManager,
+  ): Promise<boolean> {
     try {
       const result: UpdateResult = await manager.update(
         ActiveElectionEntity,
-        { setupCode: SEEDERS_CONSTANTS.SETUP_CODE },
+        { id: this.ACTIVE_ELECTION_ID },
         {
           electionId,
         },
@@ -33,22 +37,18 @@ export class ActiveElectionRepositoryImpl
     const activeElectionEntity = await manager
       .createQueryBuilder(ActiveElectionEntity, 'activeElection')
       .innerJoinAndSelect('activeElection.election', 'election')
-      .where('activeElection.setupCode = :setupCode', {
-        setupCode: SEEDERS_CONSTANTS.SETUP_CODE,
-      })
+      .where('activeElection.id = :id', { id: this.ACTIVE_ELECTION_ID })
       .andWhere('activeElection.electionId IS NOT NULL')
       .getOne();
 
-    return activeElectionEntity
-      ? this.toModel(activeElectionEntity)
-      : null;
+    return activeElectionEntity ? this.toModel(activeElectionEntity) : null;
   }
 
-  async resetElection(manager: EntityManager): Promise<boolean> {
+  async reset(manager: EntityManager): Promise<boolean> {
     try {
       const result: UpdateResult = await manager.update(
         ActiveElectionEntity,
-        { setupCode: SEEDERS_CONSTANTS.SETUP_CODE },
+        { id: this.ACTIVE_ELECTION_ID },
         {
           electionId: null,
         },
@@ -63,7 +63,6 @@ export class ActiveElectionRepositoryImpl
   private toModel(entity: ActiveElectionEntity): ActiveElection {
     return new ActiveElection({
       id: entity.id,
-      setupCode: entity.setupCode,
       electionId: entity.electionId,
       createdBy: entity.createdBy,
       createdAt: entity.createdAt,
@@ -72,4 +71,3 @@ export class ActiveElectionRepositoryImpl
     });
   }
 }
-

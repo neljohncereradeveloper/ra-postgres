@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { ActivityLogEntity } from '../entities/activity-log.entity';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 
 @Injectable()
@@ -16,7 +16,16 @@ export class ActivityLogRepositoryImpl
     private readonly repository: Repository<ActivityLogEntity>,
   ) {}
 
-  async create(log: ActivityLog, manager: EntityManager): Promise<ActivityLog> {
+  async create(
+    log: ActivityLog,
+    manager: EntityManager,
+    username?: string,
+  ): Promise<ActivityLog> {
+    // Set username in the domain model
+    if (username) {
+      log.username = username;
+    }
+
     // Convert JSON string to object for jsonb storage
     let detailsJson: any = null;
     if (log.details) {
@@ -34,18 +43,21 @@ export class ActivityLogRepositoryImpl
     }
 
     // Use raw SQL query for insert
+    // Note: user_id is still stored in DB but we're using username in domain model
     const query = `
       INSERT INTO activitylogs (action, entity, details, timestamp, user_id)
       VALUES ($1, $2, $3::jsonb, $4, $5)
       RETURNING id, action, entity, details::text as details, timestamp, user_id
     `;
 
+    // For now, we'll store null for user_id since we're using username in domain
+    // This can be updated later if needed to look up user_id from username
     const result = await manager.query(query, [
       log.action,
       log.entity,
       detailsJson ? JSON.stringify(detailsJson) : null,
       log.timestamp || new Date(),
-      log.userId,
+      null, // user_id - can be updated later if needed
     ]);
 
     const savedRow = result[0];
@@ -114,18 +126,13 @@ export class ActivityLogRepositoryImpl
     // Handle null/empty cases
     const detailsString = row.details || '';
 
-    const log = new ActivityLog(
-      row.action,
-      row.entity,
-      detailsString,
-      row.timestamp,
-      row.user_id || row.userId, // Support both snake_case and camelCase
-    );
-
-    // Set the ID if it exists
-    if (row.id) {
-      log.id = row.id;
-    }
+    const log = new ActivityLog({
+      id: row.id,
+      action: row.action,
+      entity: row.entity,
+      details: detailsString,
+      timestamp: row.timestamp,
+    });
 
     return log;
   }

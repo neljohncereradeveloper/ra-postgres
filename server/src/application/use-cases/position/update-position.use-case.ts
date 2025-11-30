@@ -1,9 +1,9 @@
 import { UpdatePositionCommand } from '@application/commands/position/update-position.command';
-import { ActivityLog } from '@domain/models/activitylog,model';
+import { ActivityLog } from '@domain/models/activitylog.model';
 import { Position } from '@domain/models/position.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
-import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception copy';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
