@@ -24,7 +24,7 @@ export class RestorePrecinctUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<void> {
+  async execute(id: number, userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.RESTORE,
       async (manager) => {
@@ -47,7 +47,7 @@ export class RestorePrecinctUseCase {
           throw new SomethinWentWrongException('Precinct restore failed');
         }
 
-        // Use domain model factory method to create activity log
+        // Log the restore
         const log = ActivityLog.create({
           action: PRECINCT_ACTIONS.RESTORE,
           entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,
@@ -61,6 +61,8 @@ export class RestorePrecinctUseCase {
           username: userName,
         });
         await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

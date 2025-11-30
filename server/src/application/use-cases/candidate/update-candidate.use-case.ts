@@ -75,12 +75,11 @@ export class UpdateCandidateUseCase {
           throw new NotFoundException('Position not found');
         }
 
-        const district =
-          await this.districtRepository.findByDescriptionWithElectionId(
-            dto.district,
-            activeElection.electionId,
-            manager,
-          );
+        const district = await this.districtRepository.findByDescription(
+          dto.district,
+          activeElection.electionId,
+          manager,
+        );
         if (!district) {
           throw new NotFoundException('District not found');
         }

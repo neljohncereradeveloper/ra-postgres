@@ -7,10 +7,8 @@ export interface DistrictRepository<Context = unknown> {
     updateData: Partial<District>,
     context?: Context,
   ): Promise<boolean>;
-  softDelete(id: number, context?: Context): Promise<boolean>;
-  restoreDeleted(id: number, context?: Context): Promise<boolean>;
   findById(id: number, context?: Context): Promise<District>;
-  findPaginatedListWithElectionId(
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -28,14 +26,11 @@ export interface DistrictRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  findByDescriptionWithElectionId(
+  findByDescription(
     desc1: string,
     electionId: number,
     context?: Context,
   ): Promise<District | null>;
-  findAllWithElectionId(
-    electionId: number,
-    context?: Context,
-  ): Promise<District[]>;
-  countByElectionId(electionId: number, context?: Context): Promise<number>;
+  combobox(electionId: number, context?: Context): Promise<District[]>;
+  countByElection(electionId: number, context?: Context): Promise<number>;
 }

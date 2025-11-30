@@ -6,10 +6,11 @@ import { ActivityLogRepository } from '@domains/repositories/activity-log.reposi
 import { DistrictRepository } from '@domains/repositories/district.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
+import { NotFoundException } from '@domains/exceptions/index';
 
 @Injectable()
 export class CreateDistrictUseCase {
@@ -31,45 +32,56 @@ export class CreateDistrictUseCase {
     username: string,
   ): Promise<District> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_DISTRICT,
+      DISTRICT_ACTIONS.CREATE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only add district if election is scheduled
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+        // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
+        // use domain model method to create (encapsulates business logic and validation)
         const newDistrict = District.create({
-          electionId: activeElection.electionId,
+          electionId: election.id,
           desc1: dto.desc1,
           createdBy: username,
         });
-        const district = await this.districtRepository.create(
+        // create the district in the database
+        const createdDistrict = await this.districtRepository.create(
           newDistrict,
           manager,
         );
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_DISTRICT,
-          DATABASE_CONSTANTS.MODELNAME_DISTRICT,
-          JSON.stringify({
-            id: district.id,
-            election: election.name,
-            desc1: district.desc1,
+        // Log the creation
+        const log = ActivityLog.create({
+          action: DISTRICT_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_DISTRICT,
+          details: JSON.stringify({
+            id: createdDistrict.id,
+            desc1: createdDistrict.desc1,
+            createdBy: username,
+            createdAt: createdDistrict.createdAt,
           }),
-          new Date(),
-          username,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: username,
+        });
+        await this.activityLogRepository.create(log, manager);
 
-        return district;
+        // log the creation
+        return createdDistrict;
       },
     );
   }

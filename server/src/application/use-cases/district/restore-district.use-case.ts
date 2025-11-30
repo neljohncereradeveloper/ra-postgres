@@ -1,18 +1,18 @@
 import { ActivityLog } from '@domain/models/activitylog.model';
-import { District } from '@domain/models/district.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { DistrictRepository } from '@domains/repositories/district.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 @Injectable()
-export class RestoreDeleteDistrictUseCase {
+export class RestoreDistrictUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -26,63 +26,65 @@ export class RestoreDeleteDistrictUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userId: number): Promise<void> {
+  async execute(id: number, userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RESTORE_DELETE_DISTRICT,
+      DISTRICT_ACTIONS.RESTORE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only restore deleted district if election is scheduled
-        election.validateForUpdate();
-
-        // First try to restore using repository method to find deleted district
-        // Then load and use domain method
-        const restoreSuccess = await this.districtRepository.restoreDeleted(
-          id,
-          manager,
-        );
-        if (!restoreSuccess) {
+        if (!election) {
           throw new NotFoundException(
-            `District with ID ${id} not found or already restored.`,
+            `Election with ID ${activeElection.electionId} not found.`,
           );
         }
+        // Use domain model method to validate if election is scheduled
+        election.validateForUpdate();
 
-        // Load the restored district and use domain method to ensure consistency
+        // Retrieve the district
         const district = await this.districtRepository.findById(id, manager);
         if (!district) {
-          // If still not found after restore, something went wrong
-          throw new NotFoundException(
-            `District with ID ${id} could not be restored.`,
-          );
+          throw new NotFoundException(`District with ID ${id} not found.`);
         }
 
         // Use domain method to restore (ensures deletedBy is cleared)
         district.restore();
 
         // Save the restored district
-        await this.districtRepository.update(id, district, manager);
-
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.RESTORE_DELETE_DISTRICT,
-          DATABASE_CONSTANTS.MODELNAME_DISTRICT,
-          JSON.stringify({
-            id,
-            explaination: `District with ID ${id} restored`,
-          }),
-          new Date(),
-          userId,
+        const success = await this.districtRepository.update(
+          id,
+          district,
+          manager,
         );
-        // insert log
+        if (!success) {
+          throw new SomethinWentWrongException(`District restore failed`);
+        }
+
+        // Log the restore
+        const log = ActivityLog.create({
+          action: DISTRICT_ACTIONS.RESTORE,
+          entity: DATABASE_CONSTANTS.MODELNAME_DISTRICT,
+          details: JSON.stringify({
+            id,
+            desc1: district.desc1,
+            explanation: `District with ID : ${id} restored by USER : ${userName}`,
+            restoredBy: userName,
+            restoredAt: district.deletedAt,
+          }),
+          username: userName,
+        });
         await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { DistrictController } from './controller/district.controller';
 import { CreateDistrictUseCase } from '@application/use-cases/district/create-district.use-case';
 import { UpdateDistrictUseCase } from '@application/use-cases/district/update-district.use-case';
-import { FindDistrictsWithFiltersUseCase } from '@application/use-cases/district/find-with-filters-district.use-case';
-import { SoftDeleteDistrictUseCase } from '@application/use-cases/district/soft-delete-district.use-case';
-import { RestoreDeleteDistrictUseCase } from '@application/use-cases/district/restore-delete-district.use-case';
-import { RetrieveComboboxDistrictUseCase } from '@application/use-cases/district/retrieve-combobox-district.use-case';
+import { PaginatedDistrictsListUseCase } from '@application/use-cases/district/paginated-district-list.use-case';
+import { ArchiveDistrictUseCase } from '@application/use-cases/district/archive-district.use-case';
+import { RestoreDistrictUseCase } from '@application/use-cases/district/restore-district.use-case';
+import { ComboboxDistrictUseCase } from '@application/use-cases/district/combobox-district.use-case';
 import { MysqlDatabaseModule } from '@infrastructure/database/typeorm-mysql/mysql-database.module';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DistrictRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/district.repository.impl';
@@ -36,18 +36,18 @@ import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/r
     }, // Dependency Injection
     CreateDistrictUseCase,
     UpdateDistrictUseCase,
-    FindDistrictsWithFiltersUseCase,
-    SoftDeleteDistrictUseCase,
-    RestoreDeleteDistrictUseCase,
-    RetrieveComboboxDistrictUseCase,
+    PaginatedDistrictsListUseCase,
+    ArchiveDistrictUseCase,
+    RestoreDistrictUseCase,
+    ComboboxDistrictUseCase,
   ],
   exports: [
     CreateDistrictUseCase,
     UpdateDistrictUseCase,
-    FindDistrictsWithFiltersUseCase,
-    SoftDeleteDistrictUseCase,
-    RestoreDeleteDistrictUseCase,
-    RetrieveComboboxDistrictUseCase,
+    PaginatedDistrictsListUseCase,
+    ArchiveDistrictUseCase,
+    RestoreDistrictUseCase,
+    ComboboxDistrictUseCase,
   ],
 })
 export class DistrictModule {}

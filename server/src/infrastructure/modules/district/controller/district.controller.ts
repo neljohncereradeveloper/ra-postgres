@@ -16,10 +16,10 @@ import { CreateDistrictUseCase } from '@application/use-cases/district/create-di
 import { CreateDistrictDto } from '../interface/dto/create-district.dto';
 import { UpdateDistrictDto } from '../interface/dto/update-district.dto';
 import { UpdateDistrictUseCase } from '@application/use-cases/district/update-district.use-case';
-import { FindDistrictsWithFiltersUseCase } from '@application/use-cases/district/find-with-filters-district.use-case';
-import { SoftDeleteDistrictUseCase } from '@application/use-cases/district/soft-delete-district.use-case';
-import { RestoreDeleteDistrictUseCase } from '@application/use-cases/district/restore-delete-district.use-case';
-import { RetrieveComboboxDistrictUseCase } from '@application/use-cases/district/retrieve-combobox-district.use-case';
+import { PaginatedDistrictsListUseCase } from '@application/use-cases/district/paginated-district-list.use-case';
+import { ArchiveDistrictUseCase } from '@application/use-cases/district/archive-district.use-case';
+import { RestoreDistrictUseCase } from '@application/use-cases/district/restore-district.use-case';
+import { ComboboxDistrictUseCase } from '@application/use-cases/district/combobox-district.use-case';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
 import {
@@ -35,10 +35,10 @@ export class DistrictController {
   constructor(
     private readonly createDistrictUseCase: CreateDistrictUseCase,
     private readonly updateDistrictUseCase: UpdateDistrictUseCase,
-    private readonly findDistrictsWithFiltersUseCase: FindDistrictsWithFiltersUseCase,
-    private readonly softDeleteDistrictUseCase: SoftDeleteDistrictUseCase,
-    private readonly restoreDeleteDistrictUseCase: RestoreDeleteDistrictUseCase,
-    private readonly retrieveComboboxDistrictUseCase: RetrieveComboboxDistrictUseCase,
+    private readonly findDistrictsWithFiltersUseCase: PaginatedDistrictsListUseCase,
+    private readonly softDeleteDistrictUseCase: ArchiveDistrictUseCase,
+    private readonly restoreDeleteDistrictUseCase: RestoreDistrictUseCase,
+    private readonly retrieveComboboxDistrictUseCase: ComboboxDistrictUseCase,
   ) {}
 
   @Version('1') // API versioning

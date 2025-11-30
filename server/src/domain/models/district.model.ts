@@ -1,4 +1,6 @@
 import { DistrictValidationPolicy } from '@domain/policies/district/district-validation.policy';
+import { DistrictBusinessException } from '@domains/exceptions/district/district-business.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * District Domain Model
@@ -80,7 +82,14 @@ export class District {
    * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws DistrictValidationException - If validation fails
    */
-  update(dto: { desc1: string }, updatedBy: string): void {
+  update(dto: { desc1: string; updatedBy?: string }): void {
+    if (this.deletedAt) {
+      throw new DistrictBusinessException(
+        'District is archived and cannot be updated',
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
     // Create a temporary district with the new values to validate before applying
     const tempDistrict = new District({
       id: this.id,
@@ -92,7 +101,7 @@ export class District {
 
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
-    this.updatedBy = updatedBy;
+    this.updatedBy = dto.updatedBy;
     this.updatedAt = new Date();
   }
 
@@ -100,6 +109,14 @@ export class District {
    * Archives (soft deletes) the district
    */
   archive(deletedBy: string): void {
+    // Validate if the district is not already archived
+    if (this.deletedAt) {
+      throw new DistrictBusinessException(
+        'District is already archived.',
+        HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
+      );
+    }
+
     this.deletedAt = new Date();
     this.deletedBy = deletedBy;
   }
@@ -108,6 +125,14 @@ export class District {
    * Restores a previously archived district
    */
   restore(): void {
+    if (!this.deletedAt) {
+      throw new DistrictBusinessException(
+        `District with ID ${this.id} is not archived.`,
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
+    // restore the district
     this.deletedAt = null;
     this.deletedBy = null;
   }
@@ -120,7 +145,7 @@ export class District {
    * - District name must meet length requirements
    * - All required fields must be present
    *
-   * @throws DistrictValidationException - If validation fails
+   * @throws DistrictBusinessException - If validation fails
    */
   validate(): void {
     new DistrictValidationPolicy().validate(this);

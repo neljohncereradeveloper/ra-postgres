@@ -52,7 +52,7 @@ export class StartElectionUseCase {
           activeElection.electionId,
           manager,
         );
-        const districtCount = await this.districtRepository.countByElectionId(
+        const districtCount = await this.districtRepository.countByElection(
           activeElection.electionId,
           manager,
         );

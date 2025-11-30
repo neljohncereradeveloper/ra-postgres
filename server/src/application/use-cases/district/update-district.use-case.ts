@@ -9,9 +9,9 @@ import { DistrictRepository } from '@domains/repositories/district.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
 
 @Injectable()
 export class UpdateDistrictUseCase {
@@ -31,65 +31,71 @@ export class UpdateDistrictUseCase {
   async execute(
     id: number,
     dto: UpdateDistrictCommand,
-    userId: number,
+    userName: string,
   ): Promise<District> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.UPDATE_DISTRICT,
+      DISTRICT_ACTIONS.UPDATE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only update district if election is scheduled
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+        // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
-        // validate district existence
-        const districtResult = await this.districtRepository.findById(
-          id,
-          manager,
-        );
-        if (!districtResult) {
+        // retrieve the district
+        const district = await this.districtRepository.findById(id, manager);
+        if (!district) {
           throw new NotFoundException('District not found');
         }
 
-        // Update the district
-        const district = new District({
-          electionId: activeElection.electionId,
+        // use domain model method to update (encapsulates business logic and validation)
+        district.update({
           desc1: dto.desc1,
+          updatedBy: userName,
         });
+
+        // update the district in the database
         const updateSuccessfull = await this.districtRepository.update(
           id,
           district,
           manager,
         );
-
         if (!updateSuccessfull) {
           throw new SomethinWentWrongException('District update failed');
         }
 
+        // retrieve the updated district
         const updateResult = await this.districtRepository.findById(
           id,
           manager,
         );
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPDATE_DISTRICT,
-          DATABASE_CONSTANTS.MODELNAME_DISTRICT,
-          JSON.stringify({
+
+        // Log the update
+        const log = ActivityLog.create({
+          action: DISTRICT_ACTIONS.UPDATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_DISTRICT,
+          details: JSON.stringify({
             id: updateResult.id,
-            election: election.name,
             desc1: updateResult.desc1,
+            updatedBy: userName,
+            updatedAt: updateResult.updatedAt,
           }),
-          new Date(),
-          userId,
-        );
-        // insert log
+          username: userName,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return updateResult;

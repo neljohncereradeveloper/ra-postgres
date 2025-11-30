@@ -3,7 +3,7 @@ export * from './shared/not-found.exception';
 export * from './shared/something-wentwrong.exception';
 export * from './activity-log/activity-log-validation.exception';
 export * from './precinct/precinct-business.exception';
-export * from './district/district-validation.exception';
+export * from './district/district-business.exception';
 export * from './position/position-business.exception';
 export * from './election/election-validation.exception';
 export * from './election/cast-vote.exception';

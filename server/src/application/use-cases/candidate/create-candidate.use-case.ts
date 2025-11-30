@@ -78,12 +78,11 @@ export class CreateCandidateUseCase {
           throw new BadRequestException('Position not found');
         }
 
-        const district =
-          await this.districtRepository.findByDescriptionWithElectionId(
-            dto.district,
-            activeElection.electionId,
-            manager,
-          );
+        const district = await this.districtRepository.findByDescription(
+          dto.district,
+          activeElection.electionId,
+          manager,
+        );
         if (!district) {
           throw new BadRequestException('District not found');
         }

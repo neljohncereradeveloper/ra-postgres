@@ -22,7 +22,7 @@ export class ComboboxPositionUseCase {
 
   async execute(): Promise<{ value: string; label: string }[]> {
     return this.transactionHelper.executeTransaction(
-      POSITION_ACTIONS.DEFAULT,
+      POSITION_ACTIONS.COMBOBOX,
       async (manager) => {
         // retrieve the active election
         const activeElection =

@@ -71,7 +71,7 @@ export class DistrictRepositoryImpl
     return result.affected > 0; // Return true if a row was restored
   }
 
-  async findPaginatedListWithElectionId(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -146,7 +146,7 @@ export class DistrictRepositoryImpl
     return districtEntity ? this.toModel(districtEntity) : null;
   }
 
-  async findByDescriptionWithElectionId(
+  async findByDescription(
     desc1: string,
     electionId: number,
     manager: EntityManager,
@@ -157,7 +157,7 @@ export class DistrictRepositoryImpl
     return districtEntity ? this.toModel(districtEntity) : null;
   }
 
-  async findAllWithElectionId(
+  async combobox(
     electionId: number,
     manager: EntityManager,
   ): Promise<District[]> {
@@ -166,7 +166,7 @@ export class DistrictRepositoryImpl
     });
   }
 
-  async countByElectionId(
+  async countByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {

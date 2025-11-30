@@ -59,6 +59,7 @@ export class PaginatedPositionsListUseCase {
         if (limit < 1) {
           throw new BadRequestException('Limit must be greater than 0');
         }
+
         // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
