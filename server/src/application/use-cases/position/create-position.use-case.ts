@@ -5,11 +5,12 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
+import { NotFoundException } from '@domains/exceptions/index';
 
 @Injectable()
 export class CreatePositionUseCase {
@@ -26,50 +27,62 @@ export class CreatePositionUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(dto: CreatePositionCommand, userId: number): Promise<Position> {
+  async execute(
+    dto: CreatePositionCommand,
+    username: string,
+  ): Promise<Position> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_POSITION,
+      POSITION_ACTIONS.CREATE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only add position if election is scheduled
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+        // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
-        const newPosition = new Position({
-          electionId: activeElection.electionId,
+        // use domain model method to create (encapsulates business logic and validation)
+        const newPosition = Position.create({
+          electionId: election.id,
           desc1: dto.desc1,
-          maxCandidates: dto.maxCandidates,
-          termLimit: dto.termLimit,
+          maxCandidates: dto.maxCandidates || 1,
+          termLimit: dto.termLimit || '1',
+          createdBy: username,
         });
-        const position = await this.positionRepository.create(
+        // create the position in the database
+        const createdPosition = await this.positionRepository.create(
           newPosition,
           manager,
         );
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_POSITION,
-          DATABASE_CONSTANTS.MODELNAME_POSITION,
-          JSON.stringify({
-            id: position.id,
-            election: election.name,
-            desc1: position.desc1,
-            maxCandidates: position.maxCandidates,
-            termLimit: position.termLimit,
+        // Log the creation
+        const log = ActivityLog.create({
+          action: POSITION_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_POSITION,
+          details: JSON.stringify({
+            id: createdPosition.id,
+            desc1: createdPosition.desc1,
+            createdBy: username,
+            createdAt: createdPosition.createdAt,
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: username,
+        });
+        await this.activityLogRepository.create(log, manager);
 
-        return position;
+        return createdPosition;
       },
     );
   }

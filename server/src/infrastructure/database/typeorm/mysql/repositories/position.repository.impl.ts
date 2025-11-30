@@ -71,7 +71,7 @@ export class PositionRepositoryImpl
     return result.affected > 0; // Return true if a row was restored
   }
 
-  async findPaginatedListWithElectionId(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -146,7 +146,7 @@ export class PositionRepositoryImpl
     return positionEntity ? this.toModel(positionEntity) : null;
   }
 
-  async findByDescriptionWithElectionId(
+  async findByDescription(
     desc1: string,
     electionId: number,
     manager: EntityManager,
@@ -157,7 +157,7 @@ export class PositionRepositoryImpl
     return positionEntity ? this.toModel(positionEntity) : null;
   }
 
-  async findAllWithElectionId(
+  async combobox(
     electionId: number,
     manager: EntityManager,
   ): Promise<Position[]> {
@@ -166,7 +166,7 @@ export class PositionRepositoryImpl
     });
   }
 
-  async findByElectionId(
+  async findByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<Position[]> {
@@ -177,7 +177,7 @@ export class PositionRepositoryImpl
     return positionEntities.map((entity) => this.toModel(entity));
   }
 
-  async countByElectionId(
+  async countByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {

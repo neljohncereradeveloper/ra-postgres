@@ -55,7 +55,7 @@ export class UpdatePrecinctUseCase {
           manager,
         );
 
-        // Use domain model factory method to create activity log
+        // Log the update
         const log = ActivityLog.create({
           action: PRECINCT_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,

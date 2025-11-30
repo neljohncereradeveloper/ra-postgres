@@ -4,18 +4,16 @@ export interface PositionRepository<Context = unknown> {
   create(position: Position, context?: Context): Promise<Position>;
   update(
     id: number,
-    updateData: Partial<Position>,
+    dto: Partial<Position>,
     context?: Context,
   ): Promise<boolean>;
-  softDelete(id: number, context?: Context): Promise<boolean>;
-  restoreDeleted(id: number, context?: Context): Promise<boolean>;
-  findById(id: number, context?: Context): Promise<Position>;
-  findPaginatedListWithElectionId(
+  findById(id: number, context: Context): Promise<Position>;
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
     electionId: number,
+    isArchived: boolean,
     context: Context,
   ): Promise<{
     data: Position[];
@@ -28,15 +26,12 @@ export interface PositionRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  findByDescriptionWithElectionId(
+  findByDescription(
     desc1: string,
     electionId: number,
     context: Context,
   ): Promise<Position | null>;
-  findAllWithElectionId(
-    electionId: number,
-    context: Context,
-  ): Promise<Position[]>;
-  findByElectionId(electionId: number, context: Context): Promise<Position[]>;
-  countByElectionId(electionId: number, context?: Context): Promise<number>;
+  combobox(electionId: number, context: Context): Promise<Position[]>;
+  findByElection(electionId: number, context: Context): Promise<Position[]>;
+  countByElection(electionId: number, context?: Context): Promise<number>;
 }

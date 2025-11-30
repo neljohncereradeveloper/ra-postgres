@@ -1,5 +1,5 @@
 import { PrecinctValidationPolicy } from '@domain/policies/precinct/precinct-validation.policy';
-import { PrecinctBusinessValidationException } from '@domains/exceptions/precinct/precinct-business-validation.exception';
+import { PrecinctBusinessException } from '@domains/exceptions/precinct/precinct-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
@@ -76,7 +76,7 @@ export class Precinct {
    */
   update(dto: { desc1: string; updatedBy?: string }): void {
     if (this.deletedAt) {
-      throw new PrecinctBusinessValidationException(
+      throw new PrecinctBusinessException(
         'Precinct is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
       );
@@ -105,7 +105,7 @@ export class Precinct {
   archive(deletedBy: string): void {
     // Validate if the precinct is not already archived
     if (this.deletedAt) {
-      throw new PrecinctBusinessValidationException(
+      throw new PrecinctBusinessException(
         'Precinct is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
@@ -121,7 +121,7 @@ export class Precinct {
    */
   restore(): void {
     if (!this.deletedAt) {
-      throw new PrecinctBusinessValidationException(
+      throw new PrecinctBusinessException(
         `Precinct with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
       );

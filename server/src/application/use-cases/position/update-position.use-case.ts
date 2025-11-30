@@ -8,10 +8,10 @@ import { ActivityLogRepository } from '@domains/repositories/activity-log.reposi
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
 
 @Injectable()
 export class UpdatePositionUseCase {
@@ -31,69 +31,73 @@ export class UpdatePositionUseCase {
   async execute(
     id: number,
     dto: UpdatePositionCommand,
-    userId: number,
+    username: string,
   ): Promise<Position> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.UPDATE_POSITION,
+      POSITION_ACTIONS.UPDATE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only update position if election is scheduled
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+        // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
-        // validate position existence
-        const positionResult = await this.positionRepository.findById(
-          id,
-          manager,
-        );
-        if (!positionResult) {
+        // retrieve the position
+        const position = await this.positionRepository.findById(id, manager);
+        if (!position) {
           throw new NotFoundException('Position not found');
         }
 
-        // Update the district
-        const position = new Position({
-          electionId: activeElection.electionId,
+        // use domain model method to update (encapsulates business logic and validation)
+        position.update({
           desc1: dto.desc1,
           maxCandidates: dto.maxCandidates,
           termLimit: dto.termLimit,
+          updatedBy: username,
         });
+
+        // update the position in the database
         const updateSuccessfull = await this.positionRepository.update(
           id,
           position,
           manager,
         );
-
         if (!updateSuccessfull) {
           throw new SomethinWentWrongException('Position update failed');
         }
 
+        // retrieve the updated position
         const updateResult = await this.positionRepository.findById(
           id,
           manager,
         );
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPDATE_POSITION,
-          DATABASE_CONSTANTS.MODELNAME_POSITION,
-          JSON.stringify({
+
+        // Log the update
+        const log = ActivityLog.create({
+          action: POSITION_ACTIONS.UPDATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_POSITION,
+          details: JSON.stringify({
             id: updateResult.id,
-            election: election.name,
             desc1: updateResult.desc1,
-            maxCandidates: updateResult.maxCandidates,
-            termLimit: updateResult.termLimit,
+            updatedBy: username,
+            updatedAt: updateResult.updatedAt,
           }),
-          new Date(),
-          userId,
-        );
-        // insert log
+          username: username,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return updateResult;

@@ -20,11 +20,11 @@ import {
 } from '@shared/constants/auth.constants';
 import { AuthorizeApplicationAccess } from '@infrastructure/modules/auth/decorators/applicationaccess.decorator';
 import { CreatePositionUseCase } from '@application/use-cases/position/create-position.use-case';
-import { SoftDeletePositionUseCase } from '@application/use-cases/position/soft-delete-position.use-case';
-import { RestoreDeletePositionUseCase } from '@application/use-cases/position/restore-delete-position.use-case';
-import { RetrieveComboboxPositionUseCase } from '@application/use-cases/position/retrieve-combobox-position.use-case';
+import { ArchivePositionUseCase } from '@application/use-cases/position/archive-position.use-case';
+import { RestorePositionUseCase } from '@application/use-cases/position/restore-position.use-case';
+import { ComboboxPositionUseCase } from '@application/use-cases/position/combobox-position.use-case';
 import { UpdatePositionUseCase } from '@application/use-cases/position/update-position.use-case';
-import { FindPositionsWithFiltersUseCase } from '@application/use-cases/position/find-with-filters-position.use-case';
+import { PaginatedPositionsListUseCase } from '@application/use-cases/position/paginated-position-list.use-case';
 import { CreatePositionDto } from '../interface/dto/create-position.dto';
 import { UpdatePositionDto } from '../interface/dto/update-position.dto';
 // Controller for handling client-related requests
@@ -34,10 +34,10 @@ export class PositionController {
   constructor(
     private readonly createPositionUseCase: CreatePositionUseCase,
     private readonly updatePositionUseCase: UpdatePositionUseCase,
-    private readonly findPositionsWithFiltersUseCase: FindPositionsWithFiltersUseCase,
-    private readonly softDeletePositionUseCase: SoftDeletePositionUseCase,
-    private readonly restoreDeletePositionUseCase: RestoreDeletePositionUseCase,
-    private readonly retrieveComboboxPositionUseCase: RetrieveComboboxPositionUseCase,
+    private readonly findPositionsWithFiltersUseCase: PaginatedPositionsListUseCase,
+    private readonly softDeletePositionUseCase: ArchivePositionUseCase,
+    private readonly restoreDeletePositionUseCase: RestorePositionUseCase,
+    private readonly retrieveComboboxPositionUseCase: ComboboxPositionUseCase,
   ) {}
 
   @Version('1') // API versioning

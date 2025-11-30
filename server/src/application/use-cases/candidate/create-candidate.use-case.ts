@@ -69,12 +69,11 @@ export class CreateCandidateUseCase {
           );
         }
 
-        const position =
-          await this.positionRepository.findByDescriptionWithElectionId(
-            dto.position,
-            activeElection.electionId,
-            manager,
-          );
+        const position = await this.positionRepository.findByDescription(
+          dto.position,
+          activeElection.electionId,
+          manager,
+        );
         if (!position) {
           throw new BadRequestException('Position not found');
         }

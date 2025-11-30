@@ -84,7 +84,7 @@ export class CastVoteUseCase {
         const positionsMap = new Map();
 
         // Collect all positions for validation
-        const positions = await this.positionRepository.findByElectionId(
+        const positions = await this.positionRepository.findByElection(
           activeElection.electionId,
           manager,
         );

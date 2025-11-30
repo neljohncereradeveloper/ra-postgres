@@ -3,15 +3,17 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
+import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
-import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
+import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
+import { ElectionNotFoundException } from '@domains/exceptions/election/eelction-not-found.exception';
 
 @Injectable()
-export class RestoreDeletePositionUseCase {
+export class ArchivePositionUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -25,46 +27,66 @@ export class RestoreDeletePositionUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userId: number): Promise<void> {
+  async execute(id: number, userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RESTORE_DELETE_POSITION,
+      POSITION_ACTIONS.ARCHIVE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only restore deleted position if election is scheduled
+        if (!election) {
+          throw new ElectionNotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+        // Can only archive position if election is scheduled
         election.validateForUpdate();
 
-        const success = await this.positionRepository.restoreDeleted(
+        // retrieve the position
+        const position = await this.positionRepository.findById(id, manager);
+        if (!position) {
+          throw new NotFoundException(`Position with ID ${id} not found.`);
+        }
+
+        // use domain model method to archive (encapsulates business logic and validation)
+        position.archive(userName);
+
+        // update the position in the database
+        const success = await this.positionRepository.update(
           id,
+          position,
           manager,
         );
         if (!success) {
-          throw new NotFoundException(
-            `Position with ID ${id} not found or already restored.`,
-          );
+          throw new SomethinWentWrongException('Position archive failed');
         }
 
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.RESTORE_DELETE_POSITION,
-          DATABASE_CONSTANTS.MODELNAME_POSITION,
-          JSON.stringify({
+        // Log the archive
+        const log = ActivityLog.create({
+          action: POSITION_ACTIONS.ARCHIVE,
+          entity: DATABASE_CONSTANTS.MODELNAME_POSITION,
+          details: JSON.stringify({
             id,
-            explaination: `Position with ID ${id} restored`,
+            desc1: position.desc1,
+            explanation: `Position with ID : ${id} archived by USER : ${userName}`,
+            archivedBy: userName,
+            archivedAt: position.deletedAt,
           }),
-          new Date(),
-          userId,
-        );
-        // insert log
+          username: userName,
+        });
+
         await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

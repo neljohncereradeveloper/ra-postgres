@@ -11,6 +11,8 @@ import { ArchivePrecinctUseCase } from '@application/use-cases/precinct/archive-
 import { UpdatePrecinctUseCase } from '@application/use-cases/precinct/update-precinct.use-case';
 import { RestorePrecinctUseCase } from '@application/use-cases/precinct/restore-precinct.use-case';
 import { ComboboxPrecinctUseCase } from '@application/use-cases/precinct/combobox-precinct.use-case';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
+import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
 
 @Module({
   imports: [MysqlDatabaseModule],
@@ -22,7 +24,11 @@ import { ComboboxPrecinctUseCase } from '@application/use-cases/precinct/combobo
       useClass: TransactionAdapter,
     },
     { provide: REPOSITORY_TOKENS.PRECINCT, useClass: PrecinctRepositoryImpl },
-
+    {
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
+    },
+    { provide: REPOSITORY_TOKENS.ELECTION, useClass: ElectionRepositoryImpl },
     {
       provide: REPOSITORY_TOKENS.ACTIVITYLOGS,
       useClass: ActivityLogRepositoryImpl,

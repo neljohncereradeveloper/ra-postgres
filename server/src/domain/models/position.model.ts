@@ -1,4 +1,6 @@
 import { PositionValidationPolicy } from '@domain/policies/position/position-validation.policy';
+import { PositionBusinessException } from '@domains/exceptions/position/position-business.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * Position Domain Model
@@ -90,10 +92,19 @@ export class Position {
    * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws PositionValidationException - If validation fails
    */
-  update(
-    dto: { desc1: string; maxCandidates: number; termLimit: string },
-    updatedBy: string,
-  ): void {
+  update(dto: {
+    desc1: string;
+    maxCandidates: number;
+    termLimit: string;
+    updatedBy?: string;
+  }): void {
+    if (this.deletedAt) {
+      throw new PositionBusinessException(
+        'Position is archived and cannot be updated',
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
     // Create a temporary position with the new values to validate before applying
     const tempPosition = new Position({
       id: this.id,
@@ -109,7 +120,7 @@ export class Position {
     this.desc1 = dto.desc1;
     this.maxCandidates = dto.maxCandidates;
     this.termLimit = dto.termLimit;
-    this.updatedBy = updatedBy;
+    this.updatedBy = dto.updatedBy;
     this.updatedAt = new Date();
   }
 
@@ -117,6 +128,15 @@ export class Position {
    * Archives (soft deletes) the position
    */
   archive(deletedBy: string): void {
+    // Validate if the position is not already archived
+    if (this.deletedAt) {
+      throw new PositionBusinessException(
+        'Position is already archived.',
+        HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
+      );
+    }
+
+    // Apply archive operation
     this.deletedAt = new Date();
     this.deletedBy = deletedBy;
   }
@@ -125,6 +145,14 @@ export class Position {
    * Restores a previously archived position
    */
   restore(): void {
+    if (!this.deletedAt) {
+      throw new PositionBusinessException(
+        `Position with ID ${this.id} is not archived.`,
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
+    // restore the position
     this.deletedAt = null;
     this.deletedBy = null;
   }

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PRECINCT_ACTIONS } from '@domain/constants/index';
 import { ActivityLog } from '@domain/models/index';
 import { TransactionPort } from '@domain/ports/index';
@@ -6,9 +6,12 @@ import {
   NotFoundException,
   SomethinWentWrongException,
 } from '@domains/exceptions/index';
+import { ElectionNotFoundException } from '@domains/exceptions/election/eelction-not-found.exception';
 import {
   ActivityLogRepository,
   PrecinctRepository,
+  ActiveElectionRepository,
+  ElectionRepository,
 } from '@domains/repositories/index';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
@@ -22,18 +25,41 @@ export class ArchivePrecinctUseCase {
     private readonly precinctRepository: PrecinctRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
+    @Inject(REPOSITORY_TOKENS.ELECTION)
+    private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<void> {
+  async execute(id: number, userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.ARCHIVE,
       async (manager) => {
+        // retrieve the active election
+        const activeElection =
+          await this.activeElectionRepository.retrieveActiveElection(manager);
+        if (!activeElection) {
+          throw new BadRequestException('No Active election');
+        }
+
+        // retrieve the election
+        const election = await this.electionRepository.findById(
+          activeElection.electionId,
+          manager,
+        );
+        if (!election) {
+          throw new ElectionNotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+        // Use domain model method to validate if election is scheduled
+        election.validateForUpdate();
+
         // Retrieve the precinct
         const precinct = await this.precinctRepository.findById(id, manager);
         if (!precinct) {
           throw new NotFoundException(`Precinct with ID ${id} not found.`);
         }
-
         // Use domain model method to archive (encapsulates business logic and validation)
         precinct.archive(userName);
 
@@ -61,6 +87,8 @@ export class ArchivePrecinctUseCase {
           username: userName,
         });
         await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

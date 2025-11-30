@@ -56,7 +56,7 @@ export class StartElectionUseCase {
           activeElection.electionId,
           manager,
         );
-        const positionCount = await this.positionRepository.countByElectionId(
+        const positionCount = await this.positionRepository.countByElection(
           activeElection.electionId,
           manager,
         );
