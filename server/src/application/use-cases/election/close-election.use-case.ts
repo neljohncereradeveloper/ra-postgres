@@ -8,6 +8,11 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { Election } from '@domain/models/election.model';
+import { ELECTION_ACTIONS } from '@domain/constants/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 
 @Injectable()
 export class CloseElectionUseCase {
@@ -24,27 +29,41 @@ export class CloseElectionUseCase {
     // private readonly ballotRepository: BallotRepository,
   ) {}
 
-  async execute(userId: number): Promise<Election> {
+  async execute(userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CLOSE_ELECTION,
+      ELECTION_ACTIONS.CLOSE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
+
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Apply business logic to end the event (state modification)
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found`,
+          );
+        }
+
+        // use domain model method to close the election
         election.closeEvent();
 
-        await this.electionRepository.update(
+        // update the election in the database
+        const success = await this.electionRepository.update(
           activeElection.electionId,
           election,
           manager,
         );
+        if (!success) {
+          throw new SomethinWentWrongException('Election close failed');
+        }
+
         // reset the active event
         await this.activeElectionRepository.reset(manager);
 
@@ -54,19 +73,25 @@ export class CloseElectionUseCase {
         //   manager,
         // );
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CLOSE_ELECTION,
-          DATABASE_CONSTANTS.MODELNAME_ELECTION,
-          JSON.stringify({
-            id: activeElection.electionId,
-            explaination: `Election ${election.name} closed`,
+        // Log the cancel election
+        const log = ActivityLog.create({
+          action: ELECTION_ACTIONS.CLOSE,
+          entity: DATABASE_CONSTANTS.MODELNAME_ELECTION,
+          details: JSON.stringify({
+            id: election.id,
+            name: election.name,
+            address: election.address,
+            date: election.date,
+            desc1: election.desc1,
+            explanation: `Election ${election.name} closed by USER : ${userName}`,
+            closedBy: userName,
+            closedAt: new Date(),
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: userName,
+        });
+        await this.activityLogRepository.create(log, manager);
 
-        return election;
+        return success;
       },
     );
   }

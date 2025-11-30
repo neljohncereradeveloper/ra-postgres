@@ -183,7 +183,7 @@ export class ElectionRepositoryImpl
     };
   }
 
-  async findAll(): Promise<Election[]> {
+  async combobox(): Promise<Election[]> {
     const electionEntities = await this.electionRepo.find({
       where: { deletedAt: null },
     });
@@ -192,7 +192,7 @@ export class ElectionRepositoryImpl
     return ElectionMapper.toDomainList(electionEntities);
   }
 
-  async retrieveScheduledElections(): Promise<Election[]> {
+  async comboboxRetrieveScheduledElections(): Promise<Election[]> {
     const electionEntities = await this.electionRepo.find({
       where: { deletedAt: null },
     });

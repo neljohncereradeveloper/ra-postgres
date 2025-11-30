@@ -167,7 +167,7 @@ export class DelegateRepositoryImpl
     return delegateEntity ? this.toModel(delegateEntity) : null;
   }
 
-  async countByElectionId(
+  async countByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {

@@ -1,6 +1,7 @@
 import { ElectionStatus } from '@domain/enums/index';
 import { Election } from '@domain/models/election.model';
-import { ElectionMutationLockedException } from '@domains/exceptions/election/election-lock.exception';
+import { ElectionBusinessException } from '@domains/exceptions/election/election-business.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * ElectionLockPolicy
@@ -8,28 +9,31 @@ import { ElectionMutationLockedException } from '@domains/exceptions/election/el
  * This policy enforces data lock rules when an election is closed or cancelled.
  *
  * @param election - The election to validate
- * @throws ElectionMutationLockedException - If the election is closed or cancelled
+ * @throws ElectionBusinessException - If the election business rule validation fails
  */
 export class ElectionLockPolicy {
   validate(election: Election): void {
     // Validate if the election is not closed
     if (election.electionStatus === ElectionStatus.CLOSED) {
-      throw new ElectionMutationLockedException(
+      throw new ElectionBusinessException(
         'Cannot update election. Election has already closed.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if the election is not cancelled
     if (election.electionStatus === ElectionStatus.CANCELLED) {
-      throw new ElectionMutationLockedException(
+      throw new ElectionBusinessException(
         'Cannot update election. Election is already cancelled.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if the election is not started
     if (election.electionStatus === ElectionStatus.STARTED) {
-      throw new ElectionMutationLockedException(
+      throw new ElectionBusinessException(
         'Cannot update election. Election has already started.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
   }

@@ -5,12 +5,12 @@ import { PositionRepository } from '@domains/repositories/position.repository';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import {
   BadRequestException,
   NotFoundException,
 } from '@domains/exceptions/index';
+import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
 
 @Injectable()
 export class PaginatedPositionsListUseCase {

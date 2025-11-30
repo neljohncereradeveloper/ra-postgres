@@ -9,15 +9,15 @@ import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-m
 import { ElectionController } from './controller/election.controller';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
 import { CreateElectionUseCase } from '@application/use-cases/election/create-election.use-case';
-import { FindPaginatedElectionsUseCase } from '@application/use-cases/election/find-paginated-elections.use-case';
-import { RetrieveComboboxElectionUseCase } from '@application/use-cases/election/retrieve-combobox-election.use-case';
+import { PaginatedElectionListUseCase } from '@application/use-cases/election/paginated-election-list.use-case';
+import { ComboboxElectionUseCase } from '@application/use-cases/election/combobox-election.use-case';
 import { UpdateElectionUseCase } from '@application/use-cases/election/update-election.use-case';
 import { CloseElectionUseCase } from '@application/use-cases/election/close-election.use-case';
-import { SoftDeleteElectionUseCase } from '@application/use-cases/election/soft-delete-election.use-case';
+import { ArchiveElectionUseCase } from '@application/use-cases/election/archive-election.use-case';
 import { CancelElectionUseCase } from '@application/use-cases/election/cancel-election.use-case';
 import { StartElectionUseCase } from '@application/use-cases/election/start-election.use-case';
-import { RestoreDeleteElectionUseCase } from '@application/use-cases/election/restore-delete-election.use-case';
-import { RetrieveScheduledElectionUseCase } from '@application/use-cases/election/retrieve-scheduled-election.use-case';
+import { RestoreElectionUseCase } from '@application/use-cases/election/restore-election.use-case';
+import { ComboboxScheduledElectionUseCase } from '@application/use-cases/election/combobox-scheduled-election.use-case';
 import { PositionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/position.repository.impl';
 import { CandidateRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/candidate.repository.impl';
 import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/ballot.repository.impl';
@@ -47,26 +47,26 @@ import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/rep
     }, // Dependency Injection
     CreateElectionUseCase,
     UpdateElectionUseCase,
-    FindPaginatedElectionsUseCase,
-    SoftDeleteElectionUseCase,
-    RestoreDeleteElectionUseCase,
-    RetrieveComboboxElectionUseCase,
+    PaginatedElectionListUseCase,
+    ArchiveElectionUseCase,
+    RestoreElectionUseCase,
+    ComboboxElectionUseCase,
     CloseElectionUseCase,
     StartElectionUseCase,
     CancelElectionUseCase,
-    RetrieveScheduledElectionUseCase,
+    ComboboxScheduledElectionUseCase,
   ],
   exports: [
     CreateElectionUseCase,
     UpdateElectionUseCase,
-    FindPaginatedElectionsUseCase,
-    SoftDeleteElectionUseCase,
-    RestoreDeleteElectionUseCase,
-    RetrieveComboboxElectionUseCase,
+    PaginatedElectionListUseCase,
+    ArchiveElectionUseCase,
+    RestoreElectionUseCase,
+    ComboboxElectionUseCase,
     CloseElectionUseCase,
     StartElectionUseCase,
     CancelElectionUseCase,
-    RetrieveScheduledElectionUseCase,
+    ComboboxScheduledElectionUseCase,
   ],
 })
 export class ElectionModule {}

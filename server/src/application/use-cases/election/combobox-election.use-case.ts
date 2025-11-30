@@ -3,14 +3,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 
 @Injectable()
-export class RetrieveComboboxElectionUseCase {
+export class ComboboxElectionUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.ELECTION)
     private readonly electionRepository: ElectionRepository,
   ) {}
 
   async execute(): Promise<{ value: string; label: string }[]> {
-    const elections = await this.electionRepository.findAll();
+    const elections = await this.electionRepository.combobox();
 
     return elections.map((val: { name: string }) => ({
       value: val.name,

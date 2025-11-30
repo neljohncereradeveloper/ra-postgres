@@ -35,6 +35,6 @@ export interface DelegateRepository<Context = unknown> {
     electionId: number,
     context?: Context,
   ): Promise<Delegate>;
-  countByElectionId(electionId: number, context?: Context): Promise<number>;
+  countByElection(electionId: number, context?: Context): Promise<number>;
   markAsVoted(delegateId: number, context?: Context): Promise<void>;
 }

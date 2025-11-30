@@ -1,5 +1,5 @@
 import { CastVoteValidationPolicy } from '../../../../src/domain/policies/cast-vote/cast-vote-validation.policy';
-import { CastVoteValidationException } from '../../../../src/domain/exceptions/election/cast-vote.exception';
+import { CastVoteValidationException } from '../../../../src/domain/exceptions/cast-vote/cast-vote.exception';
 import { BALLOT_STATUS_CONSTANTS } from '../../../../src/shared/constants/ballot.constants';
 import { ELECTION_STATUS_CONSTANTS } from '../../../../src/shared/constants/election.constants';
 

@@ -2,16 +2,19 @@ import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
-import { Election } from '@domain/models/election.model';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { DistrictRepository } from '@domains/repositories/district.repository';
+import { ELECTION_ACTIONS } from '@domain/constants/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 
 @Injectable()
 export class StartElectionUseCase {
@@ -34,37 +37,46 @@ export class StartElectionUseCase {
     private readonly candidateRepository: CandidateRepository,
   ) {}
 
-  async execute(userId: number): Promise<Election> {
+  async execute(userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.START_ELECTION,
+      ELECTION_ACTIONS.START,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
+
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found`,
+          );
+        }
 
-        const delegatesCount = await this.delegateRepository.countByElectionId(
-          activeElection.electionId,
+        const delegatesCount = await this.delegateRepository.countByElection(
+          election.id,
           manager,
         );
         const districtCount = await this.districtRepository.countByElection(
-          activeElection.electionId,
+          election.id,
           manager,
         );
         const positionCount = await this.positionRepository.countByElection(
-          activeElection.electionId,
+          election.id,
           manager,
         );
-        const candidateCount = await this.candidateRepository.countByElectionId(
-          activeElection.electionId,
+        const candidateCount = await this.candidateRepository.countByElection(
+          election.id,
           manager,
         );
 
+        // use domain model method to start the election and validate the election
         election.startEvent(
           delegatesCount,
           districtCount,
@@ -72,25 +84,36 @@ export class StartElectionUseCase {
           candidateCount,
         );
 
-        await this.electionRepository.update(
-          activeElection.electionId,
+        // update the election in the database
+        const success = await this.electionRepository.update(
+          election.id,
           election,
           manager,
         );
+        if (!success) {
+          throw new SomethinWentWrongException('Election start failed');
+        }
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.START_ELECTION,
-          DATABASE_CONSTANTS.MODELNAME_ELECTION,
-          JSON.stringify({
-            id: activeElection.electionId,
-            explaination: `Election ${election.name} started`,
+        // Log the archive
+        const log = ActivityLog.create({
+          action: ELECTION_ACTIONS.START,
+          entity: DATABASE_CONSTANTS.MODELNAME_ELECTION,
+          details: JSON.stringify({
+            id: election.id,
+            name: election.name,
+            desc1: election.desc1,
+            address: election.address,
+            date: election.date,
+            explanation: `Election with ID : ${election.id} started by USER : ${userName}`,
+            startedBy: userName,
+            startedAt: election.startTime,
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: userName,
+        });
 
-        return election;
+        await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

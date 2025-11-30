@@ -5,5 +5,5 @@ export * from './activity-log/activity-log-validation.exception';
 export * from './precinct/precinct-business.exception';
 export * from './district/district-business.exception';
 export * from './position/position-business.exception';
-export * from './election/election-validation.exception';
-export * from './election/cast-vote.exception';
+export * from './election/election-business.exception';
+export * from './cast-vote/cast-vote.exception';

@@ -2,7 +2,8 @@
 
 import { ElectionStatus } from '@domain/enums/index';
 import { Election } from '@domain/models/election.model';
-import { ElectionCancellationNotAllowedException } from '@domains/exceptions/election/election-cancellation.exception';
+import { ElectionBusinessException } from '@domains/exceptions/election/election-business.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * ElectionCancelPolicy
@@ -10,20 +11,22 @@ import { ElectionCancellationNotAllowedException } from '@domains/exceptions/ele
  * This policy enforces business rules for canceling an election.
  *
  * @param election - The election to validate
- * @throws ElectionCancellationNotAllowedException - If the election cannot be canceled
+ * @throws ElectionBusinessException - If the election business rule validation fails
  */
 export class ElectionCancelPolicy {
   validateElectionCancel(election: Election): void {
     // Validate if the election is not cancelled
     if (election.electionStatus === ElectionStatus.CANCELLED) {
-      throw new ElectionCancellationNotAllowedException(
-        'Election is already canceled.',
+      throw new ElectionBusinessException(
+        'Election is already cancelled.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
     // Validate if the election is not closed
     if (election.electionStatus === ElectionStatus.CLOSED) {
-      throw new ElectionCancellationNotAllowedException(
-        'Election has closed. Cannot be canceled.',
+      throw new ElectionBusinessException(
+        'Election has already closed. Cannot be cancelled.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
   }

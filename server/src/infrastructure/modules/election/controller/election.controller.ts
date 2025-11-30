@@ -20,17 +20,17 @@ import {
 } from '@shared/constants/auth.constants';
 import { AuthorizeApplicationAccess } from '@infrastructure/modules/auth/decorators/applicationaccess.decorator';
 import { CreateElectionUseCase } from '@application/use-cases/election/create-election.use-case';
-import { FindPaginatedElectionsUseCase } from '@application/use-cases/election/find-paginated-elections.use-case';
+import { PaginatedElectionListUseCase } from '@application/use-cases/election/paginated-election-list.use-case';
 import { UpdateElectionUseCase } from '@application/use-cases/election/update-election.use-case';
-import { SoftDeleteElectionUseCase } from '@application/use-cases/election/soft-delete-election.use-case';
-import { RestoreDeleteElectionUseCase } from '@application/use-cases/election/restore-delete-election.use-case';
+import { ArchiveElectionUseCase } from '@application/use-cases/election/archive-election.use-case';
+import { RestoreElectionUseCase } from '@application/use-cases/election/restore-election.use-case';
 import { StartElectionUseCase } from '@application/use-cases/election/start-election.use-case';
 import { CloseElectionUseCase } from '@application/use-cases/election/close-election.use-case';
-import { RetrieveComboboxElectionUseCase } from '@application/use-cases/election/retrieve-combobox-election.use-case';
+import { ComboboxElectionUseCase } from '@application/use-cases/election/combobox-election.use-case';
 import { CancelElectionUseCase } from '@application/use-cases/election/cancel-election.use-case';
 import { CreateElectionDto } from '../interface/dto/create-election.dto';
 import { UpdateElectionDto } from '../interface/dto/update-election.dto';
-import { RetrieveScheduledElectionUseCase } from '@application/use-cases/election/retrieve-scheduled-election.use-case';
+import { ComboboxScheduledElectionUseCase } from '@application/use-cases/election/combobox-scheduled-election.use-case';
 
 // Controller for handling client-related requests
 @Controller('elections')
@@ -40,14 +40,14 @@ export class ElectionController {
   constructor(
     private readonly createElectionUseCase: CreateElectionUseCase,
     private readonly updateElectionUseCase: UpdateElectionUseCase,
-    private readonly findElectionsWithFiltersUseCase: FindPaginatedElectionsUseCase,
-    private readonly softDeleteElectionUseCase: SoftDeleteElectionUseCase,
-    private readonly restoreDeleteElectionUseCase: RestoreDeleteElectionUseCase,
+    private readonly findElectionsWithFiltersUseCase: PaginatedElectionListUseCase,
+    private readonly softDeleteElectionUseCase: ArchiveElectionUseCase,
+    private readonly restoreDeleteElectionUseCase: RestoreElectionUseCase,
     private readonly startElectionUseCase: StartElectionUseCase,
     private readonly closeElectionUseCase: CloseElectionUseCase,
     private readonly cancelElectionUseCase: CancelElectionUseCase,
-    private readonly retrieveComboboxElectionUseCase: RetrieveComboboxElectionUseCase,
-    private readonly retrieveScheduledElectionUseCase: RetrieveScheduledElectionUseCase,
+    private readonly retrieveComboboxElectionUseCase: ComboboxElectionUseCase,
+    private readonly retrieveScheduledElectionUseCase: ComboboxScheduledElectionUseCase,
   ) {}
 
   @Version('1') // API versioning

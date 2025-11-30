@@ -187,7 +187,7 @@ export class CandidateRepositoryImpl
     };
   }
 
-  async countByElectionId(
+  async countByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {

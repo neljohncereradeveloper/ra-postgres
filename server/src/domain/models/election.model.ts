@@ -4,6 +4,8 @@ import { ElectionStartPolicy } from '@domain/policies/election/election-start.po
 import { ElectionLockPolicy } from '@domain/policies/election/election-lock.policy';
 import { ElectionValidationPolicy } from '@domain/policies/election/election-validation.policy';
 import { ElectionStatus } from '@domain/enums/index';
+import { ElectionBusinessException } from '../exceptions';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 export class Election {
   id: number;
@@ -156,18 +158,23 @@ export class Election {
    * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws ElectionValidationException - If validation fails
    */
-  update(
-    dto: {
-      name: string;
-      desc1: string;
-      address: string;
-      date: Date;
-      maxAttendees: number;
-      startTime: Date | null;
-      endTime: Date | null;
-    },
-    updatedBy: string,
-  ): void {
+  update(dto: {
+    name: string;
+    desc1: string;
+    address: string;
+    date: Date;
+    maxAttendees: number;
+    startTime: Date | null;
+    endTime: Date | null;
+    updatedBy: string;
+  }): void {
+    if (this.deletedAt) {
+      throw new ElectionBusinessException(
+        'Election is archived and cannot be updated',
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
     // Create a temporary election with the new values to validate before applying
     const tempElection = new Election({
       id: this.id,
@@ -191,7 +198,7 @@ export class Election {
     this.maxAttendees = dto.maxAttendees;
     this.startTime = dto.startTime;
     this.endTime = dto.endTime;
-    this.updatedBy = updatedBy;
+    this.updatedBy = dto.updatedBy;
     this.updatedAt = new Date();
   }
 
@@ -199,6 +206,15 @@ export class Election {
    * Archives (soft deletes) the election
    */
   archive(deletedBy: string): void {
+    // Validate if the election is not already archived
+    if (this.deletedAt) {
+      throw new ElectionBusinessException(
+        'Election is already archived.',
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
+    // archive the election
     this.deletedAt = new Date();
     this.deletedBy = deletedBy;
   }
@@ -207,6 +223,14 @@ export class Election {
    * Restores a previously archived election
    */
   restore(): void {
+    if (!this.deletedAt) {
+      throw new ElectionBusinessException(
+        `Election with ID ${this.id} is not archived.`,
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
+    // restore the election
     this.deletedAt = null;
     this.deletedBy = null;
   }

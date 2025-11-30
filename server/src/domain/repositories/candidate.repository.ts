@@ -28,6 +28,6 @@ export interface CandidateRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  countByElectionId(electionId: number, context?: Context): Promise<number>;
+  countByElection(electionId: number, context?: Context): Promise<number>;
   getCastVoteCandidates(electionId: number, context?: Context): Promise<any[]>;
 }

@@ -4,11 +4,10 @@ import { ActivityLogRepository } from '@domains/repositories/activity-log.reposi
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { ELECTION_STATUS_CONSTANTS } from '@shared/constants/election.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { CreateElectionCommand } from '@application/commands/election/create-election.command';
 import { Election } from '@domain/models/election.model';
+import { ELECTION_ACTIONS } from '@domain/constants/index';
 
 @Injectable()
 export class CreateElectionUseCase {
@@ -21,9 +20,12 @@ export class CreateElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(dto: CreateElectionCommand, userId: number): Promise<Election> {
+  async execute(
+    dto: CreateElectionCommand,
+    userName: string,
+  ): Promise<Election> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_ELECTION,
+      ELECTION_ACTIONS.CREATE,
       async (manager) => {
         // Create and validate election using domain method
         const election = Election.create({
@@ -31,31 +33,34 @@ export class CreateElectionUseCase {
           desc1: dto.desc1,
           address: dto.address,
           date: dto.date,
-          createdBy: userId.toString(),
+          createdBy: userName,
         });
 
-        const savedElection = await this.electionRepository.create(
+        // create the election in the database
+        const createdElection = await this.electionRepository.create(
           election,
           manager,
         );
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_ELECTION,
-          DATABASE_CONSTANTS.MODELNAME_ELECTION,
-          JSON.stringify({
-            id: savedElection.id,
-            name: dto.name,
-            desc1: dto.desc1,
-            address: dto.address,
-            status: ELECTION_STATUS_CONSTANTS.SCHEDULED,
-            date: dto.date,
+        // Log the creation
+        const log = ActivityLog.create({
+          action: ELECTION_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_ELECTION,
+          details: JSON.stringify({
+            id: createdElection.id,
+            name: createdElection.name,
+            desc1: createdElection.desc1,
+            address: createdElection.address,
+            date: createdElection.date,
+            createdBy: userName,
+            createdAt: createdElection.createdAt,
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: userName,
+        });
+        await this.activityLogRepository.create(log, manager);
 
-        return savedElection;
+        // Return the created election
+        return createdElection;
       },
     );
   }

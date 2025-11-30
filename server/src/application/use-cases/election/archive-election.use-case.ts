@@ -1,6 +1,8 @@
+import { ELECTION_ACTIONS } from '@domain/constants/index';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
@@ -10,7 +12,7 @@ import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 
 @Injectable()
-export class SoftDeleteElectionUseCase {
+export class ArchiveElectionUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -20,11 +22,11 @@ export class SoftDeleteElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userId: number) {
+  async execute(id: number, userName: string) {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.SOFT_DELETE_ELECTION,
+      ELECTION_ACTIONS.ARCHIVE,
       async (manager) => {
-        // Load election and use domain method to archive
+        // retrieve the election
         const election = await this.electionRepository.findById(id, manager);
         if (!election) {
           throw new NotFoundException(
@@ -33,36 +35,40 @@ export class SoftDeleteElectionUseCase {
         }
 
         // Use domain method to archive (soft delete)
-        election.archive(userId.toString());
+        election.archive(userName);
 
-        // Save the updated election
+        // update the election in the database
         const success = await this.electionRepository.update(
           id,
           election,
           manager,
         );
         if (!success) {
-          throw new NotFoundException(
+          throw new SomethinWentWrongException(
             `Failed to delete election with ID ${id}.`,
           );
         }
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.SOFT_DELETE_ELECTION,
-          DATABASE_CONSTANTS.MODELNAME_ELECTION,
-          JSON.stringify({
+        // Log the archive
+        const log = ActivityLog.create({
+          action: ELECTION_ACTIONS.ARCHIVE,
+          entity: DATABASE_CONSTANTS.MODELNAME_ELECTION,
+          details: JSON.stringify({
             id,
-            explaination: `Election with ID ${id} deleted`,
+            name: election.name,
+            desc1: election.desc1,
+            address: election.address,
+            date: election.date,
+            explanation: `Election with ID : ${id} archived by USER : ${userName}`,
+            archivedBy: userName,
+            archivedAt: election.deletedAt,
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: userName,
+        });
 
-        return {
-          success: true,
-          message: `Election with ID ${id} deleted successfully.`,
-        };
+        await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

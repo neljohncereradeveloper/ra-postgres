@@ -1,6 +1,7 @@
 import { Election } from '@domain/models/election.model';
 import { ElectionStatus } from '@domain/enums/index';
-import { ElectionValidationException } from '@domains/exceptions/election/election-validation.exception';
+import { ElectionBusinessException } from '@domains/exceptions/election/election-business.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * ElectionValidationPolicy
@@ -23,31 +24,37 @@ export class ElectionValidationPolicy {
    * - End time must be after start time if both are provided
    *
    * @param election - The election to validate
-   * @throws ElectionValidationException - If election validation fails
+   * @throws ElectionBusinessException - If election business rule validation fails
    */
   validate(election: Election): void {
     if (!election) {
-      throw new ElectionValidationException('Election not found');
+      throw new ElectionBusinessException(
+        'Election not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if name is provided
     if (!election.name || election.name.trim().length === 0) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election name is required and cannot be empty.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if name length is within limits (255 characters max based on entity)
     if (election.name.length > 255) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election name must not exceed 255 characters.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if name has minimum length
     if (election.name.trim().length < 2) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election name must be at least 2 characters long.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
@@ -55,37 +62,42 @@ export class ElectionValidationPolicy {
     if (election.desc1 !== undefined && election.desc1 !== null) {
       if (election.desc1.length > 65535) {
         // TEXT type can hold up to 65,535 characters
-        throw new ElectionValidationException(
+        throw new ElectionBusinessException(
           'Election description must not exceed 65535 characters.',
+          HTTP_STATUS.BAD_REQUEST,
         );
       }
     }
 
     // Validate if address is provided
     if (!election.address || election.address.trim().length === 0) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election address is required and cannot be empty.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if address length is within reasonable limits (65535 characters max for TEXT type)
     if (election.address.length > 65535) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election address must not exceed 65535 characters.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if date is provided
     if (!election.date) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election date is required and cannot be empty.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if date is a valid date
     if (!(election.date instanceof Date) || isNaN(election.date.getTime())) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'Election date must be a valid date.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
@@ -96,7 +108,10 @@ export class ElectionValidationPolicy {
       (!(election.startTime instanceof Date) ||
         isNaN(election.startTime.getTime()))
     ) {
-      throw new ElectionValidationException('Start time must be a valid date.');
+      throw new ElectionBusinessException(
+        'Start time must be a valid date.',
+        HTTP_STATUS.BAD_REQUEST,
+      );
     }
 
     // Validate if endTime is a valid date if provided
@@ -105,7 +120,10 @@ export class ElectionValidationPolicy {
       election.endTime !== null &&
       (!(election.endTime instanceof Date) || isNaN(election.endTime.getTime()))
     ) {
-      throw new ElectionValidationException('End time must be a valid date.');
+      throw new ElectionBusinessException(
+        'End time must be a valid date.',
+        HTTP_STATUS.BAD_REQUEST,
+      );
     }
 
     // Validate if endTime is after startTime when both are provided
@@ -114,29 +132,35 @@ export class ElectionValidationPolicy {
       election.endTime &&
       election.endTime < election.startTime
     ) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         'End time must be after start time.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if electionStatus is provided
     if (!election.electionStatus) {
-      throw new ElectionValidationException('Election status is required.');
+      throw new ElectionBusinessException(
+        'Election status is required.',
+        HTTP_STATUS.BAD_REQUEST,
+      );
     }
 
     // Validate if electionStatus is a valid enum value
     const validStatuses = Object.values(ElectionStatus);
     if (!validStatuses.includes(election.electionStatus)) {
-      throw new ElectionValidationException(
+      throw new ElectionBusinessException(
         `Election status must be one of: ${validStatuses.join(', ')}.`,
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if maxAttendees is positive if provided
     if (election.maxAttendees !== undefined && election.maxAttendees !== null) {
       if (election.maxAttendees <= 0) {
-        throw new ElectionValidationException(
+        throw new ElectionBusinessException(
           'Maximum attendees must be greater than zero.',
+          HTTP_STATUS.BAD_REQUEST,
         );
       }
     }

@@ -4,10 +4,14 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { ELECTION_ACTIONS } from '@domain/constants/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 
 @Injectable()
 export class CancelElectionUseCase {
@@ -22,44 +26,63 @@ export class CancelElectionUseCase {
     private readonly activeElectionRepository: ActiveElectionRepository,
   ) {}
 
-  async execute(userId: number): Promise<Election> {
+  async execute(userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CANCEL_ELECTION,
+      ELECTION_ACTIONS.CANCEL,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
+
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found`,
+          );
+        }
 
-        // Apply business logic to cancel the event (state modification)
+        // use domain model method to cancel the election
         election.cancelEvent(`Election ${election.name} cancelled`);
 
-        await this.electionRepository.update(
+        // update the election in the database
+        const success = await this.electionRepository.update(
           activeElection.electionId,
           election,
           manager,
         );
+        if (!success) {
+          throw new SomethinWentWrongException('Election cancel failed');
+        }
+
         // reset the active election
         await this.activeElectionRepository.reset(manager);
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CANCEL_ELECTION,
-          DATABASE_CONSTANTS.MODELNAME_ELECTION,
-          JSON.stringify({
-            id: activeElection.electionId,
-            explaination: `Election ${election.name} cancelled.`,
+        // Log the cancel election
+        const log = ActivityLog.create({
+          action: ELECTION_ACTIONS.CANCEL,
+          entity: DATABASE_CONSTANTS.MODELNAME_ELECTION,
+          details: JSON.stringify({
+            id: election.id,
+            name: election.name,
+            address: election.address,
+            date: election.date,
+            desc1: election.desc1,
+            explanation: `Election ${election.name} cancelled by USER : ${userName}`,
+            cancelledBy: userName,
+            cancelledAt: new Date(),
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: userName,
+        });
+        await this.activityLogRepository.create(log, manager);
 
-        return election;
+        return success;
       },
     );
   }
