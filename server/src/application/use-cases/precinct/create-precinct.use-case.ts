@@ -28,7 +28,7 @@ export class CreatePrecinctUseCase {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.CREATE,
       async (manager) => {
-        // Use domain model factory method to create and validate
+        // use domain model factory method to create (encapsulates business logic and validation)
         const precinct = Precinct.create({
           desc1: dto.desc1,
           createdBy: userName,
@@ -48,6 +48,7 @@ export class CreatePrecinctUseCase {
             id: createdPrecinct.id,
             desc1: createdPrecinct.desc1,
             createdBy: userName,
+            createdAt: createdPrecinct.createdAt,
           }),
           username: userName,
         });

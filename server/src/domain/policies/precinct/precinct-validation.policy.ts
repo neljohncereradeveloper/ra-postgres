@@ -1,7 +1,8 @@
 // domain/policies/precinct/precinct-validation.policy.ts
 
 import { Precinct } from '@domain/models/precinct.model';
-import { PrecinctValidationException } from '@domains/exceptions/precinct/precinct-validation.exception';
+import { PrecinctBusinessValidationException } from '@domains/exceptions/precinct/precinct-business-validation.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * PrecinctValidationPolicy
@@ -18,31 +19,37 @@ export class PrecinctValidationPolicy {
    * - Precinct name cannot be empty or just whitespace
    *
    * @param precinct - The precinct to validate
-   * @throws PrecinctValidationException - If precinct validation fails
+   * @throws PrecinctBusinessValidationException - If precinct validation fails
    */
   validate(precinct: Precinct): void {
     if (!precinct) {
-      throw new PrecinctValidationException('Precinct not found');
+      throw new PrecinctBusinessValidationException(
+        'Precinct not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if desc1 is provided
     if (!precinct.desc1 || precinct.desc1.trim().length === 0) {
-      throw new PrecinctValidationException(
+      throw new PrecinctBusinessValidationException(
         'Precinct name is required and cannot be empty.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if desc1 length is within limits (255 characters max based on entity)
     if (precinct.desc1.length > 255) {
-      throw new PrecinctValidationException(
+      throw new PrecinctBusinessValidationException(
         'Precinct name must not exceed 255 characters.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if desc1 has minimum length
     if (precinct.desc1.trim().length < 3) {
-      throw new PrecinctValidationException(
+      throw new PrecinctBusinessValidationException(
         'Precinct name must be at least 3 characters long.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
   }

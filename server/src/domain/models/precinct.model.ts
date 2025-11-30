@@ -1,4 +1,6 @@
 import { PrecinctValidationPolicy } from '@domain/policies/precinct/precinct-validation.policy';
+import { PrecinctBusinessValidationException } from '@domains/exceptions/precinct/precinct-business-validation.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * Precinct Domain Model
@@ -48,7 +50,7 @@ export class Precinct {
    *
    * @param params - Precinct creation parameters
    * @returns A new validated Precinct instance
-   * @throws PrecinctValidationException - If validation fails
+   * @throws PrecinctBusinessValidationException - If validation fails
    */
   static create(params: { desc1: string; createdBy?: string }): Precinct {
     const precinct = new Precinct({
@@ -70,9 +72,16 @@ export class Precinct {
    *
    * @param dto - Precinct data containing fields to update (desc1 is required)
    * @param updatedBy - Username of the user performing the update (required for audit)
-   * @throws PrecinctValidationException - If validation fails
+   * @throws PrecinctBusinessValidationException - If validation fails
    */
   update(dto: { desc1: string; updatedBy?: string }): void {
+    if (this.deletedAt) {
+      throw new PrecinctBusinessValidationException(
+        'Precinct is archived and cannot be updated',
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
     // Create a temporary precinct with the new values to validate before applying
     const tempPrecinct = new Precinct({
       id: this.id,
@@ -89,8 +98,20 @@ export class Precinct {
 
   /**
    * Archives (soft deletes) the precinct
+   *
+   * @param deletedBy - Username of the user performing the archive
+   * @throws PrecinctBusinessValidationException - If the precinct cannot be archived
    */
   archive(deletedBy: string): void {
+    // Validate if the precinct is not already archived
+    if (this.deletedAt) {
+      throw new PrecinctBusinessValidationException(
+        'Precinct is already archived.',
+        HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
+      );
+    }
+
+    // Apply archive operation
     this.deletedAt = new Date();
     this.deletedBy = deletedBy;
   }
@@ -99,6 +120,14 @@ export class Precinct {
    * Restores a previously archived precinct
    */
   restore(): void {
+    if (!this.deletedAt) {
+      throw new PrecinctBusinessValidationException(
+        `Precinct with ID ${this.id} is not archived.`,
+        HTTP_STATUS.CONFLICT,
+      );
+    }
+
+    // restore the precinct
     this.deletedAt = null;
     this.deletedBy = null;
   }
@@ -110,7 +139,7 @@ export class Precinct {
    * - Precinct name must meet length requirements
    * - All required fields must be present
    *
-   * @throws PrecinctValidationException - If validation fails
+   * @throws PrecinctBusinessValidationException - If validation fails
    */
   validate(): void {
     new PrecinctValidationPolicy().validate(this);

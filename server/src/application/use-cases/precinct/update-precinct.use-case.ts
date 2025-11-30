@@ -36,14 +36,7 @@ export class UpdatePrecinctUseCase {
           throw new NotFoundException('Precinct not found');
         }
 
-        // Ensure precinct is not archived
-        if (precinct.deletedAt) {
-          throw new NotFoundException(
-            'Precinct is archived and cannot be updated',
-          );
-        }
-
-        // Use domain model method to update
+        // use domain model method to update (encapsulates business logic and validation)
         precinct.update({ desc1: dto.desc1, updatedBy: userName });
 
         // Update the precinct in the database
@@ -56,6 +49,7 @@ export class UpdatePrecinctUseCase {
           throw new SomethinWentWrongException('Precinct update failed.');
         }
 
+        // retrieve the updated precinct
         const updateResult = await this.precinctRepository.findById(
           id,
           manager,
@@ -68,6 +62,8 @@ export class UpdatePrecinctUseCase {
           details: JSON.stringify({
             id: updateResult.id,
             desc1: updateResult.desc1,
+            updatedBy: userName,
+            updatedAt: updateResult.updatedAt,
           }),
           username: userName,
         });

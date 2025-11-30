@@ -1,6 +1,9 @@
 import { ActivityLog } from '@domain/models/index';
 import { TransactionPort } from '@domain/ports/index';
-import { NotFoundException } from '@domains/exceptions/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 import {
   ActivityLogRepository,
   PrecinctRepository,
@@ -31,12 +34,6 @@ export class RestorePrecinctUseCase {
           throw new NotFoundException(`Precinct with ID ${id} not found.`);
         }
 
-        if (!precinct.deletedAt) {
-          throw new NotFoundException(
-            `Precinct with ID ${id} is not archived.`,
-          );
-        }
-
         // Use domain model method to restore (encapsulates business logic)
         precinct.restore();
 
@@ -47,7 +44,7 @@ export class RestorePrecinctUseCase {
           manager,
         );
         if (!success) {
-          throw new NotFoundException('Precinct restore failed');
+          throw new SomethinWentWrongException('Precinct restore failed');
         }
 
         // Use domain model factory method to create activity log
@@ -56,7 +53,10 @@ export class RestorePrecinctUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,
           details: JSON.stringify({
             id,
+            desc1: precinct.desc1,
             explanation: `Precinct with ID : ${id} restored by USER : ${userName}`,
+            restoredBy: userName,
+            restoredAt: new Date(),
           }),
           username: userName,
         });

@@ -34,14 +34,7 @@ export class ArchivePrecinctUseCase {
           throw new NotFoundException(`Precinct with ID ${id} not found.`);
         }
 
-        // Ensure precinct is not already archived
-        if (precinct.deletedAt) {
-          throw new NotFoundException(
-            `Precinct with ID ${id} is already archived.`,
-          );
-        }
-
-        // Use domain model method to archive (encapsulates business logic)
+        // Use domain model method to archive (encapsulates business logic and validation)
         precinct.archive(userName);
 
         // Update the precinct in the database
@@ -60,7 +53,10 @@ export class ArchivePrecinctUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,
           details: JSON.stringify({
             id,
+            desc1: precinct.desc1,
             explanation: `Precinct with ID : ${id} archived by USER : ${userName}`,
+            archivedBy: userName,
+            archivedAt: precinct.deletedAt,
           }),
           username: userName,
         });

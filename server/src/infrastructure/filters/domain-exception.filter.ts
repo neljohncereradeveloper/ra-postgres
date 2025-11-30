@@ -10,10 +10,10 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     // Map DomainException to an HTTP-specific error
-    response.status(400).json({
+    response.status(exception.statusCode).json({
       message: exception.message,
       error: exception.code || 'DOMAIN_ERROR',
-      statusCode: 400,
+      statusCode: exception.statusCode,
     });
   }
 }
