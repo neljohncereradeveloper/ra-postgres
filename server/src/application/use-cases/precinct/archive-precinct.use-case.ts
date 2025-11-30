@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PRECINCT_ACTIONS } from '@domain/constants/index';
 import { ActivityLog } from '@domain/models/index';
 import { TransactionPort } from '@domain/ports/index';
@@ -6,7 +6,6 @@ import {
   NotFoundException,
   SomethinWentWrongException,
 } from '@domains/exceptions/index';
-import { ElectionNotFoundException } from '@domains/exceptions/election/eelction-not-found.exception';
 import {
   ActivityLogRepository,
   PrecinctRepository,
@@ -39,7 +38,7 @@ export class ArchivePrecinctUseCase {
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
@@ -48,7 +47,7 @@ export class ArchivePrecinctUseCase {
           manager,
         );
         if (!election) {
-          throw new ElectionNotFoundException(
+          throw new NotFoundException(
             `Election with ID ${activeElection.electionId} not found.`,
           );
         }

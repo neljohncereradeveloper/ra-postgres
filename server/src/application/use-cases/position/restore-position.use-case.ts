@@ -3,7 +3,7 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
@@ -34,7 +34,7 @@ export class RestorePositionUseCase {
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No active election');
+          throw new NotFoundException('No active election');
         }
 
         // retrieve the election

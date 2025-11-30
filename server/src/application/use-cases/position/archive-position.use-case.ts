@@ -4,13 +4,12 @@ import { NotFoundException } from '@domains/exceptions/shared/not-found.exceptio
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
-import { ElectionNotFoundException } from '@domains/exceptions/election/eelction-not-found.exception';
 
 @Injectable()
 export class ArchivePositionUseCase {
@@ -35,7 +34,7 @@ export class ArchivePositionUseCase {
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
@@ -44,7 +43,7 @@ export class ArchivePositionUseCase {
           manager,
         );
         if (!election) {
-          throw new ElectionNotFoundException(
+          throw new NotFoundException(
             `Election with ID ${activeElection.electionId} not found.`,
           );
         }

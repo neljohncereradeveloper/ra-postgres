@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Position } from '@domain/models/position.model';
 import { Inject } from '@nestjs/common';
 import { PositionRepository } from '@domains/repositories/position.repository';
@@ -7,7 +7,10 @@ import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
-import { NotFoundException } from '@domains/exceptions/index';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@domains/exceptions/index';
 
 @Injectable()
 export class PaginatedPositionsListUseCase {
