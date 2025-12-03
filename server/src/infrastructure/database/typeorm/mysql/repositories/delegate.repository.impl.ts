@@ -24,7 +24,7 @@ export class DelegateRepositoryImpl
     }
   }
 
-  async findPaginatedWithElectionIdList(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,

@@ -60,15 +60,14 @@ export class FindWithPaginationUseCase {
         }
 
         // Call the repository method to get filtered data
-        const result =
-          await this.delegateRepository.findPaginatedWithElectionIdList(
-            term,
-            page,
-            limit,
-            isDeleted,
-            activeElection.electionId,
-            manager,
-          );
+        const result = await this.delegateRepository.findPaginatedList(
+          term,
+          page,
+          limit,
+          isDeleted,
+          activeElection.electionId,
+          manager,
+        );
 
         return result;
       },

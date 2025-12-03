@@ -3,11 +3,11 @@ import { Delegate } from '@domain/models/delegate.model';
 export interface DelegateRepository<Context = unknown> {
   create(delegate: Delegate, context?: Context): Promise<Delegate>;
   findById(id: number, context?: Context): Promise<Delegate>;
-  findPaginatedWithElectionIdList(
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
     electionId: number,
     context?: Context,
   ): Promise<{
@@ -38,3 +38,4 @@ export interface DelegateRepository<Context = unknown> {
   countByElection(electionId: number, context?: Context): Promise<number>;
   markAsVoted(delegateId: number, context?: Context): Promise<void>;
 }
+//
