@@ -8,3 +8,4 @@ export * from './election/election-close.policy';
 export * from './election/election-cancel.policy';
 export * from './election/election-lock.policy';
 export * from './cast-vote/cast-vote-validation.policy';
+export * from './delegate/delegate-validation.policy';
