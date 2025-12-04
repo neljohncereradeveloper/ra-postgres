@@ -10,6 +10,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ArchiveCandidateUseCase {
@@ -77,7 +78,7 @@ export class ArchiveCandidateUseCase {
             displayName: candidate.displayName,
             explanation: `Candidate with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: candidate.deletedAt,
+            archivedAt: getPHDateTime(candidate.deletedAt),
           }),
           username: userName,
         });

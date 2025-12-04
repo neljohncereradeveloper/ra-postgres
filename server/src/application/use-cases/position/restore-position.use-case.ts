@@ -10,6 +10,7 @@ import { ActiveElectionRepository } from '@domains/repositories/active-election.
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class RestorePositionUseCase {
@@ -77,7 +78,7 @@ export class RestorePositionUseCase {
             desc1: position.desc1,
             explanation: `Position with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: new Date(),
+            restoredAt: getPHDateTime(),
           }),
           username: userName,
         });

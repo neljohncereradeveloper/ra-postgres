@@ -12,6 +12,7 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class UpdateDistrictUseCase {
@@ -92,7 +93,7 @@ export class UpdateDistrictUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: userName,
-            updatedAt: updateResult.updatedAt,
+            updatedAt: getPHDateTime(updateResult.updatedAt),
           }),
           username: userName,
         });

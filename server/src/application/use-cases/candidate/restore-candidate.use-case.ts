@@ -10,6 +10,7 @@ import { CandidateRepository } from '@domains/repositories/candidate.repository'
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class RestoreCandidateUseCase {
@@ -77,7 +78,7 @@ export class RestoreCandidateUseCase {
             displayName: candidate.displayName,
             explanation: `Candidate with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: new Date(),
+            restoredAt: getPHDateTime(),
           }),
           username: userName,
         });

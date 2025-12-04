@@ -10,6 +10,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class RestoreDistrictUseCase {
@@ -78,7 +79,7 @@ export class RestoreDistrictUseCase {
             desc1: district.desc1,
             explanation: `District with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: new Date(),
+            restoredAt: getPHDateTime(),
           }),
           username: userName,
         });

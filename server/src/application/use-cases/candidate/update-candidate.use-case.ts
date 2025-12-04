@@ -15,6 +15,7 @@ import { DistrictRepository } from '@domains/repositories/district.repository';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class UpdateCandidateUseCase {
@@ -131,7 +132,7 @@ export class UpdateCandidateUseCase {
             district: district.desc1,
             delegate: delegate.accountName,
             updatedBy: userName,
-            updatedAt: updateResult.updatedAt,
+            updatedAt: getPHDateTime(updateResult.updatedAt),
           }),
           username: userName,
         });

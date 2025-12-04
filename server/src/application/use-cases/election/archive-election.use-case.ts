@@ -1,14 +1,13 @@
 import { ELECTION_ACTIONS } from '@domain/constants/index';
 import { ActivityLog } from '@domain/models/activitylog.model';
-import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 
 @Injectable()
@@ -58,10 +57,10 @@ export class ArchiveElectionUseCase {
             name: election.name,
             desc1: election.desc1,
             address: election.address,
-            date: election.date,
+            date: getPHDateTime(election.date),
             explanation: `Election with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: election.deletedAt,
+            archivedAt: getPHDateTime(election.deletedAt),
           }),
           username: userName,
         });

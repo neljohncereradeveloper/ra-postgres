@@ -3,6 +3,7 @@ import { ELECTION_ACTIONS } from '@domain/constants/index';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { Election } from '@domain/models/election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import {
   NotFoundException,
   SomethinWentWrongException,
@@ -43,7 +44,7 @@ export class UpdateElectionUseCase {
           name: dto.name,
           desc1: dto.desc1,
           address: dto.address,
-          date: dto.date,
+          date: getPHDateTime(dto.date),
           maxAttendees: dto.maxAttendees,
           startTime: dto.startTime,
           endTime: dto.endTime,
@@ -77,12 +78,12 @@ export class UpdateElectionUseCase {
             name: election.name,
             desc1: election.desc1,
             address: election.address,
-            date: election.date,
+            date: getPHDateTime(election.date),
             maxAttendees: election.maxAttendees,
             startTime: election.startTime,
             endTime: election.endTime,
             updatedBy: userName,
-            updatedAt: election.updatedAt,
+            updatedAt: getPHDateTime(election.updatedAt),
           }),
           username: userName,
         });

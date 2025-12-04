@@ -8,10 +8,8 @@ import { ElectionRepository } from '@domains/repositories/election.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { Inject, Injectable } from '@nestjs/common';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { Election } from '@domain/models/election.model';
-import { User } from '@domain/models/user.model';
 import { CAST_VOTE_ACTIONS } from '@domain/constants/cast-vote/cast-vote-actions.constants';
 import {
   BadRequestException,

@@ -10,6 +10,7 @@ import { ElectionRepository } from '@domains/repositories/election.repository';
 import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class RestoreDelegateUseCase {
@@ -78,7 +79,7 @@ export class RestoreDelegateUseCase {
             controlNumber: delegate.controlNumber,
             explanation: `Delegate with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: new Date(),
+            restoredAt: getPHDateTime(),
           }),
           username: userName,
         });

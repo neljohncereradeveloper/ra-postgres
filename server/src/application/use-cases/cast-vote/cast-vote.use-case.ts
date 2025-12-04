@@ -11,13 +11,11 @@ import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { Election } from '@domain/models/election.model';
-import { User } from '@domain/models/user.model';
 import { GatewayGateway } from '@infrastructure/modules/gateway/gateway.gateway';
 import { NotFoundException } from '@domains/exceptions/index';
 import { CAST_VOTE_ACTIONS } from '@domain/constants/cast-vote/cast-vote-actions.constants';
@@ -169,7 +167,7 @@ export class CastVoteUseCase {
                 election: election.name,
                 ballotNumber: castVote.ballotNumber,
                 candidate: candidate.displayName,
-                dateTimeCast: castVote.dateTimeCast,
+                dateTimeCast: getPHDateTime(castVote.dateTimeCast),
               }),
               username: username,
             });

@@ -8,6 +8,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { CreateElectionCommand } from '@application/commands/election/create-election.command';
 import { Election } from '@domain/models/election.model';
 import { ELECTION_ACTIONS } from '@domain/constants/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class CreateElectionUseCase {
@@ -32,7 +33,7 @@ export class CreateElectionUseCase {
           name: dto.name,
           desc1: dto.desc1,
           address: dto.address,
-          date: dto.date,
+          date: getPHDateTime(dto.date),
           createdBy: userName,
         });
 
@@ -51,9 +52,9 @@ export class CreateElectionUseCase {
             name: createdElection.name,
             desc1: createdElection.desc1,
             address: createdElection.address,
-            date: createdElection.date,
+            date: getPHDateTime(createdElection.date),
             createdBy: userName,
-            createdAt: createdElection.createdAt,
+            createdAt: getPHDateTime(createdElection.createdAt),
           }),
           username: userName,
         });

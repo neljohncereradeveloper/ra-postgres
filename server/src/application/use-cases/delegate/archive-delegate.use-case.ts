@@ -10,6 +10,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ArchiveDelegateUseCase {
@@ -78,7 +79,7 @@ export class ArchiveDelegateUseCase {
             controlNumber: delegate.controlNumber,
             explanation: `Delegate with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: delegate.deletedAt,
+            archivedAt: getPHDateTime(delegate.deletedAt),
           }),
           username: userName,
         });

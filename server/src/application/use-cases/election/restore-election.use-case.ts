@@ -1,6 +1,7 @@
 import { ELECTION_ACTIONS } from '@domain/constants/index';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
@@ -54,10 +55,10 @@ export class RestoreElectionUseCase {
             name: election.name,
             desc1: election.desc1,
             address: election.address,
-            date: election.date,
+            date: getPHDateTime(election.date),
             explanation: `Election with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: new Date(),
+            restoredAt: getPHDateTime(),
           }),
           username: userName,
         });

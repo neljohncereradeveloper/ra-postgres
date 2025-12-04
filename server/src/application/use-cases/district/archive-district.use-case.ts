@@ -10,6 +10,7 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ArchiveDistrictUseCase {
@@ -77,7 +78,7 @@ export class ArchiveDistrictUseCase {
             desc1: district.desc1,
             explanation: `District with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: district.deletedAt,
+            archivedAt: getPHDateTime(district.deletedAt),
           }),
           username: userName,
         });

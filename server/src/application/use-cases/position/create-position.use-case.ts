@@ -11,6 +11,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
 import { NotFoundException } from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class CreatePositionUseCase {
@@ -76,7 +77,7 @@ export class CreatePositionUseCase {
             id: createdPosition.id,
             desc1: createdPosition.desc1,
             createdBy: username,
-            createdAt: createdPosition.createdAt,
+            createdAt: getPHDateTime(createdPosition.createdAt),
           }),
           username: username,
         });

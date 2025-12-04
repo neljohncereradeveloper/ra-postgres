@@ -14,6 +14,7 @@ import {
 } from '@domains/repositories/index';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ArchivePrecinctUseCase {
@@ -81,7 +82,7 @@ export class ArchivePrecinctUseCase {
             desc1: precinct.desc1,
             explanation: `Precinct with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: precinct.deletedAt,
+            archivedAt: getPHDateTime(precinct.deletedAt),
           }),
           username: userName,
         });

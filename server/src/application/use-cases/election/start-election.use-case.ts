@@ -15,6 +15,7 @@ import {
   NotFoundException,
   SomethinWentWrongException,
 } from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class StartElectionUseCase {
@@ -103,10 +104,10 @@ export class StartElectionUseCase {
             name: election.name,
             desc1: election.desc1,
             address: election.address,
-            date: election.date,
+            date: getPHDateTime(election.date),
             explanation: `Election with ID : ${election.id} started by USER : ${userName}`,
             startedBy: userName,
-            startedAt: election.startTime,
+            startedAt: getPHDateTime(election.startTime),
           }),
           username: userName,
         });

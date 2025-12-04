@@ -10,6 +10,7 @@ import { PrecinctRepository } from '@domains/repositories/precinct.repository';
 import { UpdatePrecinctCommand } from '@application/commands/precinct/update-precinct.command';
 import { Precinct } from '@domain/models/precinct.model';
 import { PRECINCT_ACTIONS } from '@domain/constants/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class UpdatePrecinctUseCase {
@@ -63,7 +64,7 @@ export class UpdatePrecinctUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: userName,
-            updatedAt: updateResult.updatedAt,
+            updatedAt: getPHDateTime(updateResult.updatedAt),
           }),
           username: userName,
         });

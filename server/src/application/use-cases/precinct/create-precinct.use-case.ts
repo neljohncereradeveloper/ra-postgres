@@ -2,6 +2,7 @@ import { CreatePrecinctCommand } from '@application/commands/precinct/create-pre
 import { PRECINCT_ACTIONS } from '@domain/constants/index';
 import { ActivityLog, Precinct } from '@domain/models/index';
 import { TransactionPort } from '@domain/ports/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import {
   ActivityLogRepository,
   PrecinctRepository,
@@ -48,7 +49,7 @@ export class CreatePrecinctUseCase {
             id: createdPrecinct.id,
             desc1: createdPrecinct.desc1,
             createdBy: userName,
-            createdAt: createdPrecinct.createdAt,
+            createdAt: getPHDateTime(createdPrecinct.createdAt),
           }),
           username: userName,
         });

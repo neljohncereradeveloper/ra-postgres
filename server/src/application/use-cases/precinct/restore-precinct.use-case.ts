@@ -12,6 +12,7 @@ import { PRECINCT_ACTIONS } from '@domain/constants/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class RestorePrecinctUseCase {
@@ -56,7 +57,7 @@ export class RestorePrecinctUseCase {
             desc1: precinct.desc1,
             explanation: `Precinct with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: new Date(),
+            restoredAt: getPHDateTime(),
           }),
           username: userName,
         });

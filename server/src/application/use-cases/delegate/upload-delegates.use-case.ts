@@ -18,6 +18,7 @@ import { ElectionRepository } from '@domains/repositories/election.repository';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { UUIDGeneratorPort } from '@domain/ports/uuid-generator.port';
 import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 const schema = {
   branch: { prop: 'branch', type: String },
@@ -101,6 +102,8 @@ export class UploadDelegatesUseCase {
           details: JSON.stringify({
             message: `Processing ${rows.rows.length} rows from uploaded file.`,
             election: election.name,
+            uploadProcessAt: getPHDateTime(),
+            uploadedBy: username,
           }),
           username,
         });
@@ -146,6 +149,8 @@ export class UploadDelegatesUseCase {
           details: JSON.stringify({
             message: `Uploading ${rows.rows.length} delegates finished.`,
             election: election.name,
+            uploadFinishedAt: getPHDateTime(),
+            uploadedBy: username,
           }),
           username,
         });

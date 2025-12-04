@@ -11,6 +11,7 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
 import { NotFoundException } from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class CreateDistrictUseCase {
@@ -74,7 +75,7 @@ export class CreateDistrictUseCase {
             id: createdDistrict.id,
             desc1: createdDistrict.desc1,
             createdBy: username,
-            createdAt: createdDistrict.createdAt,
+            createdAt: getPHDateTime(createdDistrict.createdAt),
           }),
           username: username,
         });

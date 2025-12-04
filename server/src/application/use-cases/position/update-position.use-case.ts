@@ -12,6 +12,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class UpdatePositionUseCase {
@@ -94,7 +95,7 @@ export class UpdatePositionUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: username,
-            updatedAt: updateResult.updatedAt,
+            updatedAt: getPHDateTime(updateResult.updatedAt),
           }),
           username: username,
         });

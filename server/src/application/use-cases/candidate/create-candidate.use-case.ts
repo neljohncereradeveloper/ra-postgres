@@ -17,6 +17,7 @@ import {
   NotFoundException,
 } from '@domains/exceptions/index';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class CreateCandidateUseCase {
@@ -123,7 +124,7 @@ export class CreateCandidateUseCase {
             district: district.desc1,
             delegate: delegate.accountName,
             createdBy: username,
-            createdAt: candidate.createdAt,
+            createdAt: getPHDateTime(candidate.createdAt),
           }),
           username: username,
         });
