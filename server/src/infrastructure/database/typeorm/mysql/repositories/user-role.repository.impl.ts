@@ -94,34 +94,6 @@ export class UserRoleRepositoryImpl
     }
   }
 
-  async softDeleteWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<boolean> {
-    const query = `
-      UPDATE userroles
-      SET deleted_at = ?
-      WHERE id = ? AND deleted_at IS NULL
-    `;
-
-    const result = await manager.query(query, [new Date(), id]);
-    return result.affectedRows && result.affectedRows > 0;
-  }
-
-  async restoreWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<boolean> {
-    const query = `
-      UPDATE userroles
-      SET deleted_at = NULL
-      WHERE id = ? AND deleted_at IS NOT NULL
-    `;
-
-    const result = await manager.query(query, [id]);
-    return result.affectedRows && result.affectedRows > 0;
-  }
-
   async findPaginatedList(
     term: string,
     page: number,
