@@ -285,7 +285,7 @@ export class DelegateRepositoryImpl
       INNER JOIN elections e ON d.electionid = e.id
       WHERE ${whereClause}
       ORDER BY d.accountname ASC
-      LIMIT $${paramIndex++} OFFSET $${paramIndex}
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
 
     // Build count query

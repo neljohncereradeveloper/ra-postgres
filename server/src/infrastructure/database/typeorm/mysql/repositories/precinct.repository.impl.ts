@@ -156,7 +156,7 @@ export class PrecinctRepositoryImpl
       FROM precincts
       ${whereClause}
       ORDER BY id DESC
-      LIMIT $${paramIndex++} OFFSET $${paramIndex}
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
 
     // Count query

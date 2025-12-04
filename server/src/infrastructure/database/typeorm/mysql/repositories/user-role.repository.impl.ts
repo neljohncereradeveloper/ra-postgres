@@ -147,7 +147,7 @@ export class UserRoleRepositoryImpl
       FROM userroles
       ${whereClause}
       ORDER BY id DESC
-      LIMIT $${paramIndex++} OFFSET $${paramIndex}
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
 
     // Build count query

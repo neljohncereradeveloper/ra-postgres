@@ -204,7 +204,7 @@ export class ElectionRepositoryImpl
       FROM elections
       ${whereClause}
       ORDER BY id DESC
-      LIMIT $${paramIndex++} OFFSET $${paramIndex}
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
 
     // Build count query
