@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity('users')
-@Unique(['user_name'])
+@Unique(['username'])
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,46 +21,43 @@ export class UserEntity {
   @Column({ length: 100 })
   watcher: string;
 
-  @Column({ name: 'application_access', length: 500 })
-  applicationAccess: string;
+  @Column({ length: 500 })
+  applicationaccess: string;
 
-  @Column({ name: 'user_roles', length: 500 })
-  userRoles: string;
+  @Column({ length: 500 })
+  userroles: string;
 
-  @Column({ name: 'user_name', length: 100 })
-  userName: string;
+  @Column({ length: 100 })
+  username: string;
 
   @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
   @Column({
-    name: 'deleted_by',
     comment: 'username of the user who deleted the user',
     nullable: true,
   })
-  deletedBy?: string;
+  deletedby?: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedAt?: Date | null;
+  deletedat?: Date | null;
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the user',
     nullable: true,
   })
-  createdBy?: string;
+  createdby?: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who updated the user',
     nullable: true,
   })
-  updatedBy?: string;
+  updatedby?: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 }

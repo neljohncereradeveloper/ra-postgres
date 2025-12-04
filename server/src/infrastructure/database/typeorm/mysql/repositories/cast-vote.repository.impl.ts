@@ -16,15 +16,15 @@ export class CastVoteRepositoryImpl
     try {
       const query = `
         INSERT INTO cast_votes (
-          election_id,
-          ballot_number,
+          electionid,
+          ballotnumber,
           precinct,
-          candidate_id,
-          position_id,
-          district_id,
-          date_time_cast
+          candidateid,
+          positionid,
+          districtid,
+          datetimecast
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
       `;
 
       const result = await context.query(query, [
@@ -42,16 +42,16 @@ export class CastVoteRepositoryImpl
       const selectQuery = `
         SELECT 
           id,
-          election_id as electionId,
-          ballot_number as ballotNumber,
+          electionid as electionid,
+          ballotnumber as ballotnumber,
           precinct,
-          candidate_id as candidateId,
-          position_id as positionId,
-          district_id as districtId,
-          date_time_cast as dateTimeCast,
-          deleted_at as deletedAt
+          candidateid as candidateid,
+          positionid as positionid,
+          districtid as districtid,
+          datetimecast as datetimecast,
+          deletedat as deletedat
         FROM cast_votes
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const rows = await context.query(selectQuery, [insertId]);
@@ -73,16 +73,16 @@ export class CastVoteRepositoryImpl
       const query = `
         SELECT
           cv.id,
-          cv.election_id as electionId,
-          cv.ballot_number as ballotNumber,
+          cv.electionid as electionid,
+          cv.ballotnumber as ballotnumber,
           cv.precinct,
-          cv.candidate_id as candidateId,
-          cv.position_id as positionId,
-          cv.district_id as districtId,
-          cv.date_time_cast as dateTimeCast,
-          cv.deleted_at as deletedAt
+          cv.candidateid as candidateid,
+          cv.positionid as positionid,
+          cv.districtid as districtid,
+          cv.datetimecast as datetimecast,
+          cv.deletedat as deletedat
         FROM cast_votes cv
-        WHERE cv.ballot_number = ? AND cv.election_id = ?
+        WHERE cv.ballotnumber = $1 AND cv.electionid = $2
         LIMIT 1
       `;
 
@@ -101,14 +101,14 @@ export class CastVoteRepositoryImpl
   private rowToModel(row: any): CastVote {
     return new CastVote({
       id: row.id,
-      electionId: row.electionId,
-      ballotNumber: row.ballotNumber,
+      electionId: row.electionid,
+      ballotNumber: row.ballotnumber,
       precinct: row.precinct,
-      candidateId: row.candidateId,
-      positionId: row.positionId,
-      districtId: row.districtId,
-      dateTimeCast: row.dateTimeCast,
-      deletedAt: row.deletedAt,
+      candidateId: row.candidateid,
+      positionId: row.positionid,
+      districtId: row.districtid,
+      dateTimeCast: row.datetimecast,
+      deletedAt: row.deletedat,
     });
   }
 }

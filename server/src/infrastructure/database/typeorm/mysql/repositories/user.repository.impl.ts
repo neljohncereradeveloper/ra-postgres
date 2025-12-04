@@ -13,14 +13,14 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         INSERT INTO users (
           precinct,
           watcher,
-          application_access,
-          user_roles,
-          user_name,
+          applicationaccess,
+          userroles,
+          username,
           password,
-          created_by,
-          created_at
+          createdby,
+          createdat
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `;
 
       const result = await manager.query(query, [
@@ -41,18 +41,18 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
           id,
           precinct,
           watcher,
-          application_access as applicationAccess,
-          user_roles as userRoles,
-          user_name as userName,
+          applicationaccess as applicationaccess,
+          userroles as userroles,
+          username as username,
           password,
-          deleted_by as deletedBy,
-          deleted_at as deletedAt,
-          created_by as createdBy,
-          created_at as createdAt,
-          updated_by as updatedBy,
-          updated_at as updatedAt
+          deletedby as deletedby,
+          deletedat as deletedat,
+          createdby as createdby,
+          createdat as createdat,
+          updatedby as updatedby,
+          updatedat as updatedat
         FROM users
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const rows = await manager.query(selectQuery, [insertId]);
@@ -73,44 +73,45 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     try {
       const updateParts: string[] = [];
       const values: any[] = [];
+      let paramIndex = 1;
 
       if (updateFields.precinct !== undefined) {
-        updateParts.push('precinct = ?');
+        updateParts.push(`precinct = $${paramIndex++}`);
         values.push(updateFields.precinct);
       }
 
       if (updateFields.watcher !== undefined) {
-        updateParts.push('watcher = ?');
+        updateParts.push(`watcher = $${paramIndex++}`);
         values.push(updateFields.watcher);
       }
 
       if (updateFields.applicationAccess !== undefined) {
-        updateParts.push('application_access = ?');
+        updateParts.push(`applicationaccess = $${paramIndex++}`);
         values.push(updateFields.applicationAccess);
       }
 
       if (updateFields.userRoles !== undefined) {
-        updateParts.push('user_roles = ?');
+        updateParts.push(`userroles = $${paramIndex++}`);
         values.push(updateFields.userRoles);
       }
 
       if (updateFields.userName !== undefined) {
-        updateParts.push('user_name = ?');
+        updateParts.push(`username = $${paramIndex++}`);
         values.push(updateFields.userName);
       }
 
       if (updateFields.password !== undefined) {
-        updateParts.push('password = ?');
+        updateParts.push(`password = $${paramIndex++}`);
         values.push(updateFields.password);
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updateParts.push('updated_by = ?');
+        updateParts.push(`updatedby = $${paramIndex++}`);
         values.push(updateFields.updatedBy);
       }
 
       if (updateFields.updatedAt !== undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(updateFields.updatedAt);
       }
 
@@ -123,7 +124,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       const query = `
         UPDATE users
         SET ${updateParts.join(', ')}
-        WHERE id = ? AND deleted_at IS NULL
+        WHERE id = $${paramIndex} AND deletedat IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -160,14 +161,15 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
 
     // Filter by deletion status
     if (isDeleted) {
-      whereConditions.push('deleted_at IS NOT NULL');
+      whereConditions.push('deletedat IS NOT NULL');
     } else {
-      whereConditions.push('deleted_at IS NULL');
+      whereConditions.push('deletedat IS NULL');
     }
 
     // Apply search filter on watcher
+    let paramIndex = 1;
     if (term) {
-      whereConditions.push('LOWER(watcher) LIKE ?');
+      whereConditions.push(`LOWER(watcher) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -179,14 +181,14 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        application_access as applicationAccess,
-        user_roles as userRoles,
-        user_name as userName,
-        deleted_at as deletedAt
+        applicationaccess as applicationaccess,
+        userroles as userroles,
+        username as username,
+        deletedat as deletedat
       FROM users
       ${whereClause}
       ORDER BY id DESC
-      LIMIT ? OFFSET ?
+      LIMIT $${paramIndex++} OFFSET $${paramIndex}
     `;
 
     // Build count query
@@ -232,18 +234,18 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        application_access as applicationAccess,
-        user_roles as userRoles,
-        user_name as userName,
+        applicationaccess as applicationaccess,
+        userroles as userroles,
+        username as username,
         password,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM users
-      WHERE id = ? AND deleted_at IS NULL
+      WHERE id = $1 AND deletedat IS NULL
     `;
 
     const rows = await manager.query(query, [id]);
@@ -255,26 +257,31 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
   }
 
   async findByUserName(userName: string): Promise<User | null> {
-    const query = `
-      SELECT 
-        id,
-        precinct,
-        watcher,
-        application_access as applicationAccess,
-        user_roles as userRoles,
-        user_name as userName,
-        password
-      FROM users
-      WHERE user_name = ?
-      LIMIT 1
-    `;
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      const query = `
+        SELECT 
+          id,
+          precinct,
+          watcher,
+          applicationaccess as applicationaccess,
+          userroles as userroles,
+          username as username,
+          password
+        FROM users
+        WHERE username = $1
+        LIMIT 1
+      `;
 
-    const rows = await this.dataSource.query(query, [userName]);
-    if (rows.length === 0) {
-      return null;
+      const rows = await queryRunner.query(query, [userName]);
+      if (rows.length === 0) {
+        return null;
+      }
+
+      return this.rowToModel(rows[0], true);
+    } finally {
+      await queryRunner.release();
     }
-
-    return this.rowToModel(rows[0], true);
   }
 
   // Helper: Convert raw query result to domain model
@@ -283,16 +290,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       id: row.id,
       precinct: row.precinct,
       watcher: row.watcher,
-      applicationAccess: row.applicationAccess,
-      userRoles: row.userRoles,
-      userName: row.userName,
+      applicationAccess: row.applicationaccess,
+      userRoles: row.userroles,
+      userName: row.username,
       password: includePassword ? row.password : undefined,
-      deletedBy: row.deletedBy,
-      deletedAt: row.deletedAt,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      deletedBy: row.deletedby,
+      deletedAt: row.deletedat,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

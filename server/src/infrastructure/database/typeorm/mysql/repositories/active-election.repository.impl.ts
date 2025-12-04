@@ -17,8 +17,8 @@ export class ActiveElectionRepositoryImpl
       const result = await manager.query(
         `
         UPDATE active_election
-        SET election_id = ?
-        WHERE id = ?
+        SET electionid = $1
+        WHERE id = $2
         `,
         [electionId, this.ACTIVE_ELECTION_ID],
       );
@@ -39,15 +39,15 @@ export class ActiveElectionRepositoryImpl
       `
       SELECT 
         ae.id,
-        ae.election_id as electionId,
-        ae.created_by as createdBy,
-        ae.created_at as createdAt,
-        ae.updated_by as updatedBy,
-        ae.updated_at as updatedAt
+        ae.electionid as electionid,
+        ae.createdby as createdby,
+        ae.createdat as createdat,
+        ae.updatedby as updatedby,
+        ae.updatedat as updatedat
       FROM active_election ae
-      INNER JOIN elections e ON ae.election_id = e.id
-      WHERE ae.id = ?
-        AND ae.election_id IS NOT NULL
+      INNER JOIN elections e ON ae.electionid = e.id
+      WHERE ae.id = $1
+        AND ae.electionid IS NOT NULL
       `,
       [this.ACTIVE_ELECTION_ID],
     );
@@ -64,8 +64,8 @@ export class ActiveElectionRepositoryImpl
       const result = await manager.query(
         `
         UPDATE active_election
-        SET election_id = NULL
-        WHERE id = ?
+        SET electionid = NULL
+        WHERE id = $1
         `,
         [this.ACTIVE_ELECTION_ID],
       );
@@ -80,11 +80,11 @@ export class ActiveElectionRepositoryImpl
   private toModel(row: any): ActiveElection {
     return new ActiveElection({
       id: row.id,
-      electionId: row.electionId,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      electionId: row.electionid,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

@@ -16,54 +16,51 @@ import { CandidateEntity } from './candidate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 
 @Entity('positions')
-@Unique(['election_id', 'desc1'])
+@Unique(['electionid', 'desc1'])
 export class PositionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'election_id' })
+  @Column()
   @Index()
-  electionId: number;
+  electionid: number;
 
   @Column({ length: 255 })
   desc1: string;
 
-  @Column({ name: 'max_candidates', nullable: true })
-  maxCandidates: number; // Note: Add CHECK constraint in migration: max_candidates > 0 OR max_candidates IS NULL
+  @Column({ nullable: true })
+  maxcandidates: number; // Note: Add CHECK constraint in migration: max_candidates > 0 OR max_candidates IS NULL
 
-  @Column({ name: 'term_limit', length: 100, nullable: true })
-  termLimit: string;
+  @Column({ length: 100, nullable: true })
+  termlimit: string;
 
   @Column({
-    name: 'deleted_by',
     comment: 'username of the user who deleted the position',
     nullable: true,
   })
-  deletedBy?: string;
+  deletedby?: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedAt: Date | null; // For soft delete
+  deletedat: Date | null; // For soft delete
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the position',
     nullable: true,
   })
-  createdBy?: string;
+  createdby?: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who updated the position',
     nullable: true,
   })
-  updatedBy?: string;
+  updatedby?: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 
   /**
    * Relationships
@@ -72,7 +69,7 @@ export class PositionEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'election_id' })
+  @JoinColumn({ name: 'electionid' })
   election: ElectionEntity;
 
   @OneToMany(() => CandidateEntity, (candidate) => candidate.position)

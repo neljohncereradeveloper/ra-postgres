@@ -24,7 +24,7 @@ export class ActivityLogEntity {
   @Index()
   timestamp: Date; // Automatically sets the current date and time
 
-  @Column({ name: 'username' })
+  @Column()
   @Index()
   username: string;
 }

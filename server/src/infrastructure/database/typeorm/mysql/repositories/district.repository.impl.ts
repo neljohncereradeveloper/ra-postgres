@@ -15,12 +15,12 @@ export class DistrictRepositoryImpl
     try {
       const query = `
         INSERT INTO districts (
-          election_id,
+          electionid,
           desc1,
-          created_by,
-          created_at
+          createdby,
+          createdat
         )
-        VALUES (?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4)
       `;
 
       const result = await manager.query(query, [
@@ -35,16 +35,16 @@ export class DistrictRepositoryImpl
       const selectQuery = `
         SELECT 
           id,
-          election_id as electionId,
+          electionid as electionid,
           desc1,
-          deleted_by as deletedBy,
-          deleted_at as deletedAt,
-          created_by as createdBy,
-          created_at as createdAt,
-          updated_by as updatedBy,
-          updated_at as updatedAt
+          deletedby as deletedby,
+          deletedat as deletedat,
+          createdby as createdby,
+          createdat as createdat,
+          updatedby as updatedby,
+          updatedat as updatedat
         FROM districts
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const rows = await manager.query(selectQuery, [insertId]);
@@ -65,19 +65,20 @@ export class DistrictRepositoryImpl
     try {
       const updateParts: string[] = [];
       const values: any[] = [];
+      let paramIndex = 1;
 
       if (updateFields.desc1 !== undefined) {
-        updateParts.push('desc1 = ?');
+        updateParts.push(`desc1 = $${paramIndex++}`);
         values.push(updateFields.desc1);
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updateParts.push('updated_by = ?');
+        updateParts.push(`updatedby = $${paramIndex++}`);
         values.push(updateFields.updatedBy);
       }
 
       if (updateFields.updatedAt !== undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(updateFields.updatedAt);
       }
 
@@ -90,7 +91,7 @@ export class DistrictRepositoryImpl
       const query = `
         UPDATE districts
         SET ${updateParts.join(', ')}
-        WHERE id = ? AND deleted_at IS NULL
+        WHERE id = $${paramIndex} AND deletedat IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -122,18 +123,19 @@ export class DistrictRepositoryImpl
 
     // Filter by deletion status
     if (isDeleted) {
-      whereConditions.push('deleted_at IS NOT NULL');
+      whereConditions.push('deletedat IS NOT NULL');
     } else {
-      whereConditions.push('deleted_at IS NULL');
+      whereConditions.push('deletedat IS NULL');
     }
 
     // Filter by election
-    whereConditions.push('election_id = ?');
+    let paramIndex = 1;
+    whereConditions.push(`electionid = $${paramIndex++}`);
     queryParams.push(electionId);
 
     // Apply search filter on description
     if (term) {
-      whereConditions.push('LOWER(desc1) LIKE ?');
+      whereConditions.push(`LOWER(desc1) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -143,18 +145,18 @@ export class DistrictRepositoryImpl
     const dataQuery = `
       SELECT 
         id,
-        election_id as electionId,
+        electionid as electionid,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM districts
       ${whereClause}
       ORDER BY id DESC
-      LIMIT ? OFFSET ?
+      LIMIT $${paramIndex++} OFFSET $${paramIndex}
     `;
 
     // Build count query
@@ -198,16 +200,16 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        election_id as electionId,
+        electionid as electionid,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM districts
-      WHERE id = ? AND deleted_at IS NULL
+      WHERE id = $1 AND deletedat IS NULL
     `;
 
     const rows = await manager.query(query, [id]);
@@ -226,16 +228,16 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        election_id as electionId,
+        electionid as electionid,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM districts
-      WHERE desc1 = ? AND election_id = ? AND deleted_at IS NULL
+      WHERE desc1 = $1 AND electionid = $2 AND deletedat IS NULL
       LIMIT 1
     `;
 
@@ -254,16 +256,16 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        election_id as electionId,
+        electionid as electionid,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM districts
-      WHERE election_id = ? AND deleted_at IS NULL
+      WHERE electionid = $1 AND deletedat IS NULL
       ORDER BY desc1 ASC
     `;
 
@@ -278,7 +280,7 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT COUNT(id) AS count
       FROM districts
-      WHERE deleted_at IS NULL AND election_id = ?
+      WHERE deletedat IS NULL AND electionid = $1
     `;
 
     const result = await manager.query(query, [electionId]);
@@ -289,14 +291,14 @@ export class DistrictRepositoryImpl
   private rowToModel(row: any): District {
     return new District({
       id: row.id,
-      electionId: row.electionId,
+      electionId: row.electionid,
       desc1: row.desc1,
-      deletedBy: row.deletedBy,
-      deletedAt: row.deletedAt,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      deletedBy: row.deletedby,
+      deletedAt: row.deletedat,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

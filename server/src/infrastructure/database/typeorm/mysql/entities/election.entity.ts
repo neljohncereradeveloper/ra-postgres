@@ -17,7 +17,7 @@ import { PositionEntity } from './position.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 import { BallotEntity } from './ballot.entity';
 import { CandidateEntity } from './candidate.entity';
-import { ElectionStatus } from '@domain/enums/index';
+import { ElectionStatus } from '../../../../../domain/enums/election/election-status.enum';
 
 @Entity('elections')
 @Unique(['name'])
@@ -37,54 +37,50 @@ export class ElectionEntity {
   @Column({ type: 'date', nullable: true })
   date: Date;
 
-  @Column({ name: 'start_time', type: 'timestamp', nullable: true })
-  startTime: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  starttime: Date;
 
-  @Column({ name: 'end_time', type: 'timestamp', nullable: true })
-  endTime: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  endtime: Date;
 
-  @Column({ name: 'max_attendees', nullable: true })
-  maxAttendees: number; // Note: Add CHECK constraint in migration: max_attendees > 0 OR max_attendees IS NULL
+  @Column({ nullable: true })
+  maxattendees: number; // Note: Add CHECK constraint in migration: max_attendees > 0 OR max_attendees IS NULL
 
   @Column({
     type: 'enum',
     enum: ElectionStatus,
     default: ElectionStatus.SCHEDULED,
-    name: 'election_status',
   })
   @Index()
-  electionStatus: ElectionStatus;
+  electionstatus: ElectionStatus;
 
   @Column({
-    name: 'deleted_by',
     comment: 'username of the user who deleted the election',
     nullable: true,
   })
-  deletedBy?: string;
+  deletedby?: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedAt: Date | null; // For soft delete
+  deletedat: Date | null; // For soft delete
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the election',
     nullable: true,
   })
-  createdBy?: string;
+  createdby?: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who updated the election',
     nullable: true,
   })
-  updatedBy?: string;
+  updatedby?: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 
   /** One to many */
   @OneToMany(() => DelegateEntity, (member) => member.election)

@@ -18,15 +18,15 @@ export class CandidateRepositoryImpl
     try {
       const query = `
         INSERT INTO candidates (
-          election_id,
-          delegate_id,
-          position_id,
-          district_id,
-          display_name,
-          created_by,
-          created_at
+          electionid,
+          delegateid,
+          positionid,
+          districtid,
+          displayname,
+          createdby,
+          createdat
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
       `;
 
       const result = await manager.query(query, [
@@ -44,19 +44,19 @@ export class CandidateRepositoryImpl
       const selectQuery = `
         SELECT 
           id,
-          election_id as electionId,
-          delegate_id as delegateId,
-          position_id as positionId,
-          district_id as districtId,
-          display_name as displayName,
-          deleted_by as deletedBy,
-          deleted_at as deletedAt,
-          created_by as createdBy,
-          created_at as createdAt,
-          updated_by as updatedBy,
-          updated_at as updatedAt
+          electionid as electionid,
+          delegateid as delegateid,
+          positionid as positionid,
+          districtid as districtid,
+          displayname as displayname,
+          deletedby as deletedby,
+          deletedat as deletedat,
+          createdby as createdby,
+          createdat as createdat,
+          updatedby as updatedby,
+          updatedat as updatedat
         FROM candidates
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const rows = await manager.query(selectQuery, [insertId]);
@@ -79,29 +79,30 @@ export class CandidateRepositoryImpl
     try {
       const updateParts: string[] = [];
       const values: any[] = [];
+      let paramIndex = 1;
 
       if (updateFields.displayName !== undefined) {
-        updateParts.push('display_name = ?');
+        updateParts.push(`displayname = $${paramIndex++}`);
         values.push(updateFields.displayName);
       }
 
       if (updateFields.positionId !== undefined) {
-        updateParts.push('position_id = ?');
+        updateParts.push(`positionid = $${paramIndex++}`);
         values.push(updateFields.positionId);
       }
 
       if (updateFields.districtId !== undefined) {
-        updateParts.push('district_id = ?');
+        updateParts.push(`districtid = $${paramIndex++}`);
         values.push(updateFields.districtId);
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updateParts.push('updated_by = ?');
+        updateParts.push(`updatedby = $${paramIndex++}`);
         values.push(updateFields.updatedBy);
       }
 
       if (updateFields.updatedAt !== undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(updateFields.updatedAt);
       }
 
@@ -114,7 +115,7 @@ export class CandidateRepositoryImpl
       const query = `
         UPDATE candidates
         SET ${updateParts.join(', ')}
-        WHERE id = ?
+        WHERE id = $${paramIndex}
       `;
 
       const result = await manager.query(query, values);
@@ -134,22 +135,22 @@ export class CandidateRepositoryImpl
     const query = `
       SELECT 
         c.id as id,
-        c.election_id as electionId,
-        c.position_id as positionId,
-        c.district_id as districtId,
-        c.delegate_id as delegateId,
-        c.display_name as displayName,
-        d.account_id as accountId,
-        d.account_name as accountName,
+        c.electionid as electionid,
+        c.positionid as positionid,
+        c.districtid as districtid,
+        c.delegateid as delegateid,
+        c.displayname as displayname,
+        d.accountid as accountid,
+        d.accountname as accountname,
         p.desc1 AS position,
         dist.desc1 AS district,
         e.name AS election
       FROM candidates c
-      LEFT JOIN delegates d ON c.delegate_id = d.id
-      LEFT JOIN positions p ON c.position_id = p.id
-      LEFT JOIN districts dist ON c.district_id = dist.id
-      LEFT JOIN elections e ON c.election_id = e.id
-      WHERE c.id = ? AND c.deleted_at IS NULL
+      LEFT JOIN delegates d ON c.delegateid = d.id
+      LEFT JOIN positions p ON c.positionid = p.id
+      LEFT JOIN districts dist ON c.districtid = dist.id
+      LEFT JOIN elections e ON c.electionid = e.id
+      WHERE c.id = $1 AND c.deletedat IS NULL
     `;
 
     const rows = await manager.query(query, [id]);
@@ -179,18 +180,19 @@ export class CandidateRepositoryImpl
 
     // Filter by deletion status
     if (isDeleted) {
-      whereConditions.push('c.deleted_at IS NOT NULL');
+      whereConditions.push('c.deletedat IS NOT NULL');
     } else {
-      whereConditions.push('c.deleted_at IS NULL');
+      whereConditions.push('c.deletedat IS NULL');
     }
 
     // Filter by election
-    whereConditions.push('c.election_id = ?');
+    let paramIndex = 1;
+    whereConditions.push(`c.electionid = $${paramIndex++}`);
     queryParams.push(electionId);
 
     // Apply search filter on display name
     if (term) {
-      whereConditions.push('LOWER(c.display_name) LIKE ?');
+      whereConditions.push(`LOWER(c.displayname) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -200,21 +202,21 @@ export class CandidateRepositoryImpl
     const dataQuery = `
       SELECT 
         c.id as id,
-        c.delegate_id as delegateId,
-        c.display_name as displayName,
-        d.account_id as accountId,
-        d.account_name as accountName,
+        c.delegateid as delegateid,
+        c.displayname as displayname,
+        d.accountid as accountid,
+        d.accountname as accountname,
         p.desc1 AS position,
         dist.desc1 AS district,
         e.name AS election
       FROM candidates c
-      LEFT JOIN delegates d ON c.delegate_id = d.id
-      LEFT JOIN positions p ON c.position_id = p.id
-      LEFT JOIN districts dist ON c.district_id = dist.id
-      LEFT JOIN elections e ON c.election_id = e.id
+      LEFT JOIN delegates d ON c.delegateid = d.id
+      LEFT JOIN positions p ON c.positionid = p.id
+      LEFT JOIN districts dist ON c.districtid = dist.id
+      LEFT JOIN elections e ON c.electionid = e.id
       ${whereClause}
       ORDER BY c.id DESC
-      LIMIT ? OFFSET ?
+      LIMIT $${paramIndex++} OFFSET $${paramIndex}
     `;
 
     // Build count query
@@ -258,7 +260,7 @@ export class CandidateRepositoryImpl
     const query = `
       SELECT COUNT(id) AS count
       FROM candidates
-      WHERE deleted_at IS NULL AND election_id = ?
+      WHERE deletedat IS NULL AND electionid = $1
     `;
 
     const result = await manager.query(query, [electionId]);
@@ -272,13 +274,13 @@ export class CandidateRepositoryImpl
     const query = `
       SELECT 
         p.desc1 AS position,
-        p.max_candidates AS positionMaxCandidates,
-        p.term_limit AS positionTermLimit,
-        c.id as candidateId,
-        c.display_name as displayName
+        p.maxcandidates AS positionmaxcandidates,
+        p.termlimit AS positiontermlimit,
+        c.id as candidateid,
+        c.displayname as displayname
       FROM candidates c
-      LEFT JOIN positions p ON c.position_id = p.id
-      WHERE c.deleted_at IS NULL AND c.election_id = ?
+      LEFT JOIN positions p ON c.positionid = p.id
+      WHERE c.deletedat IS NULL AND c.electionid = $1
     `;
 
     const rows = await manager.query(query, [electionId]);
@@ -289,17 +291,17 @@ export class CandidateRepositoryImpl
   private rowToModel(row: any): Candidate {
     return new Candidate({
       id: row.id,
-      electionId: row.electionId,
-      positionId: row.positionId,
-      districtId: row.districtId,
-      delegateId: row.delegateId,
-      displayName: row.displayName,
-      deletedBy: row.deletedBy,
-      deletedAt: row.deletedAt,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      electionId: row.electionid,
+      positionId: row.positionid,
+      districtId: row.districtid,
+      delegateId: row.delegateid,
+      displayName: row.displayname,
+      deletedBy: row.deletedby,
+      deletedAt: row.deletedat,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

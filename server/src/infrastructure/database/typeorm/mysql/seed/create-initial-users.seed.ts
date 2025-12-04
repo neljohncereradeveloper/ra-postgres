@@ -5,6 +5,7 @@ import { Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { config as dotenvConfig } from 'dotenv';
 import { ApplicationAccessEntity } from '../entities/application-access.entity';
+import { getPHDateTime } from '../../../../../domain/utils/format-ph-time';
 
 // Load environment variables from .env
 dotenvConfig();
@@ -61,23 +62,25 @@ export class SeedUsers {
     const adminUserData = {
       watcher: 'Default',
       precinct: 'Default',
-      applicationAccess: `${adminModuleApplicationAccess.desc1}, ${electionManagementModuleApplicationAccess.desc1}`,
-      userRoles: adminRole.desc1,
-      userName: 'admin',
+      applicationaccess: `${adminModuleApplicationAccess.desc1}, ${electionManagementModuleApplicationAccess.desc1}`,
+      userroles: adminRole.desc1,
+      username: 'admin',
       password: hashPassword,
+      createdby: 'System',
+      createdat: getPHDateTime(),
     };
     // Check if the super admin user already exists
     const existingAdmin = await userRepository.findOneBy({
-      userName: adminUserData.userName,
+      username: adminUserData.username,
     });
     if (!existingAdmin) {
       const newAdmin = userRepository.create(adminUserData);
       await userRepository.save(newAdmin);
       this.logger.log(
-        `Admin user '${adminUserData.userName}' created successfully.`,
+        `Admin user '${adminUserData.username}' created successfully.`,
       );
     } else {
-      this.logger.log(`Admin user '${adminUserData.userName}' already exists.`);
+      this.logger.log(`Admin user '${adminUserData.username}' already exists.`);
     }
   }
 }

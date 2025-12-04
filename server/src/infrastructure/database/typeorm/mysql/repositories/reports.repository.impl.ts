@@ -15,21 +15,21 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
         `
           SELECT
             p.desc1 AS position,
-            c.displayName AS candidate,
+            c.displayname AS candidate,
             COUNT(cv.id) AS voteCount
           FROM positions p
-          JOIN candidates c ON c.positionId = p.id
+          JOIN candidates c ON c.positionid = p.id
           LEFT JOIN cast_votes cv
-            ON cv.candidateId = c.id
-            AND cv.positionId = p.id
-            AND cv.electionId = ?
-            AND cv.deletedAt IS NULL
-          WHERE p.deletedAt IS NULL
-            AND c.deletedAt IS NULL
-            AND p.electionId = ?
-            AND c.electionId = ?
+            ON cv.candidateid = c.id
+            AND cv.positionid = p.id
+            AND cv.electionid = $1
+            AND cv.deletedat IS NULL
+          WHERE p.deletedat IS NULL
+            AND c.deletedat IS NULL
+            AND p.electionid = $2
+            AND c.electionid = $3
           GROUP BY p.id, c.id
-          ORDER BY p.id, voteCount DESC, c.displayName;
+          ORDER BY p.id, voteCount DESC, c.displayname;
         `,
         [electionId, electionId, electionId],
       );
@@ -48,20 +48,20 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
         `
           SELECT
             p.desc1 AS position,
-            c.displayName AS candidate
+            c.displayname AS candidate
           FROM positions p
-          JOIN candidates c ON c.positionId = p.id
+          JOIN candidates c ON c.positionid = p.id
           LEFT JOIN cast_votes cv
-            ON cv.candidateId = c.id
-            AND cv.positionId = p.id
-            AND cv.electionId = ?
-            AND cv.deletedAt IS NULL
-          WHERE p.deletedAt IS NULL
-            AND c.deletedAt IS NULL
-            AND p.electionId = ?
-            AND c.electionId = ?
+            ON cv.candidateid = c.id
+            AND cv.positionid = p.id
+            AND cv.electionid = $1
+            AND cv.deletedat IS NULL
+          WHERE p.deletedat IS NULL
+            AND c.deletedat IS NULL
+            AND p.electionid = $2
+            AND c.electionid = $3
           GROUP BY p.id, c.id
-          ORDER BY p.id, c.displayName;
+          ORDER BY p.id, c.displayname;
         `,
         [electionId, electionId, electionId],
       );

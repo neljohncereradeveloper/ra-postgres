@@ -15,8 +15,8 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     manager: EntityManager,
   ): Promise<Ballot> {
     const query = `
-      INSERT INTO ballots (ballot_number, delegate_id, election_id, ballot_status)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO ballots (ballotnumber, delegateid, electionid, ballotstatus)
+      VALUES ($1, $2, $3, $4)
     `;
 
     const result = await manager.query(query, [
@@ -31,12 +31,12 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const selectQuery = `
       SELECT 
         id,
-        ballot_number as ballotNumber,
-        delegate_id as delegateId,
-        election_id as electionId,
-        ballot_status as ballotStatus
+        ballotnumber as ballotnumber,
+        delegateid as delegateid,
+        electionid as electionid,
+        ballotstatus as ballotstatus
       FROM ballots
-      WHERE id = ?
+      WHERE id = $1
     `;
 
     const rows = await manager.query(selectQuery, [insertId]);
@@ -49,7 +49,7 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   ): Promise<Ballot> {
     // Update the ballot status
     await context.query(
-      `UPDATE ballots SET ballot_status = ? WHERE ballot_number = ?`,
+      `UPDATE ballots SET ballotstatus = $1 WHERE ballotnumber = $2`,
       [BALLOT_STATUS_CONSTANTS.SUBMITTED, ballotNumber],
     );
 
@@ -57,12 +57,12 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const selectQuery = `
       SELECT 
         id,
-        ballot_number as ballotNumber,
-        delegate_id as delegateId,
-        election_id as electionId,
-        ballot_status as ballotStatus
+        ballotnumber as ballotnumber,
+        delegateid as delegateid,
+        electionid as electionid,
+        ballotstatus as ballotstatus
       FROM ballots
-      WHERE ballot_number = ?
+      WHERE ballotnumber = $1
       LIMIT 1
     `;
 
@@ -80,7 +80,7 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   ): Promise<Ballot> {
     // Update ballots to unlink delegate
     await context.query(
-      `UPDATE ballots SET delegate_id = NULL WHERE election_id = ?`,
+      `UPDATE ballots SET delegateid = NULL WHERE electionid = $1`,
       [electionId],
     );
 
@@ -88,12 +88,12 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const selectQuery = `
       SELECT 
         id,
-        ballot_number as ballotNumber,
-        delegate_id as delegateId,
-        election_id as electionId,
-        ballot_status as ballotStatus
+        ballotnumber as ballotnumber,
+        delegateid as delegateid,
+        electionid as electionid,
+        ballotstatus as ballotstatus
       FROM ballots
-      WHERE election_id = ? AND delegate_id IS NULL
+      WHERE electionid = $1 AND delegateid IS NULL
       LIMIT 1
     `;
 
@@ -112,12 +112,12 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const query = `
       SELECT 
         id,
-        ballot_number as ballotNumber,
-        delegate_id as delegateId,
-        election_id as electionId,
-        ballot_status as ballotStatus
+        ballotnumber as ballotnumber,
+        delegateid as delegateid,
+        electionid as electionid,
+        ballotstatus as ballotstatus
       FROM ballots
-      WHERE delegate_id = ?
+      WHERE delegateid = $1
       LIMIT 1
     `;
 
@@ -133,10 +133,10 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   private rowToModel(row: any): Ballot {
     return new Ballot({
       id: row.id,
-      ballotNumber: row.ballotNumber,
-      delegateId: row.delegateId,
-      electionId: row.electionId,
-      ballotStatus: row.ballotStatus,
+      ballotNumber: row.ballotnumber,
+      delegateId: row.delegateid,
+      electionId: row.electionid,
+      ballotStatus: row.ballotstatus,
     });
   }
 }

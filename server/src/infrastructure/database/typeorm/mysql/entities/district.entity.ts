@@ -16,48 +16,45 @@ import { CandidateEntity } from './candidate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 
 @Entity('districts')
-@Unique(['election_id', 'desc1'])
+@Unique(['electionid', 'desc1'])
 export class DistrictEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'election_id' })
+  @Column()
   @Index()
-  electionId: number;
+  electionid: number;
 
   @Column({ length: 255 })
   desc1: string;
 
   @Column({
-    name: 'deleted_by',
     comment: 'username of the user who deleted the district',
     nullable: true,
   })
-  deletedBy: string;
+  deletedby: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedAt: Date | null; // For soft delete
+  deletedat: Date | null; // For soft delete
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the district',
     nullable: true,
   })
-  createdBy: string;
+  createdby: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who updated the district',
     nullable: true,
   })
-  updatedBy: string;
+  updatedby: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 
   /**
    * Relationships
@@ -66,7 +63,7 @@ export class DistrictEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'election_id' })
+  @JoinColumn({ name: 'electionid' })
   election: ElectionEntity;
 
   @OneToMany(() => CandidateEntity, (candidate) => candidate.district)

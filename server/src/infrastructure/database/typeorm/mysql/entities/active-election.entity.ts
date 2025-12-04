@@ -15,35 +15,33 @@ export class ActiveElectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'election_id', nullable: true })
+  @Column({ nullable: true })
   @Index()
-  electionId: number;
+  electionid: number;
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the active election record',
     nullable: true,
   })
-  createdBy: string;
+  createdby: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who last updated the active election',
     nullable: true,
   })
-  updatedBy: string;
+  updatedby: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 
   @OneToOne(() => ElectionEntity, (election) => election.activeElection, {
     nullable: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'election_id' }) // Specifies the foreign key column
+  @JoinColumn({ name: 'electionid' }) // Specifies the foreign key column
   election: ElectionEntity; // This defines the OneToOne relationship
 }

@@ -11,52 +11,51 @@ import {
 } from 'typeorm';
 import { ElectionEntity } from './election.entity';
 import { DelegateEntity } from './delegate.entity';
-import { BallotStatus } from '@domain/enums/index';
+import { BallotStatus } from '../../../../../domain/enums/ballot/ballot-status.enum';
 
 @Entity('ballots')
-@Unique(['ballot_number', 'election_id'])
+@Unique(['ballotnumber', 'electionid'])
 export class BallotEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'ballot_number', length: 100 })
+  @Column({ length: 100 })
   @Index()
-  ballotNumber: string;
+  ballotnumber: string;
 
-  @Column({ name: 'delegate_id', nullable: true })
+  @Column({ nullable: true })
   @Index()
-  delegateId: number;
+  delegateid: number;
 
-  @Column({ name: 'election_id' })
+  @Column()
   @Index()
-  electionId: number;
+  electionid: number;
 
   @Column({
     type: 'enum',
     enum: BallotStatus,
     default: BallotStatus.PENDING,
-    name: 'ballot_status',
   })
   @Index()
-  ballotStatus: BallotStatus;
+  ballotstatus: BallotStatus;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 
   @ManyToOne(() => ElectionEntity, (election) => election.ballots, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'election_id' })
+  @JoinColumn({ name: 'electionid' })
   election: ElectionEntity;
 
   @ManyToOne(() => DelegateEntity, (delegate) => delegate.ballots, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'delegate_id' })
+  @JoinColumn({ name: 'delegateid' })
   delegate: DelegateEntity;
 }

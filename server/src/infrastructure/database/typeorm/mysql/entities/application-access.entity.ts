@@ -19,33 +19,30 @@ export class ApplicationAccessEntity {
   desc1: string;
 
   @Column({
-    name: 'deleted_by',
     comment: 'username of the user who deleted the application access',
     nullable: true,
   })
-  deletedBy?: string;
+  deletedby?: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedAt?: Date | null;
+  deletedat?: Date | null;
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the application access',
     nullable: true,
   })
-  createdBy?: string;
+  createdby?: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who updated the application access',
     nullable: true,
   })
-  updatedBy?: string;
+  updatedby?: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 }

@@ -13,8 +13,8 @@ export class PrecinctRepositoryImpl
   async create(precinct: Precinct, manager: EntityManager): Promise<Precinct> {
     try {
       const query = `
-        INSERT INTO precincts (desc1, created_by, created_at)
-        VALUES (?, ?, ?)
+        INSERT INTO precincts (desc1, createdby, createdat)
+        VALUES ($1, $2, $3)
       `;
 
       const result = await manager.query(query, [
@@ -29,14 +29,14 @@ export class PrecinctRepositoryImpl
         SELECT 
           id,
           desc1,
-          deleted_by as deletedBy,
-          deleted_at as deletedAt,
-          created_by as createdBy,
-          created_at as createdAt,
-          updated_by as updatedBy,
-          updated_at as updatedAt
+          deletedby as deletedby,
+          deletedat as deletedat,
+          createdby as createdby,
+          createdat as createdat,
+          updatedby as updatedby,
+          updatedat as updatedat
         FROM precincts
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const rows = await manager.query(selectQuery, [insertId]);
@@ -57,29 +57,30 @@ export class PrecinctRepositoryImpl
     try {
       const updateParts: string[] = [];
       const values: any[] = [];
+      let paramIndex = 1;
 
       if (updateFields.desc1 !== undefined) {
-        updateParts.push('desc1 = ?');
+        updateParts.push(`desc1 = $${paramIndex++}`);
         values.push(updateFields.desc1);
       }
 
       if (updateFields.deletedAt !== undefined) {
-        updateParts.push('deleted_at = ?');
+        updateParts.push(`deletedat = $${paramIndex++}`);
         values.push(updateFields.deletedAt);
       }
 
       if (updateFields.deletedBy !== undefined) {
-        updateParts.push('deleted_by = ?');
+        updateParts.push(`deletedby = $${paramIndex++}`);
         values.push(updateFields.deletedBy);
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updateParts.push('updated_by = ?');
+        updateParts.push(`updatedby = $${paramIndex++}`);
         values.push(updateFields.updatedBy);
       }
 
       if (updateFields.updatedAt !== undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(updateFields.updatedAt);
       }
 
@@ -87,9 +88,9 @@ export class PrecinctRepositoryImpl
         return false;
       }
 
-      // Always update updated_at if not explicitly set
+      // Always update updatedat if not explicitly set
       if (updateFields.updatedAt === undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(new Date());
       }
 
@@ -98,7 +99,7 @@ export class PrecinctRepositoryImpl
       const query = `
         UPDATE precincts
         SET ${updateParts.join(', ')}
-        WHERE id = ?
+        WHERE id = $${paramIndex}
       `;
 
       const result = await manager.query(query, values);
@@ -127,14 +128,15 @@ export class PrecinctRepositoryImpl
     const queryParams: any[] = [];
 
     if (isArchived) {
-      whereConditions.push('deleted_at IS NOT NULL');
+      whereConditions.push('deletedat IS NOT NULL');
     } else {
-      whereConditions.push('deleted_at IS NULL');
+      whereConditions.push('deletedat IS NULL');
     }
 
     // Add search term if provided
+    let paramIndex = 1;
     if (term) {
-      whereConditions.push('LOWER(desc1) LIKE ?');
+      whereConditions.push(`LOWER(desc1) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -145,16 +147,16 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM precincts
       ${whereClause}
       ORDER BY id DESC
-      LIMIT ? OFFSET ?
+      LIMIT $${paramIndex++} OFFSET $${paramIndex}
     `;
 
     // Count query
@@ -196,14 +198,14 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM precincts
-      WHERE id = ?
+      WHERE id = $1
     `;
 
     const rows = await manager.query(query, [id]);
@@ -222,14 +224,14 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM precincts
-      WHERE desc1 = ? AND deleted_at IS NULL
+      WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1
     `;
 
@@ -246,14 +248,14 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM precincts
-      WHERE deleted_at IS NULL
+      WHERE deletedat IS NULL
       ORDER BY desc1 ASC
     `;
 
@@ -266,12 +268,12 @@ export class PrecinctRepositoryImpl
     return new Precinct({
       id: row.id,
       desc1: row.desc1,
-      deletedBy: row.deletedBy,
-      deletedAt: row.deletedAt,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      deletedBy: row.deletedby,
+      deletedAt: row.deletedat,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

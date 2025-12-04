@@ -15,8 +15,8 @@ export class ApplicationAccessRepositoryImpl
   ): Promise<ApplicationAccess> {
     try {
       const query = `
-        INSERT INTO applicationaccess (desc1, created_by, created_at)
-        VALUES (?, ?, ?)
+        INSERT INTO applicationaccess (desc1, createdby, createdat)
+        VALUES ($1, $2, $3)
       `;
 
       const result = await manager.query(query, [
@@ -31,14 +31,14 @@ export class ApplicationAccessRepositoryImpl
         SELECT 
           id,
           desc1,
-          deleted_by as deletedBy,
-          deleted_at as deletedAt,
-          created_by as createdBy,
-          created_at as createdAt,
-          updated_by as updatedBy,
-          updated_at as updatedAt
+          deletedby as deletedby,
+          deletedat as deletedat,
+          createdby as createdby,
+          createdat as createdat,
+          updatedby as updatedby,
+          updatedat as updatedat
         FROM applicationaccess
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const savedRow = await manager.query(selectQuery, [insertId]);
@@ -59,19 +59,20 @@ export class ApplicationAccessRepositoryImpl
     try {
       const updateParts: string[] = [];
       const values: any[] = [];
+      let paramIndex = 1;
 
       if (updateFields.desc1 !== undefined) {
-        updateParts.push('desc1 = ?');
+        updateParts.push(`desc1 = $${paramIndex++}`);
         values.push(updateFields.desc1);
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updateParts.push('updated_by = ?');
+        updateParts.push(`updatedby = $${paramIndex++}`);
         values.push(updateFields.updatedBy);
       }
 
       if (updateFields.updatedAt !== undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(updateFields.updatedAt);
       }
 
@@ -84,7 +85,7 @@ export class ApplicationAccessRepositoryImpl
       const query = `
         UPDATE applicationaccess
         SET ${updateParts.join(', ')}
-        WHERE id = ?
+        WHERE id = $${paramIndex}
       `;
 
       const result = await manager.query(query, values);
@@ -121,14 +122,15 @@ export class ApplicationAccessRepositoryImpl
 
     // Filter by deletion status
     if (isDeleted) {
-      whereConditions.push('deleted_at IS NOT NULL');
+      whereConditions.push('deletedat IS NOT NULL');
     } else {
-      whereConditions.push('deleted_at IS NULL');
+      whereConditions.push('deletedat IS NULL');
     }
 
     // Apply search filter on description
+    let paramIndex = 1;
     if (term) {
-      whereConditions.push('LOWER(desc1) LIKE ?');
+      whereConditions.push(`LOWER(desc1) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -142,16 +144,16 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM applicationaccess
       ${whereClause}
       ORDER BY id DESC
-      LIMIT ? OFFSET ?
+      LIMIT $${paramIndex++} OFFSET $${paramIndex}
     `;
 
     // Build count query
@@ -199,14 +201,14 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM applicationaccess
-      WHERE id = ? AND deleted_at IS NULL
+      WHERE id = $1 AND deletedat IS NULL
     `;
 
     const rows = await manager.query(query, [id]);
@@ -222,14 +224,14 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM applicationaccess
-      WHERE deleted_at IS NULL
+      WHERE deletedat IS NULL
       ORDER BY desc1 ASC
     `;
 
@@ -242,14 +244,14 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM applicationaccess
-      WHERE desc1 = ? AND deleted_at IS NULL
+      WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1
     `;
 
@@ -266,12 +268,12 @@ export class ApplicationAccessRepositoryImpl
     return new ApplicationAccess({
       id: row.id,
       desc1: row.desc1,
-      deletedBy: row.deletedBy,
-      deletedAt: row.deletedAt,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      deletedBy: row.deletedby,
+      deletedAt: row.deletedat,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

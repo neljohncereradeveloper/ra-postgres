@@ -19,14 +19,14 @@ export class ElectionRepositoryImpl
           desc1,
           address,
           date,
-          start_time,
-          end_time,
-          max_attendees,
-          election_status,
-          created_by,
-          created_at
+          starttime,
+          endtime,
+          maxattendees,
+          electionstatus,
+          createdby,
+          createdat
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `;
 
       const result = await manager.query(query, [
@@ -51,18 +51,18 @@ export class ElectionRepositoryImpl
           desc1,
           address,
           date,
-          start_time as startTime,
-          end_time as endTime,
-          max_attendees as maxAttendees,
-          election_status as electionStatus,
-          deleted_by as deletedBy,
-          deleted_at as deletedAt,
-          created_by as createdBy,
-          created_at as createdAt,
-          updated_by as updatedBy,
-          updated_at as updatedAt
+          starttime as starttime,
+          endtime as endtime,
+          maxattendees as maxattendees,
+          electionstatus as electionstatus,
+          deletedby as deletedby,
+          deletedat as deletedat,
+          createdby as createdby,
+          createdat as createdat,
+          updatedby as updatedby,
+          updatedat as updatedat
         FROM elections
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       const rows = await manager.query(selectQuery, [insertId]);
@@ -83,54 +83,55 @@ export class ElectionRepositoryImpl
     try {
       const updateParts: string[] = [];
       const values: any[] = [];
+      let paramIndex = 1;
 
       if (updateFields.name !== undefined) {
-        updateParts.push('name = ?');
+        updateParts.push(`name = $${paramIndex++}`);
         values.push(updateFields.name);
       }
 
       if (updateFields.desc1 !== undefined) {
-        updateParts.push('desc1 = ?');
+        updateParts.push(`desc1 = $${paramIndex++}`);
         values.push(updateFields.desc1);
       }
 
       if (updateFields.address !== undefined) {
-        updateParts.push('address = ?');
+        updateParts.push(`address = $${paramIndex++}`);
         values.push(updateFields.address);
       }
 
       if (updateFields.date !== undefined) {
-        updateParts.push('date = ?');
+        updateParts.push(`date = $${paramIndex++}`);
         values.push(updateFields.date);
       }
 
       if (updateFields.startTime !== undefined) {
-        updateParts.push('start_time = ?');
+        updateParts.push(`starttime = $${paramIndex++}`);
         values.push(updateFields.startTime);
       }
 
       if (updateFields.endTime !== undefined) {
-        updateParts.push('end_time = ?');
+        updateParts.push(`endtime = $${paramIndex++}`);
         values.push(updateFields.endTime);
       }
 
       if (updateFields.maxAttendees !== undefined) {
-        updateParts.push('max_attendees = ?');
+        updateParts.push(`maxattendees = $${paramIndex++}`);
         values.push(updateFields.maxAttendees);
       }
 
       if (updateFields.electionStatus !== undefined) {
-        updateParts.push('election_status = ?');
+        updateParts.push(`electionstatus = $${paramIndex++}`);
         values.push(updateFields.electionStatus);
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updateParts.push('updated_by = ?');
+        updateParts.push(`updatedby = $${paramIndex++}`);
         values.push(updateFields.updatedBy);
       }
 
       if (updateFields.updatedAt !== undefined) {
-        updateParts.push('updated_at = ?');
+        updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(updateFields.updatedAt);
       }
 
@@ -143,7 +144,7 @@ export class ElectionRepositoryImpl
       const query = `
         UPDATE elections
         SET ${updateParts.join(', ')}
-        WHERE id = ? AND deleted_at IS NULL
+        WHERE id = $${paramIndex} AND deletedat IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -173,14 +174,15 @@ export class ElectionRepositoryImpl
 
     // Filter by deletion status
     if (isDeleted) {
-      whereConditions.push('deleted_at IS NOT NULL');
+      whereConditions.push('deletedat IS NOT NULL');
     } else {
-      whereConditions.push('deleted_at IS NULL');
+      whereConditions.push('deletedat IS NULL');
     }
 
     // Apply search filter on name
+    let paramIndex = 1;
     if (term) {
-      whereConditions.push('LOWER(name) LIKE ?');
+      whereConditions.push(`LOWER(name) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -194,15 +196,15 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        start_time as startTime,
-        end_time as endTime,
-        max_attendees as maxAttendees,
-        election_status as electionStatus,
-        deleted_at as deletedAt
+        starttime as starttime,
+        endtime as endtime,
+        maxattendees as maxattendees,
+        electionstatus as electionstatus,
+        deletedat as deletedat
       FROM elections
       ${whereClause}
       ORDER BY id DESC
-      LIMIT ? OFFSET ?
+      LIMIT $${paramIndex++} OFFSET $${paramIndex}
     `;
 
     // Build count query
@@ -257,18 +259,18 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        start_time as startTime,
-        end_time as endTime,
-        max_attendees as maxAttendees,
-        election_status as electionStatus,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        starttime as starttime,
+        endtime as endtime,
+        maxattendees as maxattendees,
+        electionstatus as electionstatus,
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM elections
-      WHERE id = ? AND deleted_at IS NULL
+      WHERE id = $1 AND deletedat IS NULL
     `;
 
     const rows = await manager.query(query, [id]);
@@ -287,18 +289,18 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        start_time as startTime,
-        end_time as endTime,
-        max_attendees as maxAttendees,
-        election_status as electionStatus,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        starttime as starttime,
+        endtime as endtime,
+        maxattendees as maxattendees,
+        electionstatus as electionstatus,
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM elections
-      WHERE deleted_at IS NULL
+      WHERE deletedat IS NULL
       ORDER BY name ASC
     `;
 
@@ -314,18 +316,18 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        start_time as startTime,
-        end_time as endTime,
-        max_attendees as maxAttendees,
-        election_status as electionStatus,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        starttime as starttime,
+        endtime as endtime,
+        maxattendees as maxattendees,
+        electionstatus as electionstatus,
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM elections
-      WHERE deleted_at IS NULL
+      WHERE deletedat IS NULL
       ORDER BY name ASC
     `;
 
@@ -344,18 +346,18 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        start_time as startTime,
-        end_time as endTime,
-        max_attendees as maxAttendees,
-        election_status as electionStatus,
-        deleted_by as deletedBy,
-        deleted_at as deletedAt,
-        created_by as createdBy,
-        created_at as createdAt,
-        updated_by as updatedBy,
-        updated_at as updatedAt
+        starttime as starttime,
+        endtime as endtime,
+        maxattendees as maxattendees,
+        electionstatus as electionstatus,
+        deletedby as deletedby,
+        deletedat as deletedat,
+        createdby as createdby,
+        createdat as createdat,
+        updatedby as updatedby,
+        updatedat as updatedat
       FROM elections
-      WHERE name = ? AND deleted_at IS NULL
+      WHERE name = $1 AND deletedat IS NULL
       LIMIT 1
     `;
 
@@ -375,16 +377,16 @@ export class ElectionRepositoryImpl
       desc1: row.desc1,
       address: row.address,
       date: row.date,
-      startTime: row.startTime,
-      endTime: row.endTime,
-      maxAttendees: row.maxAttendees,
-      electionStatus: row.electionStatus,
-      deletedBy: row.deletedBy,
-      deletedAt: row.deletedAt,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt,
-      updatedBy: row.updatedBy,
-      updatedAt: row.updatedAt,
+      startTime: row.starttime,
+      endTime: row.endtime,
+      maxAttendees: row.maxattendees,
+      electionStatus: row.electionstatus,
+      deletedBy: row.deletedby,
+      deletedAt: row.deletedat,
+      createdBy: row.createdby,
+      createdAt: row.createdat,
+      updatedBy: row.updatedby,
+      updatedAt: row.updatedat,
     });
   }
 }

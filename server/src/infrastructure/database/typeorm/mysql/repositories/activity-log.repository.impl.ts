@@ -31,7 +31,7 @@ export class ActivityLogRepositoryImpl
     // Use raw SQL query for insert
     const query = `
       INSERT INTO activitylogs (action, entity, details, timestamp, username)
-      VALUES (?, ?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4, $5)
     `;
 
     const result = await manager.query(query, [
@@ -53,7 +53,7 @@ export class ActivityLogRepositoryImpl
         timestamp,
         username
       FROM activitylogs
-      WHERE id = ?
+      WHERE id = $1
     `;
 
     const savedRow = await manager.query(selectQuery, [insertId]);
@@ -87,7 +87,7 @@ export class ActivityLogRepositoryImpl
         timestamp,
         username
       FROM activitylogs
-      WHERE entity = ?
+      WHERE entity = $1
       ORDER BY timestamp DESC
     `;
 
@@ -105,7 +105,7 @@ export class ActivityLogRepositoryImpl
         timestamp,
         username
       FROM activitylogs
-      WHERE action = ?
+      WHERE action = $1
       ORDER BY timestamp DESC
     `;
 

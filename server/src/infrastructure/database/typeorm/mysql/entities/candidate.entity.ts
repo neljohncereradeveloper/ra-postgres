@@ -19,87 +19,84 @@ import { DelegateEntity } from './delegate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
 
 @Entity('candidates')
-@Unique(['election_id', 'delegate_id'])
-@Unique(['election_id', 'display_name'])
+@Unique(['electionid', 'delegateid'])
+@Unique(['electionid', 'displayname'])
 export class CandidateEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'election_id' })
+  @Column()
   @Index()
-  electionId: number;
+  electionid: number;
 
-  @Column({ name: 'delegate_id' })
+  @Column()
   @Index()
-  delegateId: number;
+  delegateid: number;
 
-  @Column({ name: 'position_id' })
+  @Column()
   @Index()
-  positionId: number;
+  positionid: number;
 
-  @Column({ name: 'district_id' })
+  @Column()
   @Index()
-  districtId: number;
+  districtid: number;
 
-  @Column({ name: 'display_name', length: 255 })
-  displayName: string;
+  @Column({ length: 255 })
+  displayname: string;
 
   @Column({
-    name: 'deleted_by',
     comment: 'username of the user who deleted the candidate',
     nullable: true,
   })
-  deletedBy?: string;
+  deletedby?: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
-  deletedAt: Date | null; // For soft delete
+  @DeleteDateColumn({ nullable: true })
+  deletedat: Date | null; // For soft delete
 
   @Column({
-    name: 'created_by',
     comment: 'username of the user who created the candidate',
     nullable: true,
   })
-  createdBy?: string;
+  createdby?: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @CreateDateColumn()
+  createdat: Date;
 
   @Column({
-    name: 'updated_by',
     comment: 'username of the user who updated the candidate',
     nullable: true,
   })
-  updatedBy?: string;
+  updatedby?: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @UpdateDateColumn()
+  updatedat: Date;
 
   @ManyToOne(() => ElectionEntity, (election) => election.candidates, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'election_id' })
+  @JoinColumn({ name: 'electionid' })
   election: ElectionEntity;
 
   @ManyToOne(() => PositionEntity, (position) => position.candidates, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'position_id' })
+  @JoinColumn({ name: 'positionid' })
   position: PositionEntity;
 
   @ManyToOne(() => DistrictEntity, (district) => district.candidates, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'district_id' })
+  @JoinColumn({ name: 'districtid' })
   district: DistrictEntity;
 
   @OneToOne(() => DelegateEntity, (delegate) => delegate.candidate, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'delegate_id' })
+  @JoinColumn({ name: 'delegateid' })
   delegate: DelegateEntity;
 
   @OneToMany(() => CastVoteEntity, (castVote) => castVote.candidate)
