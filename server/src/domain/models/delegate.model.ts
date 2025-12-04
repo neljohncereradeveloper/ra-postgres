@@ -1,4 +1,5 @@
 import { DelegateValidationPolicy } from '@domain/policies/delegate/delegate-validation.policy';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { DelegateBusinessException } from '@domains/exceptions/delegate/delegate-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
@@ -134,7 +135,7 @@ export class Delegate {
       clientType: params.clientType,
       hasVoted: params.hasVoted,
       createdBy: params.createdBy,
-      createdAt: new Date(),
+      createdAt: getPHDateTime(),
     });
     // Validate the delegate before returning
     delegate.validate();
@@ -196,6 +197,7 @@ export class Delegate {
       clientType: dto.clientType ?? this.clientType,
       hasVoted: dto.hasVoted ?? this.hasVoted,
       updatedBy: dto.updatedBy,
+      updatedAt: getPHDateTime(),
     });
     // Validate the new state before applying changes
     tempDelegate.validate();
@@ -230,7 +232,7 @@ export class Delegate {
       );
     }
 
-    this.deletedAt = new Date();
+    this.deletedAt = getPHDateTime();
     this.deletedBy = deletedBy;
   }
 

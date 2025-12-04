@@ -1,3 +1,5 @@
+import { getPHDateTime } from '@domain/utils/format-ph-time';
+
 /**
  * ActiveElection Domain Model
  *
@@ -49,7 +51,7 @@ export class ActiveElection {
 
     this.electionId = electionId;
     this.updatedBy = updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**
@@ -63,7 +65,7 @@ export class ActiveElection {
   reset(updatedBy: string): void {
     this.electionId = null;
     this.updatedBy = updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**

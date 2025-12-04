@@ -15,7 +15,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
-import { getPHDateTime } from '@shared/utils/format-ph-time';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { Election } from '@domain/models/election.model';
 import { User } from '@domain/models/user.model';
 import { GatewayGateway } from '@infrastructure/modules/gateway/gateway.gateway';

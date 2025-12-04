@@ -1,6 +1,7 @@
 import { CandidateValidationPolicy } from '@domain/policies/candidate/candidate-validation.policy';
 import { CandidateBusinessException } from '@domains/exceptions/candidate/candidate-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 /**
  * Candidate Domain Model
@@ -79,7 +80,7 @@ export class Candidate {
       delegateId: params.delegateId,
       displayName: params.displayName,
       createdBy: params.createdBy,
-      createdAt: new Date(),
+      createdAt: getPHDateTime(),
     });
     // Validate the candidate before returning
     candidate.validate();
@@ -126,7 +127,7 @@ export class Candidate {
     // Apply changes only if validation passes (data is already validated)
     this.displayName = dto.displayName;
     this.updatedBy = dto.updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**
@@ -141,7 +142,7 @@ export class Candidate {
       );
     }
 
-    this.deletedAt = new Date();
+    this.deletedAt = getPHDateTime();
     this.deletedBy = deletedBy;
   }
 

@@ -1,4 +1,5 @@
 import { PrecinctValidationPolicy } from '@domain/policies/precinct/precinct-validation.policy';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { PrecinctBusinessException } from '@domains/exceptions/precinct/precinct-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
@@ -56,7 +57,7 @@ export class Precinct {
     const precinct = new Precinct({
       desc1: params.desc1,
       createdBy: params.createdBy,
-      createdAt: new Date(),
+      createdAt: getPHDateTime(),
     });
     // Validate the precinct before returning
     precinct.validate();
@@ -93,7 +94,7 @@ export class Precinct {
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
     this.updatedBy = dto.updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**
@@ -112,7 +113,7 @@ export class Precinct {
     }
 
     // Apply archive operation
-    this.deletedAt = new Date();
+    this.deletedAt = getPHDateTime();
     this.deletedBy = deletedBy;
   }
 

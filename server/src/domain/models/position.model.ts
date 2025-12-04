@@ -1,4 +1,5 @@
 import { PositionValidationPolicy } from '@domain/policies/position/position-validation.policy';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { PositionBusinessException } from '@domains/exceptions/position/position-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
@@ -74,7 +75,7 @@ export class Position {
       maxCandidates: params.maxCandidates,
       termLimit: params.termLimit,
       createdBy: params.createdBy,
-      createdAt: new Date(),
+      createdAt: getPHDateTime(),
     });
     // Validate the position before returning
     position.validate();
@@ -121,7 +122,7 @@ export class Position {
     this.maxCandidates = dto.maxCandidates;
     this.termLimit = dto.termLimit;
     this.updatedBy = dto.updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**
@@ -137,7 +138,7 @@ export class Position {
     }
 
     // Apply archive operation
-    this.deletedAt = new Date();
+    this.deletedAt = getPHDateTime();
     this.deletedBy = deletedBy;
   }
 

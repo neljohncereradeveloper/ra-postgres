@@ -19,7 +19,7 @@ import {
 } from '@domains/exceptions/index';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { getPHDateTime } from '@shared/utils/format-ph-time';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ReprintCastVoteUseCase {

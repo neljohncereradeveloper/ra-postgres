@@ -1,4 +1,5 @@
 import { DistrictValidationPolicy } from '@domain/policies/district/district-validation.policy';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { DistrictBusinessException } from '@domains/exceptions/district/district-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
@@ -64,7 +65,7 @@ export class District {
       electionId: params.electionId,
       desc1: params.desc1,
       createdBy: params.createdBy,
-      createdAt: new Date(),
+      createdAt: getPHDateTime(),
     });
     // Validate the district before returning
     district.validate();
@@ -102,7 +103,7 @@ export class District {
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
     this.updatedBy = dto.updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**
@@ -117,7 +118,7 @@ export class District {
       );
     }
 
-    this.deletedAt = new Date();
+    this.deletedAt = getPHDateTime();
     this.deletedBy = deletedBy;
   }
 

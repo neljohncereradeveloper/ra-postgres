@@ -6,6 +6,7 @@ import { ElectionValidationPolicy } from '@domain/policies/election/election-val
 import { ElectionStatus } from '@domain/enums/index';
 import { ElectionBusinessException } from '../exceptions';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 export class Election {
   id: number;
@@ -88,7 +89,7 @@ export class Election {
       maxAttendees: params.maxAttendees,
       electionStatus: ElectionStatus.SCHEDULED,
       createdBy: params.createdBy,
-      createdAt: new Date(),
+      createdAt: getPHDateTime(),
     });
     // Validate the election before returning
     election.validate();
@@ -118,7 +119,7 @@ export class Election {
       candidateCount,
     );
     // set election data
-    this.startTime = new Date();
+    this.startTime = getPHDateTime();
     this.electionStatus = ElectionStatus.STARTED;
   }
 
@@ -129,7 +130,7 @@ export class Election {
     // Validate if the election can be closed
     new ElectionClosePolicy().validateElectionClose(this);
     // set election data
-    this.endTime = new Date();
+    this.endTime = getPHDateTime();
     this.electionStatus = ElectionStatus.CLOSED;
   }
 
@@ -199,7 +200,7 @@ export class Election {
     this.startTime = dto.startTime;
     this.endTime = dto.endTime;
     this.updatedBy = dto.updatedBy;
-    this.updatedAt = new Date();
+    this.updatedAt = getPHDateTime();
   }
 
   /**
@@ -215,7 +216,7 @@ export class Election {
     }
 
     // archive the election
-    this.deletedAt = new Date();
+    this.deletedAt = getPHDateTime();
     this.deletedBy = deletedBy;
   }
 

@@ -7,8 +7,9 @@ import { ElectionRepository } from '@domains/repositories/election.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { ACTIVE_ELECTION_ACTIONS } from '@domain/constants/active-election/active-election-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class SetActiveElectionUseCase {
@@ -23,9 +24,9 @@ export class SetActiveElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(electionName: string, userId: number) {
+  async execute(electionName: string, username: string) {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.UPDATE_SETTING,
+      ACTIVE_ELECTION_ACTIONS.SET_ACTIVE_ELECTION,
       async (manager) => {
         // validate existence
         const election = await this.electionRepository.findByName(
@@ -46,19 +47,22 @@ export class SetActiveElectionUseCase {
         if (!updateSuccessfull) {
           throw new SomethinWentWrongException('Active election update failed');
         }
-
         const updateResult =
           await this.activeElectionRepository.retrieveActiveElection(manager);
 
-        // Log the update
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPDATE_SETTING,
-          DATABASE_CONSTANTS.MODELNAME_ACTIVE_ELECTION,
-          JSON.stringify({ ...updateResult }),
-          new Date(),
-          userId,
-        );
-        // insert log
+        // Log the set active election
+        const log = ActivityLog.create({
+          action: ACTIVE_ELECTION_ACTIONS.SET_ACTIVE_ELECTION,
+          entity: DATABASE_CONSTANTS.MODELNAME_ACTIVE_ELECTION,
+          details: JSON.stringify({
+            electionId: election.id,
+            election: election.name,
+            explanation: `Active election set by USER : ${username}`,
+            setBy: username,
+            setAt: getPHDateTime(),
+          }),
+          username: username,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return updateResult;

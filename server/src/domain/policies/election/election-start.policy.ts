@@ -2,7 +2,7 @@ import { ElectionStatus } from '@domain/enums/index';
 import { Election } from '@domain/models/election.model';
 import { ElectionBusinessException } from '@domains/exceptions/election/election-business.exception';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
-import { getPHDateString } from '@shared/utils/format-ph-time';
+import { getPHDateString } from '@domain/utils/format-ph-time';
 
 /**
  * ElectionStartPolicy

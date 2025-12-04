@@ -5,8 +5,9 @@ import { ActivityLogRepository } from '@domains/repositories/activity-log.reposi
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { ACTIVE_ELECTION_ACTIONS } from '@domain/constants/active-election/active-election-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ResetActiveElectionUseCase {
@@ -19,37 +20,30 @@ export class ResetActiveElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(userId: number) {
+  async execute(username: string) {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RESETELECTION_SETTING,
+      ACTIVE_ELECTION_ACTIONS.RESET_ACTIVE_ELECTION,
       async (manager) => {
         // Reset the active election
-        const updateSuccessfull =
-          await this.activeElectionRepository.reset(manager);
-
-        if (!updateSuccessfull) {
+        const success = await this.activeElectionRepository.reset(manager);
+        if (!success) {
           throw new SomethinWentWrongException('Active election reset failed');
         }
 
-        const updateResult =
-          await this.activeElectionRepository.retrieveActiveElection(manager);
-
-        // Log the reset
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.RESETELECTION_SETTING,
-          DATABASE_CONSTANTS.MODELNAME_ACTIVE_ELECTION,
-          JSON.stringify({ ...updateResult }),
-          new Date(),
-          userId,
-        );
-        // insert log
+        // Log the set active election
+        const log = ActivityLog.create({
+          action: ACTIVE_ELECTION_ACTIONS.RESET_ACTIVE_ELECTION,
+          entity: DATABASE_CONSTANTS.MODELNAME_ACTIVE_ELECTION,
+          details: JSON.stringify({
+            explanation: `Active election reset by USER : ${username}`,
+            resetBy: username,
+            resetAt: getPHDateTime(),
+          }),
+          username: username,
+        });
         await this.activityLogRepository.create(log, manager);
 
-        return {
-          message: 'Active election reset successfully',
-          success: true,
-          data: updateResult,
-        };
+        return success;
       },
     );
   }

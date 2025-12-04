@@ -18,6 +18,7 @@
       "@domain/enums/*": ["src/domain/enums/*"],
       "@domain/policies/*": ["src/domain/policies/*"],
       "@domain/ports/*": ["src/domain/ports/*"],
+      "@domain/utils/*": ["src/domain/utils/*"],
       "@domains/repositories/*": ["src/domain/repositories/*"],
       "@domains/services/*": ["src/domain/services/*"],
       "@domains/exceptions/*": ["src/domain/exceptions/*"],
