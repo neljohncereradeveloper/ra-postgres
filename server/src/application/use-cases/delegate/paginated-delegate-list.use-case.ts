@@ -6,9 +6,12 @@ import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
+import { ElectionRepository } from '@domains/repositories/election.repository';
+import { NotFoundException } from '@domains/exceptions/index';
+import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
 
 @Injectable()
-export class FindWithPaginationUseCase {
+export class PaginatedDelegateListUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -16,6 +19,8 @@ export class FindWithPaginationUseCase {
     private readonly delegateRepository: DelegateRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
     private readonly activeElectionRepository: ActiveElectionRepository,
+    @Inject(REPOSITORY_TOKENS.ELECTION)
+    private readonly electionRepository: ElectionRepository,
   ) {}
 
   /**
@@ -23,14 +28,14 @@ export class FindWithPaginationUseCase {
    * @param term Search term for filtering by delegate description.
    * @param page The current page number for pagination.
    * @param limit The number of items per page.
-   * @param isDeleted Whether to retrieve deleted or non-deleted delegates.
+   * @param isArchived Whether to retrieve archived or non-archived delegates.
    * @returns An object containing filtered delegates and total count.
    */
   async execute(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
   ): Promise<{
     data: Delegate[];
     meta: {
@@ -43,33 +48,45 @@ export class FindWithPaginationUseCase {
     };
   }> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RETRIEVE_DELEGATES_BY_ACTIVE_ELECTION,
+      DELEGATE_ACTIONS.FIND_WITH_PAGINATION,
       async (manager) => {
+        // Validate input parameters (optional but recommended)
+        if (page < 1) {
+          throw new BadRequestException('Page number must be greater than 0');
+        }
+        if (limit < 1) {
+          throw new BadRequestException('Limit must be greater than 0');
+        }
+
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }
 
-        // Validate input parameters (optional but recommended)
-        if (page < 1) {
-          throw new Error('Page number must be greater than 0');
-        }
-        if (limit < 1) {
-          throw new Error('Limit must be greater than 0');
-        }
-
-        // Call the repository method to get filtered data
-        const result = await this.delegateRepository.findPaginatedList(
-          term,
-          page,
-          limit,
-          isDeleted,
+        // retrieve the election
+        const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
 
-        return result;
+        // Call the repository method to get filtered data
+        const delegates = await this.delegateRepository.findPaginatedList(
+          term,
+          page,
+          limit,
+          isArchived,
+          election.id,
+          manager,
+        );
+
+        return delegates;
       },
     );
   }

@@ -18,19 +18,19 @@ import {
   AuthUserRolesEnum,
 } from '@shared/constants/auth.constants';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadDelegatesFileUseCase } from '@application/use-cases/delegate/upload-delegates-file.use-case';
+import { UploadDelegatesUseCase } from '@application/use-cases/delegate/upload-delegates.use-case';
 import { AuthorizeApplicationAccess } from '@infrastructure/modules/auth/decorators/applicationaccess.decorator';
-import { FindWithPaginationUseCase } from '@application/use-cases/delegate/find-with-pagination.use-case';
-import { FindWithControlNumberUseCase } from '@application/use-cases/delegate/find-with-controle-number.use-case';
+import { PaginatedDelegateListUseCase } from '@application/use-cases/delegate/paginated-delegate-list.use-case';
+import { FindByControllNumberUseCase } from '@application/use-cases/delegate/find-by-controll-number.use-case';
 
 // Controller for handling client-related requests
 @Controller('delegates')
 @UseGuards(JwtBearerAuthGuard)
 export class DelegateController {
   constructor(
-    private readonly uploadDelegatesFileUseCase: UploadDelegatesFileUseCase,
-    private readonly findDelegatesWithElectionIdFiltersUseCase: FindWithPaginationUseCase,
-    private readonly findDelegatesWithElectionIdAndControlNumberUseCase: FindWithControlNumberUseCase,
+    private readonly uploadDelegatesFileUseCase: UploadDelegatesUseCase,
+    private readonly findDelegatesWithElectionIdFiltersUseCase: PaginatedDelegateListUseCase,
+    private readonly findDelegatesWithElectionIdAndControlNumberUseCase: FindByControllNumberUseCase,
   ) {}
 
   @Version('1')

@@ -61,7 +61,7 @@ export class ReprintCastVoteUseCase {
           manager,
         );
         const delegate =
-          await this.delegateRepository.findByControlNumberWithElectionId(
+          await this.delegateRepository.findByControlNumberAndElectionId(
             controlNumber,
             activeElection.electionId,
             manager,

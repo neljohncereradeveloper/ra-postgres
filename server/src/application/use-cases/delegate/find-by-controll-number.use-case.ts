@@ -3,12 +3,13 @@ import { Inject } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
+import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
+import { ElectionRepository } from '@domains/repositories/election.repository';
 
 @Injectable()
-export class FindWithControlNumberUseCase {
+export class FindByControllNumberUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -16,36 +17,50 @@ export class FindWithControlNumberUseCase {
     private readonly delegateRepository: DelegateRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
     private readonly activeElectionRepository: ActiveElectionRepository,
+    @Inject(REPOSITORY_TOKENS.ELECTION)
+    private readonly electionRepository: ElectionRepository,
   ) {}
 
   /**
-   * Executes the use case for finding delegates with control number.
+   * Executes the use case for finding a delegate by control number.
    * @param controlNumber The control number of the delegate.
-   * @returns An object containing filtered delegates and total count.
+   * @returns The delegate.
    */
   async execute(controlNumber: string) {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RETRIEVE_DELEGATES_BY_ACTIVE_ELECTION,
+      DELEGATE_ACTIONS.FIND_BY_CONTROL_NUMBER,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
           throw new BadRequestException('No Active election');
         }
 
-        // Call the repository method to get filtered data
-        const result =
-          await this.delegateRepository.findByControlNumberWithElectionId(
+        // retrieve the election
+        const election = await this.electionRepository.findById(
+          activeElection.electionId,
+          manager,
+        );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+
+        // Call the repository method to get the delegate
+        const delegate =
+          await this.delegateRepository.findByControlNumberAndElectionId(
             controlNumber,
-            activeElection.electionId,
+            election.id,
             manager,
           );
 
-        if (!result) {
+        if (!delegate) {
           throw new NotFoundException('Delegate not found');
         }
 
-        return result;
+        return delegate;
       },
     );
   }

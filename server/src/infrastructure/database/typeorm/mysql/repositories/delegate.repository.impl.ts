@@ -44,72 +44,98 @@ export class DelegateRepositoryImpl
   }> {
     const skip = (page - 1) * limit;
 
-    // Build the query
-    const queryBuilder = manager.createQueryBuilder(
-      DelegateEntity,
-      'delegates',
-    );
-
-    // Join the districts table (inner join)
-    queryBuilder.innerJoinAndSelect('delegates.election', 'elections');
-
-    // Select only the required fields
-    queryBuilder.select([
-      'delegates.id AS id',
-      'delegates.branch AS branch',
-      'delegates.accountId AS accountId',
-      'delegates.accountName AS accountName',
-      'delegates.age AS age',
-      'delegates.birthDate AS birthDate',
-      'delegates.address AS address',
-      'delegates.tell AS tell',
-      'delegates.cell AS cell',
-      'delegates.dateOpened AS dateOpened',
-      'delegates.clientType AS clientType',
-      'delegates.balance AS balance',
-      'delegates.loanStatus AS loanStatus',
-      'delegates.mevStatus AS mevStatus',
-      'delegates.deletedAt AS deletedAt',
-      'delegates.electionId as electionId',
-      'elections.name as election',
-      'delegates.hasVoted AS hasVoted',
-      'delegates.controlNumber AS controlNumber',
-    ]);
+    // Build WHERE conditions
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
 
     // Filter by deletion status
     if (isDeleted) {
-      queryBuilder.where('delegates.deletedAt IS NOT NULL');
+      whereConditions.push('d.deleted_at IS NOT NULL');
     } else {
-      queryBuilder.where('delegates.deletedAt IS NULL');
+      whereConditions.push('d.deleted_at IS NULL');
     }
 
-    // Apply search filter on description
+    // Filter by election ID
+    whereConditions.push('d.election_id = ?');
+    queryParams.push(electionId);
+
+    // Apply search filter on account name
     if (term) {
-      queryBuilder.andWhere('LOWER(delegates.accountName) LIKE :term', {
-        term: `%${term.toLowerCase()}%`,
-      });
+      whereConditions.push('LOWER(d.account_name) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
 
-    queryBuilder.andWhere('delegates.electionId = :electionId', {
-      electionId,
-    });
+    const whereClause = whereConditions.join(' AND ');
 
-    // Add ORDER BY clause for consistent pagination
-    queryBuilder.orderBy('delegates.accountName', 'ASC'); // Or another unique field
+    // Build data query
+    const dataQuery = `
+      SELECT 
+        d.id AS id,
+        d.branch AS branch,
+        d.account_id AS accountId,
+        d.account_name AS accountName,
+        d.age AS age,
+        d.birth_date AS birthDate,
+        d.address AS address,
+        d.tell AS tell,
+        d.cell AS cell,
+        d.date_opened AS dateOpened,
+        d.client_type AS clientType,
+        d.balance AS balance,
+        d.loan_status AS loanStatus,
+        d.mev_status AS mevStatus,
+        d.deleted_at AS deletedAt,
+        d.election_id AS electionId,
+        e.name AS election,
+        d.has_voted AS hasVoted,
+        d.control_number AS controlNumber
+      FROM delegates d
+      INNER JOIN elections e ON d.election_id = e.id
+      WHERE ${whereClause}
+      ORDER BY d.account_name ASC
+      LIMIT ? OFFSET ?
+    `;
 
-    // Clone the query to get the count of records (avoiding pagination in the count query)
-    const countQuery = queryBuilder
-      .clone()
-      .select('COUNT(delegates.id)', 'totalRecords');
+    // Build count query
+    const countQuery = `
+      SELECT COUNT(d.id) AS totalRecords
+      FROM delegates d
+      INNER JOIN elections e ON d.election_id = e.id
+      WHERE ${whereClause}
+    `;
 
-    // Execute both data and count queries simultaneously
-    const [data, countResult] = await Promise.all([
-      queryBuilder.offset(skip).limit(limit).getRawMany(), // Fetch the paginated data
-      countQuery.getRawOne(),
+    // Execute both queries simultaneously
+    const [dataRows, countResult] = await Promise.all([
+      manager.query(dataQuery, [...queryParams, limit, skip]),
+      manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult?.totalRecords || '0', 10);
+    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+
+    // Map raw results to domain models
+    const data = dataRows.map((row: any) => {
+      const entity = new DelegateEntity();
+      entity.id = row.id;
+      entity.branch = row.branch;
+      entity.accountId = row.accountId;
+      entity.accountName = row.accountName;
+      entity.age = row.age;
+      entity.birthDate = row.birthDate;
+      entity.address = row.address;
+      entity.tell = row.tell;
+      entity.cell = row.cell;
+      entity.dateOpened = row.dateOpened;
+      entity.clientType = row.clientType;
+      entity.balance = row.balance;
+      entity.loanStatus = row.loanStatus;
+      entity.mevStatus = row.mevStatus;
+      entity.deletedAt = row.deletedAt;
+      entity.electionId = row.electionId;
+      entity.hasVoted = row.hasVoted;
+      entity.controlNumber = row.controlNumber;
+      return this.toModel(entity);
+    });
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -136,16 +162,16 @@ export class DelegateRepositoryImpl
     return delegateEntity ? this.toModel(delegateEntity) : null;
   }
 
-  async findAllWithElectionId(
-    electionId: number,
-    manager: EntityManager,
-  ): Promise<Delegate[]> {
-    return await manager.find(DelegateEntity, {
-      where: { electionId, deletedAt: null },
-    });
-  }
+  // async findAllWithElectionId(
+  //   electionId: number,
+  //   manager: EntityManager,
+  // ): Promise<Delegate[]> {
+  //   return await manager.find(DelegateEntity, {
+  //     where: { electionId, deletedAt: null },
+  //   });
+  // }
 
-  async findByControlNumberWithElectionId(
+  async findByControlNumberAndElectionId(
     controlNumber: string,
     electionId: number,
     manager: EntityManager,
@@ -156,28 +182,30 @@ export class DelegateRepositoryImpl
     return delegateEntity ? this.toModel(delegateEntity) : null;
   }
 
-  async findByAccountIdWithElectionId(
-    accountId: string,
-    electionId: number,
-    manager: EntityManager,
-  ): Promise<Delegate> {
-    const delegateEntity = await manager.findOne(DelegateEntity, {
-      where: { accountId, electionId, deletedAt: null },
-    });
-    return delegateEntity ? this.toModel(delegateEntity) : null;
-  }
+  // async findByAccountIdWithElectionId(
+  //   accountId: string,
+  //   electionId: number,
+  //   manager: EntityManager,
+  // ): Promise<Delegate> {
+  //   const delegateEntity = await manager.findOne(DelegateEntity, {
+  //     where: { accountId, electionId, deletedAt: null },
+  //   });
+  //   return delegateEntity ? this.toModel(delegateEntity) : null;
+  // }
 
   async countByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {
-    const count = await manager
-      .createQueryBuilder('delegates', 'delegates')
-      .where('delegates.deletedAt IS NULL')
-      .andWhere('delegates.electionId = :electionId', { electionId })
-      .getCount();
+    const countQuery = `
+      SELECT COUNT(id) AS count
+      FROM delegates
+      WHERE deleted_at IS NULL
+      AND election_id = ?
+    `;
 
-    return count;
+    const result = await manager.query(countQuery, [electionId]);
+    return parseInt(result[0]?.count || '0', 10);
   }
 
   async markAsVoted(delegateId: number, manager: EntityManager): Promise<void> {

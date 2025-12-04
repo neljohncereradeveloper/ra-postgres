@@ -7,7 +7,6 @@ import {
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { Delegate } from '@domain/models/delegate.model';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
@@ -18,6 +17,7 @@ import { ActiveElectionRepository } from '@domains/repositories/active-election.
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { UUIDGeneratorPort } from '@domain/ports/uuid-generator.port';
+import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
 
 const schema = {
   branch: { prop: 'branch', type: String },
@@ -37,7 +37,7 @@ const schema = {
 };
 
 @Injectable()
-export class UploadDelegatesFileUseCase {
+export class UploadDelegatesUseCase {
   private readonly logger = new Logger('UploadDelegatesFileUseCase');
 
   constructor(
@@ -63,11 +63,11 @@ export class UploadDelegatesFileUseCase {
    * Processes the uploaded Excel file and inserts delegates into the database.
    *
    * @param file - The uploaded file
-   * @param userId - The ID of the authenticated user performing the upload
+   * @param username - The username of the authenticated user performing the upload
    */
-  async execute(file: UploadedFileInput, userId: number) {
+  async execute(file: UploadedFileInput, username: string) {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_DELEGATE,
+      DELEGATE_ACTIONS.UPLOAD_DELEGATES,
       async (manager) => {
         // Validate the file type, extension, and size
         this.validateFile(file);
@@ -94,16 +94,16 @@ export class UploadDelegatesFileUseCase {
           `Processing ${rows.rows.length} rows from uploaded file.`,
         );
 
-        const logProcessing = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPLOAD_FILE_PROCESSING,
-          `${DATABASE_CONSTANTS.MODELNAME_DELEGATE}`,
-          JSON.stringify({
+        // Log the processing
+        const logProcessing = ActivityLog.create({
+          action: DELEGATE_ACTIONS.UPLOAD_DELEGATES,
+          entity: DATABASE_CONSTANTS.MODELNAME_DELEGATE,
+          details: JSON.stringify({
             message: `Processing ${rows.rows.length} rows from uploaded file.`,
             election: election.name,
           }),
-          new Date(),
-          userId, // USERID
-        );
+          username,
+        });
         await this.activityLogRepository.create(logProcessing, manager);
 
         for (let index = 0; index < rows.rows.length; index++) {
@@ -139,16 +139,16 @@ export class UploadDelegatesFileUseCase {
           );
         }
 
-        const logFinished = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPLOAD_FILE_FINISHED,
-          `${DATABASE_CONSTANTS.MODELNAME_DELEGATE}`,
-          JSON.stringify({
-            message: `Processing ${rows.rows.length} rows from uploaded file finished.`,
+        // Log the finished
+        const logFinished = ActivityLog.create({
+          action: DELEGATE_ACTIONS.UPLOAD_DELEGATES,
+          entity: DATABASE_CONSTANTS.MODELNAME_DELEGATE,
+          details: JSON.stringify({
+            message: `Uploading ${rows.rows.length} delegates finished.`,
             election: election.name,
           }),
-          new Date(),
-          userId, // USERI
-        );
+          username,
+        });
         await this.activityLogRepository.create(logFinished, manager);
 
         return {

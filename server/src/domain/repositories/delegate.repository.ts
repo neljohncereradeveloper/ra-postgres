@@ -2,6 +2,11 @@ import { Delegate } from '@domain/models/delegate.model';
 
 export interface DelegateRepository<Context = unknown> {
   create(delegate: Delegate, context?: Context): Promise<Delegate>;
+  update(
+    id: number,
+    dto: Partial<Delegate>,
+    context?: Context,
+  ): Promise<boolean>;
   findById(id: number, context?: Context): Promise<Delegate>;
   findPaginatedList(
     term: string,
@@ -21,20 +26,20 @@ export interface DelegateRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  findAllWithElectionId(
-    electionId: number,
-    context?: Context,
-  ): Promise<Delegate[]>;
-  findByControlNumberWithElectionId(
+  // findAllWithElectionId(
+  //   electionId: number,
+  //   context?: Context,
+  // ): Promise<Delegate[]>;
+  findByControlNumberAndElectionId(
     controlNumber: string,
     electionId: number,
     context?: Context,
   ): Promise<Delegate>;
-  findByAccountIdWithElectionId(
-    accountId: string,
-    electionId: number,
-    context?: Context,
-  ): Promise<Delegate>;
+  // findByAccountIdWithElectionId(
+  //   accountId: string,
+  //   electionId: number,
+  //   context?: Context,
+  // ): Promise<Delegate>;
   countByElection(electionId: number, context?: Context): Promise<number>;
   markAsVoted(delegateId: number, context?: Context): Promise<void>;
 }

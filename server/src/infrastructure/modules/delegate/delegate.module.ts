@@ -5,13 +5,13 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
 import { DelegateRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/delegate.repository.impl';
 import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/activity-log.repository.impl';
-import { UploadDelegatesFileUseCase } from '@application/use-cases/delegate/upload-delegates-file.use-case';
+import { UploadDelegatesUseCase } from '@application/use-cases/delegate/upload-delegates.use-case';
 import { ExcelParserAdapter } from './adapters/excel-parser.adapter';
 import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
 import { ElectionLockPolicy } from '@domain/policies/election/election-lock.policy';
-import { FindWithPaginationUseCase } from '@application/use-cases/delegate/find-with-pagination.use-case';
-import { FindWithControlNumberUseCase } from '@application/use-cases/delegate/find-with-controle-number.use-case';
+import { PaginatedDelegateListUseCase } from '@application/use-cases/delegate/paginated-delegate-list.use-case';
+import { FindByControllNumberUseCase } from '@application/use-cases/delegate/find-by-controll-number.use-case';
 import { UUIDGeneratorAdapter } from 'src/infrastructure/adapters/uuid-generator';
 import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/ballot.repository.impl';
 
@@ -43,15 +43,15 @@ import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/rep
       provide: REPOSITORY_TOKENS.ACTIVITYLOGS,
       useClass: ActivityLogRepositoryImpl,
     }, // Dependency Injection
-    UploadDelegatesFileUseCase,
+    UploadDelegatesUseCase,
     ElectionLockPolicy,
-    FindWithPaginationUseCase,
-    FindWithControlNumberUseCase,
+    PaginatedDelegateListUseCase,
+    FindByControllNumberUseCase,
   ],
   exports: [
-    UploadDelegatesFileUseCase,
-    FindWithPaginationUseCase,
-    FindWithControlNumberUseCase,
+    UploadDelegatesUseCase,
+    PaginatedDelegateListUseCase,
+    FindByControllNumberUseCase,
     ElectionLockPolicy,
   ],
 })
