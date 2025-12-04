@@ -1,9 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository, UpdateResult } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { calculatePagination } from '@shared/utils/pagination.util';
-import { ElectionEntity } from '../entities/election.entity';
-import { ElectionMapper } from '../mappers/election.mapper';
 import { Election } from '@domain/models/election.model';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
@@ -12,17 +9,64 @@ import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 export class ElectionRepositoryImpl
   implements ElectionRepository<EntityManager>
 {
-  constructor(
-    @InjectRepository(ElectionEntity)
-    private readonly electionRepo: Repository<ElectionEntity>,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   async create(election: Election, manager: EntityManager): Promise<Election> {
     try {
-      const electionEntity = this.toEntity(election);
-      const savedEntity = await manager.save(ElectionEntity, electionEntity);
+      const query = `
+        INSERT INTO elections (
+          name,
+          desc1,
+          address,
+          date,
+          start_time,
+          end_time,
+          max_attendees,
+          election_status,
+          created_by,
+          created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
 
-      return this.toModel(savedEntity);
+      const result = await manager.query(query, [
+        election.name,
+        election.desc1 || null,
+        election.address,
+        election.date || null,
+        election.startTime || null,
+        election.endTime || null,
+        election.maxAttendees || null,
+        election.electionStatus || 'scheduled',
+        election.createdBy || null,
+        election.createdAt || new Date(),
+      ]);
+
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          name,
+          desc1,
+          address,
+          date,
+          start_time as startTime,
+          end_time as endTime,
+          max_attendees as maxAttendees,
+          election_status as electionStatus,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM elections
+        WHERE id = ?
+      `;
+
+      const rows = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(rows[0]);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Election name already exists');
@@ -37,40 +81,79 @@ export class ElectionRepositoryImpl
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        ElectionEntity,
-        id,
-        updateFields,
-      );
-      return result.affected && result.affected > 0;
+      const updateParts: string[] = [];
+      const values: any[] = [];
+
+      if (updateFields.name !== undefined) {
+        updateParts.push('name = ?');
+        values.push(updateFields.name);
+      }
+
+      if (updateFields.desc1 !== undefined) {
+        updateParts.push('desc1 = ?');
+        values.push(updateFields.desc1);
+      }
+
+      if (updateFields.address !== undefined) {
+        updateParts.push('address = ?');
+        values.push(updateFields.address);
+      }
+
+      if (updateFields.date !== undefined) {
+        updateParts.push('date = ?');
+        values.push(updateFields.date);
+      }
+
+      if (updateFields.startTime !== undefined) {
+        updateParts.push('start_time = ?');
+        values.push(updateFields.startTime);
+      }
+
+      if (updateFields.endTime !== undefined) {
+        updateParts.push('end_time = ?');
+        values.push(updateFields.endTime);
+      }
+
+      if (updateFields.maxAttendees !== undefined) {
+        updateParts.push('max_attendees = ?');
+        values.push(updateFields.maxAttendees);
+      }
+
+      if (updateFields.electionStatus !== undefined) {
+        updateParts.push('election_status = ?');
+        values.push(updateFields.electionStatus);
+      }
+
+      if (updateFields.updatedBy !== undefined) {
+        updateParts.push('updated_by = ?');
+        values.push(updateFields.updatedBy);
+      }
+
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
+        return false;
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE elections
+        SET ${updateParts.join(', ')}
+        WHERE id = ? AND deleted_at IS NULL
+      `;
+
+      const result = await manager.query(query, values);
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Election name already exists');
       }
       throw error;
     }
-  }
-
-  async softDelete(id: number, manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(ElectionEntity)
-      .set({ deletedAt: new Date() })
-      .where('id = :id AND deletedAt IS NULL', { id })
-      .execute();
-
-    return result.affected > 0;
-  }
-
-  async restoreDeleted(id: number, manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(ElectionEntity)
-      .set({ deletedAt: null }) // Restore by clearing deletedAt
-      .where('id = :id AND deletedAt IS NOT NULL', { id }) // Restore only if soft-deleted
-      .execute();
-
-    return result.affected > 0; // Return true if a row was restored
   }
 
   async findPaginatedList(
@@ -84,57 +167,67 @@ export class ElectionRepositoryImpl
   }> {
     const skip = (page - 1) * limit;
 
-    // Build the query
-    const queryBuilder = this.electionRepo
-      .createQueryBuilder('elections')
-      .withDeleted();
-
-    // Select only the required fields
-    queryBuilder.select([
-      'elections.id AS id',
-      'elections.name AS name',
-      'elections.desc1 AS desc1',
-      'elections.address AS address',
-      'elections.date AS date',
-      'elections.status AS status',
-      'elections.startTime AS startTime',
-      'elections.endTime AS endTime',
-      'elections.maxAttendees AS maxAttendees',
-      'elections.deletedAt AS deletedAt',
-    ]);
+    // Build WHERE clause
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
 
     // Filter by deletion status
     if (isDeleted) {
-      queryBuilder.where('elections.deletedAt IS NOT NULL');
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      queryBuilder.where('elections.deletedAt IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
-    // Apply search filter on description
+    // Apply search filter on name
     if (term) {
-      queryBuilder.andWhere('LOWER(elections.name) LIKE :term', {
-        term: `%${term.toLowerCase()}%`,
-      });
+      whereConditions.push('LOWER(name) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
 
-    // Clone the query to get the count of records (avoiding pagination in the count query)
-    const countQuery = queryBuilder
-      .clone()
-      .select('COUNT(elections.id)', 'totalRecords');
+    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
-    // Execute both data and count queries simultaneously
-    const [data, countResult] = await Promise.all([
-      queryBuilder.offset(skip).limit(limit).getRawMany(), // Fetch the paginated data
-      countQuery.getRawOne(),
+    // Build data query
+    const dataQuery = `
+      SELECT 
+        id,
+        name,
+        desc1,
+        address,
+        date,
+        start_time as startTime,
+        end_time as endTime,
+        max_attendees as maxAttendees,
+        election_status as electionStatus,
+        deleted_at as deletedAt
+      FROM elections
+      ${whereClause}
+      ORDER BY id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    // Build count query
+    const countQuery = `
+      SELECT COUNT(id) AS totalRecords
+      FROM elections
+      ${whereClause}
+    `;
+
+    // Execute both queries simultaneously
+    const [dataRows, countResult] = await Promise.all([
+      this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
+      this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult?.totalRecords || '0', 10);
+    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
       limit,
     );
+
+    // Map raw results to domain models
+    const data = dataRows.map((row: any) => this.rowToModel(row));
 
     return {
       data,
@@ -153,91 +246,145 @@ export class ElectionRepositoryImpl
     id: number,
     manager?: EntityManager,
   ): Promise<Election | null> {
-    const electionEntity = await manager.findOne(ElectionEntity, {
-      where: { id, deletedAt: null },
-    });
-    return electionEntity ? this.toModel(electionEntity) : null;
-  }
+    if (!manager) {
+      return null;
+    }
 
-  async findByIdNoneTransaction(id: number): Promise<any | null> {
-    const electionEntity = await this.electionRepo
-      .createQueryBuilder('elections')
-      .withDeleted()
-      .where('elections.id = :id', { id })
-      .andWhere('elections.deletedAt IS NULL')
-      .getOne();
+    const query = `
+      SELECT 
+        id,
+        name,
+        desc1,
+        address,
+        date,
+        start_time as startTime,
+        end_time as endTime,
+        max_attendees as maxAttendees,
+        election_status as electionStatus,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM elections
+      WHERE id = ? AND deleted_at IS NULL
+    `;
 
-    if (!electionEntity) return null;
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
+      return null;
+    }
 
-    return {
-      id: electionEntity.id,
-      name: electionEntity.name,
-      desc1: electionEntity.desc1,
-      address: electionEntity.address,
-      date: electionEntity.date,
-      startTime: electionEntity.startTime,
-      endTime: electionEntity.endTime,
-      maxAttendees: electionEntity.maxAttendees,
-      status: electionEntity.status,
-      deletedAt: electionEntity.deletedAt,
-    };
+    return this.rowToModel(rows[0]);
   }
 
   async combobox(): Promise<Election[]> {
-    const electionEntities = await this.electionRepo.find({
-      where: { deletedAt: null },
-    });
+    const query = `
+      SELECT 
+        id,
+        name,
+        desc1,
+        address,
+        date,
+        start_time as startTime,
+        end_time as endTime,
+        max_attendees as maxAttendees,
+        election_status as electionStatus,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM elections
+      WHERE deleted_at IS NULL
+      ORDER BY name ASC
+    `;
 
-    // Map the entities to domain models
-    return ElectionMapper.toDomainList(electionEntities);
+    const rows = await this.dataSource.query(query);
+    return rows.map((row: any) => this.rowToModel(row));
   }
 
   async comboboxRetrieveScheduledElections(): Promise<Election[]> {
-    const electionEntities = await this.electionRepo.find({
-      where: { deletedAt: null },
-    });
-    return ElectionMapper.toDomainList(electionEntities);
+    const query = `
+      SELECT 
+        id,
+        name,
+        desc1,
+        address,
+        date,
+        start_time as startTime,
+        end_time as endTime,
+        max_attendees as maxAttendees,
+        election_status as electionStatus,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM elections
+      WHERE deleted_at IS NULL
+      ORDER BY name ASC
+    `;
+
+    const rows = await this.dataSource.query(query);
+    return rows.map((row: any) => this.rowToModel(row));
   }
 
   async findByName(
     name: string,
     manager: EntityManager,
   ): Promise<Election | null> {
-    const electionEntity = await manager.findOne(ElectionEntity, {
-      where: { name, deletedAt: null },
-    });
-    return electionEntity ? this.toModel(electionEntity) : null;
+    const query = `
+      SELECT 
+        id,
+        name,
+        desc1,
+        address,
+        date,
+        start_time as startTime,
+        end_time as endTime,
+        max_attendees as maxAttendees,
+        election_status as electionStatus,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM elections
+      WHERE name = ? AND deleted_at IS NULL
+      LIMIT 1
+    `;
+
+    const rows = await manager.query(query, [name]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
   }
 
-  // Helper: Convert domain model to TypeORM entity
-  private toEntity(election: Election): ElectionEntity {
-    const entity = new ElectionEntity();
-    entity.id = election.id;
-    entity.name = election.name;
-    entity.desc1 = election.desc1;
-    entity.address = election.address;
-    entity.date = election.date;
-    entity.startTime = election.startTime;
-    entity.endTime = election.endTime;
-    entity.maxAttendees = election.maxAttendees;
-    entity.status = election.status;
-    entity.deletedAt = election.deletedAt;
-    return entity;
-  }
-
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: ElectionEntity): Election {
+  // Helper: Convert raw query result to domain model
+  private rowToModel(row: any): Election {
     return new Election({
-      id: entity.id,
-      name: entity.name,
-      desc1: entity.desc1,
-      address: entity.address,
-      date: entity.date,
-      startTime: entity.startTime,
-      endTime: entity.endTime,
-      maxAttendees: entity.maxAttendees,
-      status: entity.status,
-      deletedAt: entity.deletedAt,
+      id: row.id,
+      name: row.name,
+      desc1: row.desc1,
+      address: row.address,
+      date: row.date,
+      startTime: row.startTime,
+      endTime: row.endTime,
+      maxAttendees: row.maxAttendees,
+      electionStatus: row.electionStatus,
+      deletedBy: row.deletedBy,
+      deletedAt: row.deletedAt,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

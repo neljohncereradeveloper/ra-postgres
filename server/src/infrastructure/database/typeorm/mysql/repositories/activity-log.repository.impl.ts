@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
-import { ActivityLogEntity } from '../entities/activity-log.entity';
+import { DataSource, EntityManager } from 'typeorm';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 
@@ -11,22 +9,10 @@ export class ActivityLogRepositoryImpl
 {
   private readonly logger = new Logger(ActivityLogRepositoryImpl.name);
 
-  constructor(
-    @InjectRepository(ActivityLogEntity)
-    private readonly repository: Repository<ActivityLogEntity>,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {}
 
-  async create(
-    log: ActivityLog,
-    manager: EntityManager,
-    username?: string,
-  ): Promise<ActivityLog> {
-    // Set username in the domain model
-    if (username) {
-      log.username = username;
-    }
-
-    // Convert JSON string to object for jsonb storage
+  async create(log: ActivityLog, manager: EntityManager): Promise<ActivityLog> {
+    // Convert JSON string to object for JSON storage
     let detailsJson: any = null;
     if (log.details) {
       try {
@@ -43,25 +29,35 @@ export class ActivityLogRepositoryImpl
     }
 
     // Use raw SQL query for insert
-    // Note: user_id is still stored in DB but we're using username in domain model
     const query = `
-      INSERT INTO activitylogs (action, entity, details, timestamp, user_id)
-      VALUES ($1, $2, $3::jsonb, $4, $5)
-      RETURNING id, action, entity, details::text as details, timestamp, user_id
+      INSERT INTO activitylogs (action, entity, details, timestamp, username)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
-    // For now, we'll store null for user_id since we're using username in domain
-    // This can be updated later if needed to look up user_id from username
     const result = await manager.query(query, [
       log.action,
       log.entity,
       detailsJson ? JSON.stringify(detailsJson) : null,
       log.timestamp || new Date(),
-      null, // user_id - can be updated later if needed
+      log.username || null,
     ]);
 
-    const savedRow = result[0];
-    return this.rowToModel(savedRow);
+    // Get the inserted row
+    const insertId = result.insertId;
+    const selectQuery = `
+      SELECT 
+        id,
+        action,
+        entity,
+        details,
+        timestamp,
+        username
+      FROM activitylogs
+      WHERE id = ?
+    `;
+
+    const savedRow = await manager.query(selectQuery, [insertId]);
+    return this.rowToModel(savedRow[0]);
   }
 
   async findAll(): Promise<ActivityLog[]> {
@@ -70,14 +66,14 @@ export class ActivityLogRepositoryImpl
         id,
         action,
         entity,
-        details::text as details,
+        details,
         timestamp,
-        user_id
+        username
       FROM activitylogs
       ORDER BY timestamp DESC
     `;
 
-    const rows = await this.repository.query(query);
+    const rows = await this.dataSource.query(query);
     return rows.map((row) => this.rowToModel(row));
   }
 
@@ -87,15 +83,15 @@ export class ActivityLogRepositoryImpl
         id,
         action,
         entity,
-        details::text as details,
+        details,
         timestamp,
-        user_id
+        username
       FROM activitylogs
-      WHERE entity = $1
+      WHERE entity = ?
       ORDER BY timestamp DESC
     `;
 
-    const rows = await this.repository.query(query, [entity]);
+    const rows = await this.dataSource.query(query, [entity]);
     return rows.map((row) => this.rowToModel(row));
   }
 
@@ -105,26 +101,32 @@ export class ActivityLogRepositoryImpl
         id,
         action,
         entity,
-        details::text as details,
+        details,
         timestamp,
-        user_id
+        username
       FROM activitylogs
-      WHERE action = $1
+      WHERE action = ?
       ORDER BY timestamp DESC
     `;
 
-    const rows = await this.repository.query(query, [action]);
+    const rows = await this.dataSource.query(query, [action]);
     return rows.map((row) => this.rowToModel(row));
   }
 
   /**
    * Converts raw database row to domain model
-   * Handles conversion from database result (jsonb as text) to domain model
+   * Handles conversion from database result (JSON) to domain model
    */
   private rowToModel(row: any): ActivityLog {
-    // Details is already converted to text in the SQL query using ::text
-    // Handle null/empty cases
-    const detailsString = row.details || '';
+    // Handle JSON details - MySQL returns JSON as string or object depending on version
+    let detailsString = '';
+    if (row.details) {
+      if (typeof row.details === 'string') {
+        detailsString = row.details;
+      } else {
+        detailsString = JSON.stringify(row.details);
+      }
+    }
 
     const log = new ActivityLog({
       id: row.id,
@@ -132,6 +134,7 @@ export class ActivityLogRepositoryImpl
       entity: row.entity,
       details: detailsString,
       timestamp: row.timestamp,
+      username: row.username,
     });
 
     return log;

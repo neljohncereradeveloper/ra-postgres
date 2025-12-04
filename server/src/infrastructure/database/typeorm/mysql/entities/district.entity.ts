@@ -59,6 +59,9 @@ export class DistrictEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  /**
+   * Relationships
+   */
   @ManyToOne(() => ElectionEntity, (election) => election.districts, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

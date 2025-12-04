@@ -1,7 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { EntityManager, UpdateResult } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { ActiveElectionEntity } from '../entities/active-election.entity';
 import { ActiveElection } from '@domain/models/active-election.model';
 
 @Injectable()
@@ -15,14 +14,16 @@ export class ActiveElectionRepositoryImpl
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        ActiveElectionEntity,
-        { id: this.ACTIVE_ELECTION_ID },
-        {
-          electionId,
-        },
+      const result = await manager.query(
+        `
+        UPDATE active_election
+        SET election_id = ?
+        WHERE id = ?
+        `,
+        [electionId, this.ACTIVE_ELECTION_ID],
       );
-      return result.affected && result.affected > 0;
+
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Active election already exists');
@@ -34,40 +35,56 @@ export class ActiveElectionRepositoryImpl
   async retrieveActiveElection(
     manager: EntityManager,
   ): Promise<ActiveElection | null> {
-    const activeElectionEntity = await manager
-      .createQueryBuilder(ActiveElectionEntity, 'activeElection')
-      .innerJoinAndSelect('activeElection.election', 'election')
-      .where('activeElection.id = :id', { id: this.ACTIVE_ELECTION_ID })
-      .andWhere('activeElection.electionId IS NOT NULL')
-      .getOne();
+    const results = await manager.query(
+      `
+      SELECT 
+        ae.id,
+        ae.election_id as electionId,
+        ae.created_by as createdBy,
+        ae.created_at as createdAt,
+        ae.updated_by as updatedBy,
+        ae.updated_at as updatedAt
+      FROM active_election ae
+      INNER JOIN elections e ON ae.election_id = e.id
+      WHERE ae.id = ?
+        AND ae.election_id IS NOT NULL
+      `,
+      [this.ACTIVE_ELECTION_ID],
+    );
 
-    return activeElectionEntity ? this.toModel(activeElectionEntity) : null;
+    if (results.length === 0) {
+      return null;
+    }
+
+    return this.toModel(results[0]);
   }
 
   async reset(manager: EntityManager): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        ActiveElectionEntity,
-        { id: this.ACTIVE_ELECTION_ID },
-        {
-          electionId: null,
-        },
+      const result = await manager.query(
+        `
+        UPDATE active_election
+        SET election_id = NULL
+        WHERE id = ?
+        `,
+        [this.ACTIVE_ELECTION_ID],
       );
-      return result.affected && result.affected > 0;
+
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       throw error;
     }
   }
 
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: ActiveElectionEntity): ActiveElection {
+  // Helper: Convert raw query result to domain model
+  private toModel(row: any): ActiveElection {
     return new ActiveElection({
-      id: entity.id,
-      electionId: entity.electionId,
-      createdBy: entity.createdBy,
-      createdAt: entity.createdAt,
-      updatedBy: entity.updatedBy,
-      updatedAt: entity.updatedAt,
+      id: row.id,
+      electionId: row.electionId,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

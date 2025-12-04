@@ -66,6 +66,10 @@ export class CastVoteEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  /**
+   * Relationships
+   *
+   */
   @ManyToOne(() => ElectionEntity, (election) => election.castVotes, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

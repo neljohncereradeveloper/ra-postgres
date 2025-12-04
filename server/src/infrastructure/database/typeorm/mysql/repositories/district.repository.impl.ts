@@ -1,7 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository, UpdateResult } from 'typeorm';
-import { DistrictEntity } from '../entities/district.entity';
+import { EntityManager } from 'typeorm';
 import { District } from '@domain/models/district.model';
 import { DistrictRepository } from '@domains/repositories/district.repository';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
@@ -11,16 +9,46 @@ import { calculatePagination } from '@shared/utils/pagination.util';
 export class DistrictRepositoryImpl
   implements DistrictRepository<EntityManager>
 {
-  constructor(
-    @InjectRepository(DistrictEntity)
-    private readonly districtRepo: Repository<DistrictEntity>,
-  ) {}
+  constructor() {}
 
   async create(district: District, manager: EntityManager): Promise<District> {
     try {
-      const districtEntity = this.toEntity(district);
-      const savedEntity = await manager.save(DistrictEntity, districtEntity);
-      return this.toModel(savedEntity);
+      const query = `
+        INSERT INTO districts (
+          election_id,
+          desc1,
+          created_by,
+          created_at
+        )
+        VALUES (?, ?, ?, ?)
+      `;
+
+      const result = await manager.query(query, [
+        district.electionId,
+        district.desc1,
+        district.createdBy || null,
+        district.createdAt || new Date(),
+      ]);
+
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          election_id as electionId,
+          desc1,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM districts
+        WHERE id = ?
+      `;
+
+      const rows = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(rows[0]);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('District name already exists');
@@ -35,40 +63,44 @@ export class DistrictRepositoryImpl
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        DistrictEntity,
-        id,
-        updateFields,
-      );
-      return result.affected && result.affected > 0;
+      const updateParts: string[] = [];
+      const values: any[] = [];
+
+      if (updateFields.desc1 !== undefined) {
+        updateParts.push('desc1 = ?');
+        values.push(updateFields.desc1);
+      }
+
+      if (updateFields.updatedBy !== undefined) {
+        updateParts.push('updated_by = ?');
+        values.push(updateFields.updatedBy);
+      }
+
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
+        return false;
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE districts
+        SET ${updateParts.join(', ')}
+        WHERE id = ? AND deleted_at IS NULL
+      `;
+
+      const result = await manager.query(query, values);
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('District name already exists');
       }
       throw error;
     }
-  }
-
-  async softDelete(id: number, manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(DistrictEntity)
-      .set({ deletedAt: new Date() })
-      .where('id = :id AND deletedAt IS NULL', { id })
-      .execute();
-
-    return result.affected > 0;
-  }
-
-  async restoreDeleted(id: number, manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(DistrictEntity)
-      .set({ deletedAt: null }) // Restore by clearing deletedAt
-      .where('id = :id AND deletedAt IS NOT NULL', { id }) // Restore only if soft-deleted
-      .execute();
-
-    return result.affected > 0; // Return true if a row was restored
   }
 
   async findPaginatedList(
@@ -84,47 +116,70 @@ export class DistrictRepositoryImpl
   }> {
     const skip = (page - 1) * limit;
 
-    // Build the query
-    const queryBuilder = manager
-      .createQueryBuilder(DistrictEntity, 'districts')
-      .withDeleted();
+    // Build WHERE clause
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
 
     // Filter by deletion status
     if (isDeleted) {
-      queryBuilder.where('districts.deletedAt IS NOT NULL');
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      queryBuilder.where('districts.deletedAt IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
+
+    // Filter by election
+    whereConditions.push('election_id = ?');
+    queryParams.push(electionId);
 
     // Apply search filter on description
     if (term) {
-      queryBuilder.andWhere('LOWER(districts.desc1) LIKE :term', {
-        term: `%${term.toLowerCase()}%`,
-      });
+      whereConditions.push('LOWER(desc1) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
 
-    queryBuilder.andWhere('districts.electionId = :electionId', {
-      electionId,
-    });
+    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
-    // Clone the query to get the count of records (avoiding pagination in the count query)
-    const countQuery = queryBuilder
-      .clone()
-      .select('COUNT(districts.id)', 'totalRecords');
+    // Build data query
+    const dataQuery = `
+      SELECT 
+        id,
+        election_id as electionId,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM districts
+      ${whereClause}
+      ORDER BY id DESC
+      LIMIT ? OFFSET ?
+    `;
 
-    // Execute both data and count queries simultaneously
-    const [data, countResult] = await Promise.all([
-      queryBuilder.offset(skip).limit(limit).getMany(), // Fetch the paginated data
-      countQuery.getRawOne(), // Fetch the total count of records
+    // Build count query
+    const countQuery = `
+      SELECT COUNT(id) AS totalRecords
+      FROM districts
+      ${whereClause}
+    `;
+
+    // Execute both queries simultaneously
+    const [dataRows, countResult] = await Promise.all([
+      manager.query(dataQuery, [...queryParams, limit, skip]),
+      manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult?.totalRecords || '0', 10);
+    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
       limit,
     );
+
+    // Map raw results to domain models
+    const data = dataRows.map((row: any) => this.rowToModel(row));
 
     return {
       data,
@@ -140,10 +195,27 @@ export class DistrictRepositoryImpl
   }
 
   async findById(id: number, manager: EntityManager): Promise<District | null> {
-    const districtEntity = await manager.findOne(DistrictEntity, {
-      where: { id, deletedAt: null },
-    });
-    return districtEntity ? this.toModel(districtEntity) : null;
+    const query = `
+      SELECT 
+        id,
+        election_id as electionId,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM districts
+      WHERE id = ? AND deleted_at IS NULL
+    `;
+
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
   }
 
   async findByDescription(
@@ -151,51 +223,80 @@ export class DistrictRepositoryImpl
     electionId: number,
     manager: EntityManager,
   ): Promise<District | null> {
-    const districtEntity = await manager.findOne(DistrictEntity, {
-      where: { desc1, electionId, deletedAt: null },
-    });
-    return districtEntity ? this.toModel(districtEntity) : null;
+    const query = `
+      SELECT 
+        id,
+        election_id as electionId,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM districts
+      WHERE desc1 = ? AND election_id = ? AND deleted_at IS NULL
+      LIMIT 1
+    `;
+
+    const rows = await manager.query(query, [desc1, electionId]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
   }
 
   async combobox(
     electionId: number,
     manager: EntityManager,
   ): Promise<District[]> {
-    return await manager.find(DistrictEntity, {
-      where: { electionId, deletedAt: null },
-    });
+    const query = `
+      SELECT 
+        id,
+        election_id as electionId,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM districts
+      WHERE election_id = ? AND deleted_at IS NULL
+      ORDER BY desc1 ASC
+    `;
+
+    const rows = await manager.query(query, [electionId]);
+    return rows.map((row: any) => this.rowToModel(row));
   }
 
   async countByElection(
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {
-    const count = await manager
-      .createQueryBuilder(DistrictEntity, 'districts')
-      .where('districts.deletedAt IS NULL')
-      .andWhere('districts.electionId = :electionId', { electionId })
-      .getCount();
+    const query = `
+      SELECT COUNT(id) AS count
+      FROM districts
+      WHERE deleted_at IS NULL AND election_id = ?
+    `;
 
-    return count;
+    const result = await manager.query(query, [electionId]);
+    return parseInt(result[0]?.count || '0', 10);
   }
 
-  // Helper: Convert domain model to TypeORM entity
-  private toEntity(district: District): DistrictEntity {
-    const entity = new DistrictEntity();
-    entity.id = district.id;
-    entity.desc1 = district.desc1;
-    entity.deletedAt = district.deletedAt;
-    entity.electionId = district.electionId;
-    return entity;
-  }
-
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: DistrictEntity): District {
+  // Helper: Convert raw query result to domain model
+  private rowToModel(row: any): District {
     return new District({
-      id: entity.id,
-      desc1: entity.desc1,
-      deletedAt: entity.deletedAt,
-      electionId: entity.electionId,
+      id: row.id,
+      electionId: row.electionId,
+      desc1: row.desc1,
+      deletedBy: row.deletedBy,
+      deletedAt: row.deletedAt,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

@@ -3,18 +3,18 @@ export class Ballot {
   ballotNumber: string;
   delegateId: number;
   electionId: number;
-  status: string;
+  ballotStatus: string;
   constructor(params: {
     id?: number;
     electionId: number;
     delegateId: number;
     ballotNumber: string;
-    status: string;
+    ballotStatus: string;
   }) {
     this.id = params.id;
     this.electionId = params.electionId;
     this.delegateId = params.delegateId;
     this.ballotNumber = params.ballotNumber;
-    this.status = params.status;
+    this.ballotStatus = params.ballotStatus;
   }
 }

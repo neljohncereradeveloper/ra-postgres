@@ -72,15 +72,40 @@ export class DelegateEntity {
   @Column({ name: 'control_number' })
   controlNumber: string;
 
+  @Column({
+    name: 'deleted_by',
+    comment: 'username of the user who deleted the delegate',
+    nullable: true,
+  })
+  deletedBy?: string;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt?: Date | null;
+
+  @Column({
+    name: 'created_by',
+    comment: 'username of the user who created the delegate',
+    nullable: true,
+  })
+  createdBy?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
+  @Column({
+    name: 'updated_by',
+    comment: 'username of the user who updated the delegate',
+    nullable: true,
+  })
+  updatedBy?: string;
+
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  /**
+   * Relationships
+   *
+   */
   @ManyToOne(() => ElectionEntity, (election) => election.members, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

@@ -98,9 +98,9 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the ballot is in issued status
-    if (ballot.status !== BALLOT_STATUS_CONSTANTS.ISSUED) {
+    if (ballot.ballotStatus !== BALLOT_STATUS_CONSTANTS.ISSUED) {
       throw new CastVoteBusinessException(
-        `Ballot is in invalid state: ${ballot.status}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
+        `Ballot is in invalid state: ${ballot.ballotStatus}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
         HTTP_STATUS.BAD_REQUEST,
       );
     }

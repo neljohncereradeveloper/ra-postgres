@@ -1,7 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository, UpdateResult } from 'typeorm';
-import { ApplicationAccessEntity } from '../entities/application-access.entity';
+import { DataSource, EntityManager } from 'typeorm';
 import { ApplicationAccess } from '@domain/models/application-access.model';
 import { ApplicationAccessRepository } from '@domains/repositories/application-access.repository';
 
@@ -9,22 +7,42 @@ import { ApplicationAccessRepository } from '@domains/repositories/application-a
 export class ApplicationAccessRepositoryImpl
   implements ApplicationAccessRepository<EntityManager>
 {
-  constructor(
-    @InjectRepository(ApplicationAccessEntity)
-    private readonly applicationAccessRepo: Repository<ApplicationAccessEntity>,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   async create(
     applicationAccess: ApplicationAccess,
     manager: EntityManager,
   ): Promise<ApplicationAccess> {
     try {
-      const applicationAccessEntity = this.toEntity(applicationAccess);
-      const savedEntity = await manager.save(
-        ApplicationAccessEntity,
-        applicationAccessEntity,
-      );
-      return this.toModel(savedEntity);
+      const query = `
+        INSERT INTO applicationaccess (desc1, created_by, created_at)
+        VALUES (?, ?, ?)
+      `;
+
+      const result = await manager.query(query, [
+        applicationAccess.desc1,
+        applicationAccess.createdBy || null,
+        applicationAccess.createdAt || new Date(),
+      ]);
+
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          desc1,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM applicationaccess
+        WHERE id = ?
+      `;
+
+      const savedRow = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(savedRow[0]);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Application access already exists');
@@ -39,46 +57,44 @@ export class ApplicationAccessRepositoryImpl
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        ApplicationAccessEntity,
-        id,
-        updateFields,
-      );
-      return result.affected && result.affected > 0;
+      const updateParts: string[] = [];
+      const values: any[] = [];
+
+      if (updateFields.desc1 !== undefined) {
+        updateParts.push('desc1 = ?');
+        values.push(updateFields.desc1);
+      }
+
+      if (updateFields.updatedBy !== undefined) {
+        updateParts.push('updated_by = ?');
+        values.push(updateFields.updatedBy);
+      }
+
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
+        return false;
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE applicationaccess
+        SET ${updateParts.join(', ')}
+        WHERE id = ?
+      `;
+
+      const result = await manager.query(query, values);
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Application access already exists');
       }
       throw error;
     }
-  }
-
-  async softDeleteWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(ApplicationAccessEntity)
-      .set({ deletedAt: new Date() })
-      .where('id = :id AND deletedAt IS NULL', { id })
-      .execute();
-
-    return result.affected > 0;
-  }
-
-  async restoreWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(ApplicationAccessEntity)
-      .set({ deletedAt: null }) // Restore by clearing deletedAt
-      .where('id = :id AND deletedAt IS NOT NULL', { id }) // Restore only if soft-deleted
-      .execute();
-
-    return result.affected > 0; // Return true if a row was restored
   }
 
   async findPaginatedList(
@@ -99,44 +115,63 @@ export class ApplicationAccessRepositoryImpl
   }> {
     const skip = (page - 1) * limit;
 
-    // Build the query
-    const queryBuilder = this.applicationAccessRepo
-      .createQueryBuilder('applicationaccess')
-      .withDeleted();
-
-    // Select only the required fields
-    queryBuilder.select([
-      'applicationaccess.id as id',
-      'applicationaccess.desc1 as desc1',
-    ]);
+    // Build WHERE clause
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
 
     // Filter by deletion status
     if (isDeleted) {
-      queryBuilder.where('applicationaccess.deletedAt IS NOT NULL');
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      queryBuilder.where('applicationaccess.deletedAt IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Apply search filter on description
     if (term) {
-      queryBuilder.andWhere('LOWER(applicationaccess.name) LIKE :term', {
-        term: `%${term.toLowerCase()}%`,
-      });
+      whereConditions.push('LOWER(desc1) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
 
-    // Clone the query to get the count of records (avoiding pagination in the count query)
-    const countQuery = queryBuilder
-      .clone()
-      .select('COUNT(applicationaccess.id)', 'totalRecords');
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(' AND ')}`
+        : '';
 
-    // Execute both data and count queries simultaneously
-    const [data, countResult] = await Promise.all([
-      queryBuilder.offset(skip).limit(limit).getRawMany(), // Fetch the paginated data
-      countQuery.getRawOne(),
+    // Build data query
+    const dataQuery = `
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM applicationaccess
+      ${whereClause}
+      ORDER BY id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    // Build count query
+    const countQuery = `
+      SELECT COUNT(id) AS totalRecords
+      FROM applicationaccess
+      ${whereClause}
+    `;
+
+    // Execute both queries simultaneously
+    const [dataRows, countResult] = await Promise.all([
+      this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
+      this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult?.totalRecords || '0', 10);
+    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+
+    // Map raw results to domain models
+    const data = dataRows.map((row: any) => this.rowToModel(row));
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -160,47 +195,83 @@ export class ApplicationAccessRepositoryImpl
     id: number,
     manager: EntityManager,
   ): Promise<ApplicationAccess | null> {
-    const applicationAccessEntity = await manager.findOne(
-      ApplicationAccessEntity,
-      {
-        where: { id, deletedAt: null },
-      },
-    );
-    return applicationAccessEntity
-      ? this.toModel(applicationAccessEntity)
-      : null;
+    const query = `
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM applicationaccess
+      WHERE id = ? AND deleted_at IS NULL
+    `;
+
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
   }
 
   async combobox(): Promise<ApplicationAccess[]> {
-    return await this.applicationAccessRepo.find({
-      where: { deletedAt: null },
-    });
+    const query = `
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM applicationaccess
+      WHERE deleted_at IS NULL
+      ORDER BY desc1 ASC
+    `;
+
+    const rows = await this.dataSource.query(query);
+    return rows.map((row: any) => this.rowToModel(row));
   }
 
   async findByDesc(desc1: string): Promise<ApplicationAccess> {
-    const userRoleEntity = await this.applicationAccessRepo.findOne({
-      where: { desc1, deletedAt: null },
-    });
-    return userRoleEntity ? this.toModel(userRoleEntity) : null;
+    const query = `
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM applicationaccess
+      WHERE desc1 = ? AND deleted_at IS NULL
+      LIMIT 1
+    `;
+
+    const rows = await this.dataSource.query(query, [desc1]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
   }
 
-  // Helper: Convert domain model to TypeORM entity
-  private toEntity(
-    applicationAccess: ApplicationAccess,
-  ): ApplicationAccessEntity {
-    const entity = new ApplicationAccessEntity();
-    entity.id = applicationAccess.id;
-    entity.desc1 = applicationAccess.desc1;
-    entity.deletedAt = applicationAccess.deletedAt;
-    return entity;
-  }
-
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: ApplicationAccessEntity): ApplicationAccess {
+  // Helper: Convert raw query result to domain model
+  private rowToModel(row: any): ApplicationAccess {
     return new ApplicationAccess({
-      id: entity.id,
-      desc1: entity.desc1,
-      deletedAt: entity.deletedAt,
+      id: row.id,
+      desc1: row.desc1,
+      deletedBy: row.deletedBy,
+      deletedAt: row.deletedAt,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

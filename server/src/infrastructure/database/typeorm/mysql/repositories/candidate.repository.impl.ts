@@ -1,8 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { EntityManager, UpdateResult } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { calculatePagination } from '@shared/utils/pagination.util';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
-import { CandidateEntity } from '../entities/candidate.entity';
 import { Candidate } from '@domain/models/candidate.model';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 
@@ -17,9 +16,51 @@ export class CandidateRepositoryImpl
     manager: EntityManager,
   ): Promise<Candidate> {
     try {
-      const candidateEntity = this.toEntity(candidate);
-      const savedEntity = await manager.save(CandidateEntity, candidateEntity);
-      return this.toModel(savedEntity);
+      const query = `
+        INSERT INTO candidates (
+          election_id,
+          delegate_id,
+          position_id,
+          district_id,
+          display_name,
+          created_by,
+          created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const result = await manager.query(query, [
+        candidate.electionId,
+        candidate.delegateId,
+        candidate.positionId,
+        candidate.districtId,
+        candidate.displayName,
+        candidate.createdBy || null,
+        candidate.createdAt || new Date(),
+      ]);
+
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          election_id as electionId,
+          delegate_id as delegateId,
+          position_id as positionId,
+          district_id as districtId,
+          display_name as displayName,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM candidates
+        WHERE id = ?
+      `;
+
+      const rows = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(rows[0]);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException(
@@ -36,12 +77,48 @@ export class CandidateRepositoryImpl
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        CandidateEntity,
-        id,
-        updateFields,
-      );
-      return result.affected && result.affected > 0;
+      const updateParts: string[] = [];
+      const values: any[] = [];
+
+      if (updateFields.displayName !== undefined) {
+        updateParts.push('display_name = ?');
+        values.push(updateFields.displayName);
+      }
+
+      if (updateFields.positionId !== undefined) {
+        updateParts.push('position_id = ?');
+        values.push(updateFields.positionId);
+      }
+
+      if (updateFields.districtId !== undefined) {
+        updateParts.push('district_id = ?');
+        values.push(updateFields.districtId);
+      }
+
+      if (updateFields.updatedBy !== undefined) {
+        updateParts.push('updated_by = ?');
+        values.push(updateFields.updatedBy);
+      }
+
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
+        return false;
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE candidates
+        SET ${updateParts.join(', ')}
+        WHERE id = ?
+      `;
+
+      const result = await manager.query(query, values);
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Candidate name already exists');
@@ -50,58 +127,37 @@ export class CandidateRepositoryImpl
     }
   }
 
-  async softDelete(id: number, manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(CandidateEntity)
-      .set({ deletedAt: new Date() })
-      .where('id = :id AND deletedAt IS NULL', { id })
-      .execute();
-
-    return result.affected > 0;
-  }
-
-  async restoreDeleted(id: number, manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(CandidateEntity)
-      .set({ deletedAt: null }) // Restore by clearing deletedAt
-      .where('id = :id AND deletedAt IS NOT NULL', { id }) // Restore only if soft-deleted
-      .execute();
-
-    return result.affected > 0; // Return true if a row was restored
-  }
-
   async findById(
     id: number,
     manager: EntityManager,
   ): Promise<Candidate | null> {
-    const queryBuilder = manager
-      .createQueryBuilder(CandidateEntity, 'candidates')
-      .leftJoinAndSelect('candidates.position', 'positions')
-      .leftJoinAndSelect('candidates.district', 'districts')
-      .leftJoinAndSelect('candidates.election', 'elections')
-      .leftJoinAndSelect('candidates.delegate', 'delegates')
-      .select([
-        'candidates.id as id',
-        'candidates.electionId as electionId',
-        'candidates.positionId as positionId',
-        'candidates.districtId as districtId',
-        'candidates.delegateId as delegateId',
-        'candidates.displayName as displayName',
-        'delegates.accountId as accountId',
-        'delegates.accountName as accountName',
-        'positions.desc1 AS position',
-        'districts.desc1 AS district',
-        'elections.name AS election',
-      ])
-      .where('candidates.id = :id', { id })
-      .andWhere('candidates.deletedAt IS NULL')
-      .getRawOne();
+    const query = `
+      SELECT 
+        c.id as id,
+        c.election_id as electionId,
+        c.position_id as positionId,
+        c.district_id as districtId,
+        c.delegate_id as delegateId,
+        c.display_name as displayName,
+        d.account_id as accountId,
+        d.account_name as accountName,
+        p.desc1 AS position,
+        dist.desc1 AS district,
+        e.name AS election
+      FROM candidates c
+      LEFT JOIN delegates d ON c.delegate_id = d.id
+      LEFT JOIN positions p ON c.position_id = p.id
+      LEFT JOIN districts dist ON c.district_id = dist.id
+      LEFT JOIN elections e ON c.election_id = e.id
+      WHERE c.id = ? AND c.deleted_at IS NULL
+    `;
 
-    const candidateEntity = await queryBuilder;
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
+      return null;
+    }
 
-    return candidateEntity ? candidateEntity : null;
+    return rows[0];
   }
 
   async findPaginatedList(
@@ -117,57 +173,65 @@ export class CandidateRepositoryImpl
   }> {
     const skip = (page - 1) * limit;
 
-    // Build the query
-    const queryBuilder = manager
-      .createQueryBuilder(CandidateEntity, 'candidates')
-      .leftJoinAndSelect('candidates.position', 'positions')
-      .leftJoinAndSelect('candidates.district', 'districts')
-      .leftJoinAndSelect('candidates.election', 'elections')
-      .leftJoinAndSelect('candidates.delegate', 'delegates')
-      .withDeleted();
-
-    queryBuilder.select([
-      'candidates.id as id',
-      'candidates.delegateId as delegateId',
-      'candidates.displayName as displayName',
-      'delegates.accountId as accountId',
-      'delegates.accountName as accountName',
-      'positions.desc1 AS position',
-      'districts.desc1 AS district',
-      'elections.name AS election',
-    ]);
+    // Build WHERE clause
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
 
     // Filter by deletion status
     if (isDeleted) {
-      queryBuilder.where('candidates.deletedAt IS NOT NULL');
+      whereConditions.push('c.deleted_at IS NOT NULL');
     } else {
-      queryBuilder.where('candidates.deletedAt IS NULL');
+      whereConditions.push('c.deleted_at IS NULL');
     }
 
-    // Apply search filter on description
+    // Filter by election
+    whereConditions.push('c.election_id = ?');
+    queryParams.push(electionId);
+
+    // Apply search filter on display name
     if (term) {
-      queryBuilder.andWhere('LOWER(candidates.displayName) LIKE :term', {
-        term: `%${term.toLowerCase()}%`,
-      });
+      whereConditions.push('LOWER(c.display_name) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
 
-    queryBuilder.andWhere('candidates.electionId = :electionId', {
-      electionId,
-    });
+    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
-    // Clone the query to get the count of records (avoiding pagination in the count query)
-    const countQuery = queryBuilder
-      .clone()
-      .select('COUNT(candidates.id)', 'totalRecords');
+    // Build data query
+    const dataQuery = `
+      SELECT 
+        c.id as id,
+        c.delegate_id as delegateId,
+        c.display_name as displayName,
+        d.account_id as accountId,
+        d.account_name as accountName,
+        p.desc1 AS position,
+        dist.desc1 AS district,
+        e.name AS election
+      FROM candidates c
+      LEFT JOIN delegates d ON c.delegate_id = d.id
+      LEFT JOIN positions p ON c.position_id = p.id
+      LEFT JOIN districts dist ON c.district_id = dist.id
+      LEFT JOIN elections e ON c.election_id = e.id
+      ${whereClause}
+      ORDER BY c.id DESC
+      LIMIT ? OFFSET ?
+    `;
 
-    // Execute both data and count queries simultaneously
-    const [data, countResult] = await Promise.all([
-      queryBuilder.offset(skip).limit(limit).getRawMany(),
-      countQuery.getRawOne(),
+    // Build count query
+    const countQuery = `
+      SELECT COUNT(c.id) AS totalRecords
+      FROM candidates c
+      ${whereClause}
+    `;
+
+    // Execute both queries simultaneously
+    const [dataRows, countResult] = await Promise.all([
+      manager.query(dataQuery, [...queryParams, limit, skip]),
+      manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult?.totalRecords || '0', 10);
+    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
@@ -175,7 +239,7 @@ export class CandidateRepositoryImpl
     );
 
     return {
-      data,
+      data: dataRows,
       meta: {
         page,
         limit,
@@ -191,63 +255,51 @@ export class CandidateRepositoryImpl
     electionId: number,
     manager: EntityManager,
   ): Promise<number> {
-    const count = await manager
-      .createQueryBuilder(CandidateEntity, 'candidates')
-      .where('candidates.deletedAt IS NULL')
-      .andWhere('candidates.electionId = :electionId', { electionId })
-      .getCount();
+    const query = `
+      SELECT COUNT(id) AS count
+      FROM candidates
+      WHERE deleted_at IS NULL AND election_id = ?
+    `;
 
-    return count;
+    const result = await manager.query(query, [electionId]);
+    return parseInt(result[0]?.count || '0', 10);
   }
 
   async getElectionCandidates(
     electionId: number,
     manager: EntityManager,
   ): Promise<any[]> {
-    const candidates = await manager
-      .createQueryBuilder(CandidateEntity, 'candidates')
-      .leftJoinAndSelect('candidates.position', 'positions')
-      .leftJoinAndSelect('candidates.district', 'districts')
-      .leftJoinAndSelect('candidates.election', 'elections')
-      .leftJoinAndSelect('candidates.delegate', 'delegates')
-      .select([
-        'positions.desc1 AS position',
-        'positions.maxCandidates AS positionMaxCandidates',
-        'positions.termLimit AS positionTermLimit',
-        // 'districts.desc1 AS district',
-        'candidates.id as candidateId',
-        'candidates.displayName as displayName',
-      ])
-      .where('candidates.deletedAt IS NULL')
-      .andWhere('candidates.electionId = :electionId', { electionId })
-      .getRawMany();
+    const query = `
+      SELECT 
+        p.desc1 AS position,
+        p.max_candidates AS positionMaxCandidates,
+        p.term_limit AS positionTermLimit,
+        c.id as candidateId,
+        c.display_name as displayName
+      FROM candidates c
+      LEFT JOIN positions p ON c.position_id = p.id
+      WHERE c.deleted_at IS NULL AND c.election_id = ?
+    `;
 
-    return candidates;
+    const rows = await manager.query(query, [electionId]);
+    return rows;
   }
 
-  // Helper: Convert domain model to TypeORM entity
-  private toEntity(candidate: Candidate): CandidateEntity {
-    const entity = new CandidateEntity();
-    entity.id = candidate.id;
-    entity.delegateId = candidate.delegateId;
-    entity.positionId = candidate.positionId;
-    entity.districtId = candidate.districtId;
-    entity.electionId = candidate.electionId;
-    entity.displayName = candidate.displayName;
-    entity.deletedAt = candidate.deletedAt;
-    return entity;
-  }
-
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: CandidateEntity): Candidate {
+  // Helper: Convert raw query result to domain model
+  private rowToModel(row: any): Candidate {
     return new Candidate({
-      id: entity.id,
-      delegateId: entity.delegateId,
-      positionId: entity.positionId,
-      districtId: entity.districtId,
-      electionId: entity.electionId,
-      displayName: entity.displayName,
-      deletedAt: entity.deletedAt,
+      id: row.id,
+      electionId: row.electionId,
+      positionId: row.positionId,
+      districtId: row.districtId,
+      delegateId: row.delegateId,
+      displayName: row.displayName,
+      deletedBy: row.deletedBy,
+      deletedAt: row.deletedAt,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

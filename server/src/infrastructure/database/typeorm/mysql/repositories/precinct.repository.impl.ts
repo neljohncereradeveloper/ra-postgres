@@ -12,23 +12,37 @@ export class PrecinctRepositoryImpl
   constructor(private readonly dataSource: DataSource) {}
   async create(precinct: Precinct, manager: EntityManager): Promise<Precinct> {
     try {
-      // Let database handle created_at (DEFAULT CURRENT_TIMESTAMP)
-      // Only insert business data
       const query = `
-        INSERT INTO precincts (desc1, created_by)
-        VALUES ($1, $2)
-        RETURNING *
+        INSERT INTO precincts (desc1, created_by, created_at)
+        VALUES (?, ?, ?)
       `;
 
       const result = await manager.query(query, [
         precinct.desc1,
-        precinct.createdBy,
+        precinct.createdBy || null,
+        precinct.createdAt || new Date(),
       ]);
 
-      const savedRow = result[0];
-      return this.rowToModel(savedRow);
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          desc1,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM precincts
+        WHERE id = ?
+      `;
+
+      const rows = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(rows[0]);
     } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+      if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Precinct name already exists');
       }
       throw error;
@@ -41,53 +55,56 @@ export class PrecinctRepositoryImpl
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const updates: string[] = [];
+      const updateParts: string[] = [];
       const values: any[] = [];
-      let paramIndex = 1;
 
       if (updateFields.desc1 !== undefined) {
-        updates.push(`desc1 = $${paramIndex}`);
+        updateParts.push('desc1 = ?');
         values.push(updateFields.desc1);
-        paramIndex++;
       }
 
       if (updateFields.deletedAt !== undefined) {
-        updates.push(`deleted_at = $${paramIndex}`);
+        updateParts.push('deleted_at = ?');
         values.push(updateFields.deletedAt);
-        paramIndex++;
       }
 
       if (updateFields.deletedBy !== undefined) {
-        updates.push(`deleted_by = $${paramIndex}`);
+        updateParts.push('deleted_by = ?');
         values.push(updateFields.deletedBy);
-        paramIndex++;
       }
 
       if (updateFields.updatedBy !== undefined) {
-        updates.push(`updated_by = $${paramIndex}`);
+        updateParts.push('updated_by = ?');
         values.push(updateFields.updatedBy);
-        paramIndex++;
       }
 
-      if (updates.length === 0) {
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
         return false;
       }
 
-      updates.push(`updated_at = $${paramIndex}`);
-      values.push(new Date());
-      paramIndex++;
+      // Always update updated_at if not explicitly set
+      if (updateFields.updatedAt === undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(new Date());
+      }
+
       values.push(id);
 
       const query = `
         UPDATE precincts
-        SET ${updates.join(', ')}
-        WHERE id = $${paramIndex}
+        SET ${updateParts.join(', ')}
+        WHERE id = ?
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows > 0 || result.rowCount > 0;
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+      if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Precinct name already exists');
       }
       throw error;
@@ -104,45 +121,53 @@ export class PrecinctRepositoryImpl
     meta: PaginationMeta;
   }> {
     const skip = (page - 1) * limit;
-    const params: any[] = [];
-    let paramIndex = 1;
 
     // Build WHERE clause
-    let whereClause = '';
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
+
     if (isArchived) {
-      whereClause = 'WHERE deleted_at IS NOT NULL';
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereClause = 'WHERE deleted_at IS NULL';
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Add search term if provided
     if (term) {
-      whereClause += ` AND LOWER(desc1) LIKE $${paramIndex}`;
-      params.push(`%${term.toLowerCase()}%`);
-      paramIndex++;
+      whereConditions.push('LOWER(desc1) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
+
+    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
     // Data query
     const dataQuery = `
-      SELECT id, desc1, deleted_at, created_at, updated_at
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
       FROM precincts
       ${whereClause}
-      ORDER BY id
-      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      ORDER BY id DESC
+      LIMIT ? OFFSET ?
     `;
-    params.push(limit, skip);
 
     // Count query
     const countQuery = `
-      SELECT COUNT(id) as "totalRecords"
+      SELECT COUNT(id) AS totalRecords
       FROM precincts
       ${whereClause}
     `;
 
     // Execute both queries using DataSource
     const [dataRows, countResult] = await Promise.all([
-      this.dataSource.query(dataQuery, params),
-      this.dataSource.query(countQuery, params.slice(0, -2)), // Remove limit and offset params
+      this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
+      this.dataSource.query(countQuery, queryParams),
     ]);
 
     const data = dataRows.map((row) => this.rowToModel(row));
@@ -168,17 +193,25 @@ export class PrecinctRepositoryImpl
 
   async findById(id: number, manager: EntityManager): Promise<Precinct | null> {
     const query = `
-      SELECT id, desc1, deleted_by, deleted_at, created_by, created_at, updated_by, updated_at
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
       FROM precincts
-      WHERE id = $1
+      WHERE id = ?
     `;
 
-    const result = await manager.query(query, [id]);
-    if (result.length === 0) {
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
       return null;
     }
 
-    return this.rowToModel(result[0]);
+    return this.rowToModel(rows[0]);
   }
 
   async findByDescription(
@@ -186,29 +219,46 @@ export class PrecinctRepositoryImpl
     manager: EntityManager,
   ): Promise<Precinct | null> {
     const query = `
-      SELECT id, desc1, deleted_by, deleted_at, created_by, created_at, updated_by, updated_at
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
       FROM precincts
-      WHERE desc1 = $1 AND deleted_at IS NULL
+      WHERE desc1 = ? AND deleted_at IS NULL
+      LIMIT 1
     `;
 
-    const result = await manager.query(query, [desc1]);
-    if (result.length === 0) {
+    const rows = await manager.query(query, [desc1]);
+    if (rows.length === 0) {
       return null;
     }
 
-    return this.rowToModel(result[0]);
+    return this.rowToModel(rows[0]);
   }
 
   async combobox(): Promise<Precinct[]> {
     const query = `
-      SELECT id, desc1
+      SELECT 
+        id,
+        desc1,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
       FROM precincts
       WHERE deleted_at IS NULL
-      ORDER BY desc1
+      ORDER BY desc1 ASC
     `;
 
-    const result = await this.dataSource.query(query);
-    return result.map((row) => this.rowToModel(row));
+    const rows = await this.dataSource.query(query);
+    return rows.map((row) => this.rowToModel(row));
   }
 
   // Helper: Convert database row to domain model
@@ -216,12 +266,12 @@ export class PrecinctRepositoryImpl
     return new Precinct({
       id: row.id,
       desc1: row.desc1,
-      deletedBy: row.deleted_by || row.deletedBy,
-      deletedAt: row.deleted_at || row.deletedAt,
-      createdBy: row.created_by || row.createdBy,
-      createdAt: row.created_at || row.createdAt,
-      updatedBy: row.updated_by || row.updatedBy,
-      updatedAt: row.updated_at || row.updatedAt,
+      deletedBy: row.deletedBy,
+      deletedAt: row.deletedAt,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

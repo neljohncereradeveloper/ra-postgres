@@ -13,8 +13,8 @@ import { PositionEntity } from './entities/position.entity';
 import { CandidateEntity } from './entities/candidate.entity';
 import { BallotEntity } from './entities/ballot.entity';
 import { CastVoteEntity } from './entities/cast-vote.entity';
-import { SettingEntity } from './entities/setting.entity';
 import { PrecinctEntity } from './entities/precinct.entity';
+import { ActiveElectionEntity } from './entities/active-election.entity';
 
 @Module({
   imports: [
@@ -26,18 +26,18 @@ import { PrecinctEntity } from './entities/precinct.entity';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([
+      ActivityLogEntity,
       ApplicationAccessEntity,
+      UserRoleEntity,
+      UserEntity,
+      ActiveElectionEntity,
+      ElectionEntity,
+      DelegateEntity,
       DistrictEntity,
       PositionEntity,
       CandidateEntity,
-      BallotEntity,
-      ElectionEntity,
-      DelegateEntity,
-      UserRoleEntity,
-      UserEntity,
-      ActivityLogEntity,
       CastVoteEntity,
-      SettingEntity,
+      BallotEntity,
       PrecinctEntity,
     ]), // Register entities here
   ],

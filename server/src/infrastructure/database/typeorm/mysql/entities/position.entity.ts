@@ -34,16 +34,40 @@ export class PositionEntity {
   @Column({ name: 'term_limit', length: 100, nullable: true })
   termLimit: string;
 
+  @Column({
+    name: 'deleted_by',
+    comment: 'username of the user who deleted the position',
+    nullable: true,
+  })
+  deletedBy?: string;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
 
+  @Column({
+    name: 'created_by',
+    comment: 'username of the user who created the position',
+    nullable: true,
+  })
+  createdBy?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Column({
+    name: 'updated_by',
+    comment: 'username of the user who updated the position',
+    nullable: true,
+  })
+  updatedBy?: string;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  /**
+   * Relationships
+   */
   @ManyToOne(() => ElectionEntity, (election) => election.positions, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

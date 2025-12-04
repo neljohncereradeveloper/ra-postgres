@@ -1,6 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { DelegateEntity } from '../entities/delegate.entity';
 import { Delegate } from '@domain/models/delegate.model';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 
@@ -12,11 +11,202 @@ export class DelegateRepositoryImpl
 
   async create(delegate: Delegate, manager: EntityManager): Promise<Delegate> {
     try {
-      const delegateEntity = this.toEntity(delegate);
-      const savedEntity = await manager.save(DelegateEntity, delegateEntity);
-      return this.toModel(savedEntity);
+      const query = `
+        INSERT INTO delegates (
+          election_id,
+          branch,
+          account_id,
+          account_name,
+          age,
+          birth_date,
+          address,
+          tell,
+          cell,
+          date_opened,
+          client_type,
+          loan_status,
+          balance,
+          mev_status,
+          has_voted,
+          control_number,
+          created_by,
+          created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const result = await manager.query(query, [
+        delegate.electionId,
+        delegate.branch,
+        delegate.accountId,
+        delegate.accountName,
+        delegate.age || null,
+        delegate.birthDate || null,
+        delegate.address || null,
+        delegate.tell || null,
+        delegate.cell || null,
+        delegate.dateOpened || null,
+        delegate.clientType || null,
+        delegate.loanStatus,
+        delegate.balance,
+        delegate.mevStatus,
+        delegate.hasVoted || false,
+        delegate.controlNumber,
+        delegate.createdBy || null,
+        delegate.createdAt || new Date(),
+      ]);
+
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          election_id as electionId,
+          branch,
+          account_id as accountId,
+          account_name as accountName,
+          age,
+          birth_date as birthDate,
+          address,
+          tell,
+          cell,
+          date_opened as dateOpened,
+          client_type as clientType,
+          loan_status as loanStatus,
+          balance,
+          mev_status as mevStatus,
+          has_voted as hasVoted,
+          control_number as controlNumber,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM delegates
+        WHERE id = ?
+      `;
+
+      const rows = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(rows[0]);
     } catch (error) {
       console.log('error', error);
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException(error.sqlMessage);
+      }
+      throw error;
+    }
+  }
+
+  async update(
+    id: number,
+    updateFields: Partial<Delegate>,
+    manager: EntityManager,
+  ): Promise<boolean> {
+    try {
+      const updateParts: string[] = [];
+      const values: any[] = [];
+
+      if (updateFields.branch !== undefined) {
+        updateParts.push('branch = ?');
+        values.push(updateFields.branch);
+      }
+
+      if (updateFields.accountId !== undefined) {
+        updateParts.push('account_id = ?');
+        values.push(updateFields.accountId);
+      }
+
+      if (updateFields.accountName !== undefined) {
+        updateParts.push('account_name = ?');
+        values.push(updateFields.accountName);
+      }
+
+      if (updateFields.age !== undefined) {
+        updateParts.push('age = ?');
+        values.push(updateFields.age);
+      }
+
+      if (updateFields.birthDate !== undefined) {
+        updateParts.push('birth_date = ?');
+        values.push(updateFields.birthDate);
+      }
+
+      if (updateFields.address !== undefined) {
+        updateParts.push('address = ?');
+        values.push(updateFields.address);
+      }
+
+      if (updateFields.tell !== undefined) {
+        updateParts.push('tell = ?');
+        values.push(updateFields.tell);
+      }
+
+      if (updateFields.cell !== undefined) {
+        updateParts.push('cell = ?');
+        values.push(updateFields.cell);
+      }
+
+      if (updateFields.dateOpened !== undefined) {
+        updateParts.push('date_opened = ?');
+        values.push(updateFields.dateOpened);
+      }
+
+      if (updateFields.clientType !== undefined) {
+        updateParts.push('client_type = ?');
+        values.push(updateFields.clientType);
+      }
+
+      if (updateFields.balance !== undefined) {
+        updateParts.push('balance = ?');
+        values.push(updateFields.balance);
+      }
+
+      if (updateFields.loanStatus !== undefined) {
+        updateParts.push('loan_status = ?');
+        values.push(updateFields.loanStatus);
+      }
+
+      if (updateFields.mevStatus !== undefined) {
+        updateParts.push('mev_status = ?');
+        values.push(updateFields.mevStatus);
+      }
+
+      if (updateFields.hasVoted !== undefined) {
+        updateParts.push('has_voted = ?');
+        values.push(updateFields.hasVoted);
+      }
+
+      if (updateFields.controlNumber !== undefined) {
+        updateParts.push('control_number = ?');
+        values.push(updateFields.controlNumber);
+      }
+
+      if (updateFields.updatedBy !== undefined) {
+        updateParts.push('updated_by = ?');
+        values.push(updateFields.updatedBy);
+      }
+
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
+        return false;
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE delegates
+        SET ${updateParts.join(', ')}
+        WHERE id = ? AND deleted_at IS NULL
+      `;
+
+      const result = await manager.query(query, values);
+      return result.affectedRows && result.affectedRows > 0;
+    } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException(error.sqlMessage);
       }
@@ -114,28 +304,7 @@ export class DelegateRepositoryImpl
     const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => {
-      const entity = new DelegateEntity();
-      entity.id = row.id;
-      entity.branch = row.branch;
-      entity.accountId = row.accountId;
-      entity.accountName = row.accountName;
-      entity.age = row.age;
-      entity.birthDate = row.birthDate;
-      entity.address = row.address;
-      entity.tell = row.tell;
-      entity.cell = row.cell;
-      entity.dateOpened = row.dateOpened;
-      entity.clientType = row.clientType;
-      entity.balance = row.balance;
-      entity.loanStatus = row.loanStatus;
-      entity.mevStatus = row.mevStatus;
-      entity.deletedAt = row.deletedAt;
-      entity.electionId = row.electionId;
-      entity.hasVoted = row.hasVoted;
-      entity.controlNumber = row.controlNumber;
-      return this.toModel(entity);
-    });
+    const data = dataRows.map((row: any) => this.rowToModel(row));
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -156,42 +325,85 @@ export class DelegateRepositoryImpl
   }
 
   async findById(id: number, manager: EntityManager): Promise<Delegate | null> {
-    const delegateEntity = await manager.findOne(DelegateEntity, {
-      where: { id, deletedAt: null },
-    });
-    return delegateEntity ? this.toModel(delegateEntity) : null;
-  }
+    const query = `
+      SELECT 
+        id,
+        election_id as electionId,
+        branch,
+        account_id as accountId,
+        account_name as accountName,
+        age,
+        birth_date as birthDate,
+        address,
+        tell,
+        cell,
+        date_opened as dateOpened,
+        client_type as clientType,
+        loan_status as loanStatus,
+        balance,
+        mev_status as mevStatus,
+        has_voted as hasVoted,
+        control_number as controlNumber,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM delegates
+      WHERE id = ? AND deleted_at IS NULL
+    `;
 
-  // async findAllWithElectionId(
-  //   electionId: number,
-  //   manager: EntityManager,
-  // ): Promise<Delegate[]> {
-  //   return await manager.find(DelegateEntity, {
-  //     where: { electionId, deletedAt: null },
-  //   });
-  // }
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
+  }
 
   async findByControlNumberAndElectionId(
     controlNumber: string,
     electionId: number,
     manager: EntityManager,
   ): Promise<Delegate> {
-    const delegateEntity = await manager.findOne(DelegateEntity, {
-      where: { controlNumber, electionId, deletedAt: null },
-    });
-    return delegateEntity ? this.toModel(delegateEntity) : null;
-  }
+    const query = `
+      SELECT 
+        id,
+        election_id as electionId,
+        branch,
+        account_id as accountId,
+        account_name as accountName,
+        age,
+        birth_date as birthDate,
+        address,
+        tell,
+        cell,
+        date_opened as dateOpened,
+        client_type as clientType,
+        loan_status as loanStatus,
+        balance,
+        mev_status as mevStatus,
+        has_voted as hasVoted,
+        control_number as controlNumber,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM delegates
+      WHERE control_number = ? AND election_id = ? AND deleted_at IS NULL
+      LIMIT 1
+    `;
 
-  // async findByAccountIdWithElectionId(
-  //   accountId: string,
-  //   electionId: number,
-  //   manager: EntityManager,
-  // ): Promise<Delegate> {
-  //   const delegateEntity = await manager.findOne(DelegateEntity, {
-  //     where: { accountId, electionId, deletedAt: null },
-  //   });
-  //   return delegateEntity ? this.toModel(delegateEntity) : null;
-  // }
+    const rows = await manager.query(query, [controlNumber, electionId]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0]);
+  }
 
   async countByElection(
     electionId: number,
@@ -209,54 +421,41 @@ export class DelegateRepositoryImpl
   }
 
   async markAsVoted(delegateId: number, manager: EntityManager): Promise<void> {
-    await manager.update(DelegateEntity, delegateId, { hasVoted: true });
+    const query = `
+      UPDATE delegates
+      SET has_voted = ?
+      WHERE id = ?
+    `;
+
+    await manager.query(query, [true, delegateId]);
   }
 
-  // Helper: Convert domain model to TypeORM entity
-  private toEntity(delegate: Delegate): DelegateEntity {
-    const entity = new DelegateEntity();
-    entity.id = delegate.id;
-    entity.branch = delegate.branch;
-    entity.electionId = delegate.electionId;
-    entity.accountId = delegate.accountId;
-    entity.accountName = delegate.accountName;
-    entity.age = delegate.age;
-    entity.balance = delegate.balance;
-    entity.loanStatus = delegate.loanStatus;
-    entity.mevStatus = delegate.mevStatus;
-    entity.clientType = delegate.clientType;
-    entity.address = delegate.address;
-    entity.tell = delegate.tell;
-    entity.cell = delegate.cell;
-    entity.dateOpened = delegate.dateOpened;
-    entity.birthDate = delegate.birthDate;
-    entity.hasVoted = delegate.hasVoted;
-    entity.controlNumber = delegate.controlNumber;
-    entity.deletedAt = delegate.deletedAt;
-    return entity;
-  }
-
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: DelegateEntity): Delegate {
+  // Helper: Convert raw query result to domain model
+  private rowToModel(row: any): Delegate {
     return new Delegate({
-      id: entity.id,
-      branch: entity.branch,
-      electionId: entity.electionId,
-      accountId: entity.accountId,
-      accountName: entity.accountName,
-      age: entity.age,
-      balance: entity.balance,
-      loanStatus: entity.loanStatus,
-      mevStatus: entity.mevStatus,
-      clientType: entity.clientType,
-      address: entity.address,
-      tell: entity.tell,
-      cell: entity.cell,
-      dateOpened: entity.dateOpened,
-      birthDate: entity.birthDate,
-      hasVoted: entity.hasVoted,
-      controlNumber: entity.controlNumber,
-      deletedAt: entity.deletedAt,
+      id: row.id,
+      branch: row.branch,
+      electionId: row.electionId,
+      accountId: row.accountId,
+      accountName: row.accountName,
+      age: row.age,
+      balance: row.balance,
+      loanStatus: row.loanStatus,
+      mevStatus: row.mevStatus,
+      clientType: row.clientType,
+      address: row.address,
+      tell: row.tell,
+      cell: row.cell,
+      dateOpened: row.dateOpened,
+      birthDate: row.birthDate,
+      hasVoted: row.hasVoted,
+      controlNumber: row.controlNumber,
+      deletedAt: row.deletedAt,
+      deletedBy: row.deletedBy,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

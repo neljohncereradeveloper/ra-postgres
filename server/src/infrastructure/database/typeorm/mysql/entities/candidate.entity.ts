@@ -44,11 +44,32 @@ export class CandidateEntity {
   @Column({ name: 'display_name', length: 255 })
   displayName: string;
 
+  @Column({
+    name: 'deleted_by',
+    comment: 'username of the user who deleted the candidate',
+    nullable: true,
+  })
+  deletedBy?: string;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date | null; // For soft delete
 
+  @Column({
+    name: 'created_by',
+    comment: 'username of the user who created the candidate',
+    nullable: true,
+  })
+  createdBy?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Column({
+    name: 'updated_by',
+    comment: 'username of the user who updated the candidate',
+    nullable: true,
+  })
+  updatedBy?: string;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;

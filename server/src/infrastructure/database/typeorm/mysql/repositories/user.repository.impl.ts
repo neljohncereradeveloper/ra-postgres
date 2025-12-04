@@ -1,22 +1,62 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository, UpdateResult } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
+import { DataSource, EntityManager } from 'typeorm';
 import { User } from '@domain/models/user.model';
 import { UserRepository } from '@domains/repositories/user.repository';
 
 @Injectable()
 export class UserRepositoryImpl implements UserRepository<EntityManager> {
-  constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepo: Repository<UserEntity>,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   async create(user: User, manager: EntityManager): Promise<User> {
     try {
-      const userEntity = this.toEntity(user);
-      const savedEntity = await manager.save(UserEntity, userEntity);
-      return this.toModel(savedEntity);
+      const query = `
+        INSERT INTO users (
+          precinct,
+          watcher,
+          application_access,
+          user_roles,
+          user_name,
+          password,
+          created_by,
+          created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const result = await manager.query(query, [
+        user.precinct,
+        user.watcher,
+        user.applicationAccess,
+        user.userRoles,
+        user.userName,
+        user.password,
+        user.createdBy || null,
+        user.createdAt || new Date(),
+      ]);
+
+      // Get the inserted row
+      const insertId = result.insertId;
+      const selectQuery = `
+        SELECT 
+          id,
+          precinct,
+          watcher,
+          application_access as applicationAccess,
+          user_roles as userRoles,
+          user_name as userName,
+          password,
+          deleted_by as deletedBy,
+          deleted_at as deletedAt,
+          created_by as createdBy,
+          created_at as createdAt,
+          updated_by as updatedBy,
+          updated_at as updatedAt
+        FROM users
+        WHERE id = ?
+      `;
+
+      const rows = await manager.query(selectQuery, [insertId]);
+      return this.rowToModel(rows[0]);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Username already exists');
@@ -31,46 +71,69 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     manager: EntityManager,
   ): Promise<boolean> {
     try {
-      const result: UpdateResult = await manager.update(
-        UserEntity,
-        id,
-        updateFields,
-      );
-      return result.affected && result.affected > 0;
+      const updateParts: string[] = [];
+      const values: any[] = [];
+
+      if (updateFields.precinct !== undefined) {
+        updateParts.push('precinct = ?');
+        values.push(updateFields.precinct);
+      }
+
+      if (updateFields.watcher !== undefined) {
+        updateParts.push('watcher = ?');
+        values.push(updateFields.watcher);
+      }
+
+      if (updateFields.applicationAccess !== undefined) {
+        updateParts.push('application_access = ?');
+        values.push(updateFields.applicationAccess);
+      }
+
+      if (updateFields.userRoles !== undefined) {
+        updateParts.push('user_roles = ?');
+        values.push(updateFields.userRoles);
+      }
+
+      if (updateFields.userName !== undefined) {
+        updateParts.push('user_name = ?');
+        values.push(updateFields.userName);
+      }
+
+      if (updateFields.password !== undefined) {
+        updateParts.push('password = ?');
+        values.push(updateFields.password);
+      }
+
+      if (updateFields.updatedBy !== undefined) {
+        updateParts.push('updated_by = ?');
+        values.push(updateFields.updatedBy);
+      }
+
+      if (updateFields.updatedAt !== undefined) {
+        updateParts.push('updated_at = ?');
+        values.push(updateFields.updatedAt);
+      }
+
+      if (updateParts.length === 0) {
+        return false;
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE users
+        SET ${updateParts.join(', ')}
+        WHERE id = ? AND deleted_at IS NULL
+      `;
+
+      const result = await manager.query(query, values);
+      return result.affectedRows && result.affectedRows > 0;
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Username already exists');
       }
       throw error;
     }
-  }
-
-  async softDeleteWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(UserEntity)
-      .set({ deletedAt: new Date() })
-      .where('id = :id AND deletedAt IS NULL', { id })
-      .execute();
-
-    return result.affected > 0;
-  }
-
-  async restoreWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder()
-      .update(UserEntity)
-      .set({ deletedAt: null }) // Restore by clearing deletedAt
-      .where('id = :id AND deletedAt IS NOT NULL', { id }) // Restore only if soft-deleted
-      .execute();
-
-    return result.affected > 0; // Return true if a row was restored
   }
 
   async findPaginatedList(
@@ -91,54 +154,64 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
   }> {
     const skip = (page - 1) * limit;
 
-    // Build the query
-    const queryBuilder = this.userRepo
-      .createQueryBuilder('users')
-      .withDeleted();
-
-    // Select only the required fields
-    queryBuilder.select([
-      'users.id',
-      'users.precinct as precinct',
-      'users.watcher as watcher',
-      'users.applicationAccess as applicationAccess',
-      'users.userRoles as userRoles',
-      'users.userName as userName',
-      'users.deletedAt as deletedAt',
-    ]);
+    // Build WHERE clause
+    const whereConditions: string[] = [];
+    const queryParams: any[] = [];
 
     // Filter by deletion status
     if (isDeleted) {
-      queryBuilder.where('users.deletedAt IS NOT NULL');
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      queryBuilder.where('users.deletedAt IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
-    // Apply search filter on description
+    // Apply search filter on watcher
     if (term) {
-      queryBuilder.andWhere('LOWER(users.watcher) LIKE :term', {
-        term: `%${term.toLowerCase()}%`,
-      });
+      whereConditions.push('LOWER(watcher) LIKE ?');
+      queryParams.push(`%${term.toLowerCase()}%`);
     }
 
-    // Clone the query to get the count of records (avoiding pagination in the count query)
-    const countQuery = queryBuilder
-      .clone()
-      .select('COUNT(users.id)', 'totalRecords');
+    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
-    // Execute both data and count queries simultaneously
-    const [data, countResult] = await Promise.all([
-      queryBuilder.offset(skip).limit(limit).getRawMany(), // Fetch the paginated data
-      countQuery.getRawOne(),
+    // Build data query
+    const dataQuery = `
+      SELECT 
+        id,
+        precinct,
+        watcher,
+        application_access as applicationAccess,
+        user_roles as userRoles,
+        user_name as userName,
+        deleted_at as deletedAt
+      FROM users
+      ${whereClause}
+      ORDER BY id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    // Build count query
+    const countQuery = `
+      SELECT COUNT(id) AS totalRecords
+      FROM users
+      ${whereClause}
+    `;
+
+    // Execute both queries simultaneously
+    const [dataRows, countResult] = await Promise.all([
+      this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
+      this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult?.totalRecords || '0', 10);
+    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
     const nextPage = page < totalPages ? page + 1 : null;
     const previousPage = page > 1 ? page - 1 : null;
+
+    // Map raw results to domain models (without password)
+    const data = dataRows.map((row: any) => this.rowToModel(row, false));
 
     return {
       data,
@@ -154,59 +227,72 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
   }
 
   async findById(id: number, manager: EntityManager): Promise<User | null> {
-    const userEntity = await manager.findOne(UserEntity, {
-      where: { id, deletedAt: null },
-    });
-    return userEntity ? this.toModel(userEntity) : null;
-  }
+    const query = `
+      SELECT 
+        id,
+        precinct,
+        watcher,
+        application_access as applicationAccess,
+        user_roles as userRoles,
+        user_name as userName,
+        password,
+        deleted_by as deletedBy,
+        deleted_at as deletedAt,
+        created_by as createdBy,
+        created_at as createdAt,
+        updated_by as updatedBy,
+        updated_at as updatedAt
+      FROM users
+      WHERE id = ? AND deleted_at IS NULL
+    `;
 
-  async findAll(): Promise<User[]> {
-    return await this.userRepo.find({
-      where: { deletedAt: null },
-    });
+    const rows = await manager.query(query, [id]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0], true);
   }
 
   async findByUserName(userName: string): Promise<User | null> {
-    const userEntity = await this.userRepo.findOne({
-      where: { userName },
-      select: [
-        'id',
-        'userName',
-        'password',
-        'userRoles',
-        'applicationAccess',
-        'precinct',
-      ],
-    });
+    const query = `
+      SELECT 
+        id,
+        precinct,
+        watcher,
+        application_access as applicationAccess,
+        user_roles as userRoles,
+        user_name as userName,
+        password
+      FROM users
+      WHERE user_name = ?
+      LIMIT 1
+    `;
 
-    return userEntity ? this.toModel(userEntity) : null;
+    const rows = await this.dataSource.query(query, [userName]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return this.rowToModel(rows[0], true);
   }
 
-  // Helper: Convert domain model to TypeORM entity
-  private toEntity(user: User): UserEntity {
-    const entity = new UserEntity();
-    entity.id = user.id;
-    entity.precinct = user.precinct;
-    entity.watcher = user.watcher;
-    entity.applicationAccess = user.applicationAccess;
-    entity.userRoles = user.userRoles;
-    entity.userName = user.userName;
-    entity.password = user.password;
-    entity.deletedAt = user.deletedAt;
-    return entity;
-  }
-
-  // Helper: Convert TypeORM entity to domain model
-  private toModel(entity: UserEntity): User {
+  // Helper: Convert raw query result to domain model
+  private rowToModel(row: any, includePassword: boolean = false): User {
     return new User({
-      id: entity.id,
-      precinct: entity.precinct,
-      watcher: entity.watcher,
-      userRoles: entity.userRoles,
-      applicationAccess: entity.applicationAccess,
-      userName: entity.userName,
-      password: entity.password,
-      deletedAt: entity.deletedAt,
+      id: row.id,
+      precinct: row.precinct,
+      watcher: row.watcher,
+      applicationAccess: row.applicationAccess,
+      userRoles: row.userRoles,
+      userName: row.userName,
+      password: includePassword ? row.password : undefined,
+      deletedBy: row.deletedBy,
+      deletedAt: row.deletedAt,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedBy: row.updatedBy,
+      updatedAt: row.updatedAt,
     });
   }
 }

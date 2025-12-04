@@ -55,12 +55,33 @@ export class ElectionEntity {
   @Index()
   electionStatus: ElectionStatus;
 
+  @Column({
+    name: 'deleted_by',
+    comment: 'username of the user who deleted the election',
+    nullable: true,
+  })
+  deletedBy?: string;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   @Index()
   deletedAt: Date | null; // For soft delete
 
+  @Column({
+    name: 'created_by',
+    comment: 'username of the user who created the election',
+    nullable: true,
+  })
+  createdBy?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Column({
+    name: 'updated_by',
+    comment: 'username of the user who updated the election',
+    nullable: true,
+  })
+  updatedBy?: string;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
@@ -69,9 +90,13 @@ export class ElectionEntity {
   @OneToMany(() => DelegateEntity, (member) => member.election)
   members: DelegateEntity[];
 
-  @OneToOne(() => ActiveElectionEntity, (activeElection) => activeElection.election, {
-    nullable: true,
-  })
+  @OneToOne(
+    () => ActiveElectionEntity,
+    (activeElection) => activeElection.election,
+    {
+      nullable: true,
+    },
+  )
   activeElection: ActiveElectionEntity; // Reverse relationship (optional)
 
   @OneToMany(() => PositionEntity, (position) => position.election)
