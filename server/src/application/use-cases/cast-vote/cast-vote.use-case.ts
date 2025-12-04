@@ -160,7 +160,7 @@ export class CastVoteUseCase {
               manager,
             );
 
-            // Log the update
+            // Log the cast vote
             const log = ActivityLog.create({
               action: CAST_VOTE_ACTIONS.CAST_VOTE,
               entity: DATABASE_CONSTANTS.MODELNAME_CAST_VOTE,

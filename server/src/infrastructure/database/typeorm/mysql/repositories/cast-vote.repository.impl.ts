@@ -35,7 +35,7 @@ export class CastVoteRepositoryImpl
     }
   }
 
-  async reprintCastVoteWithElectionId(
+  async reprintCastVote(
     electionId: number,
     ballotNumber: string,
     context: EntityManager,

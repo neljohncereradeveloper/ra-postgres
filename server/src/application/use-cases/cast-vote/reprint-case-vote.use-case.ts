@@ -7,11 +7,19 @@ import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { Election } from '@domain/models/election.model';
 import { User } from '@domain/models/user.model';
+import { CAST_VOTE_ACTIONS } from '@domain/constants/cast-vote/cast-vote-actions.constants';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@domains/exceptions/index';
+import { ActivityLog } from '@domain/models/activitylog.model';
+import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
+import { getPHDateTime } from '@shared/utils/format-ph-time';
 
 @Injectable()
 export class ReprintCastVoteUseCase {
@@ -38,7 +46,7 @@ export class ReprintCastVoteUseCase {
 
   async execute(
     controlNumber: string,
-    user: User,
+    username: string,
   ): Promise<{
     ballotId: string;
     precinct: string;
@@ -46,20 +54,26 @@ export class ReprintCastVoteUseCase {
     groupCandidates: any;
   }> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CAST_VOTE,
+      CAST_VOTE_ACTIONS.REPRINT_CAST_VOTE,
       async (manager) => {
         // Get active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
-        // Retrieve related entities
+        // Retrieve election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${election.id} not found.`,
+          );
+        }
+
         const delegate =
           await this.delegateRepository.findByControlNumberAndElectionId(
             controlNumber,
@@ -68,9 +82,8 @@ export class ReprintCastVoteUseCase {
           );
 
         if (!delegate) {
-          throw new BadRequestException('Delegate not found');
+          throw new NotFoundException('Delegate not found');
         }
-
         if (!delegate.hasVoted) {
           throw new BadRequestException('Delegate has not yet voted');
         }
@@ -82,12 +95,11 @@ export class ReprintCastVoteUseCase {
             )
           : null;
 
-        const castVotes =
-          await this.castVoteRepository.reprintCastVoteWithElectionId(
-            activeElection.electionId,
-            ballot.ballotNumber,
-            manager,
-          );
+        const castVotes = await this.castVoteRepository.reprintCastVote(
+          election.id,
+          ballot.ballotNumber,
+          manager,
+        );
 
         // Ensure castVotes is always an array
         const castVotesArray = Array.isArray(castVotes)
@@ -113,6 +125,21 @@ export class ReprintCastVoteUseCase {
           });
         }
         const groupCandidates = Array.from(candidatesMap.values());
+
+        // Log the cast vote
+        const log = ActivityLog.create({
+          action: CAST_VOTE_ACTIONS.REPRINT_CAST_VOTE,
+          entity: DATABASE_CONSTANTS.MODELNAME_CAST_VOTE,
+          details: JSON.stringify({
+            id: castVotes.id,
+            election: election.name,
+            ballotNumber: ballot.ballotNumber,
+            delegate: delegate.accountName,
+            dateTimeReprint: getPHDateTime(),
+          }),
+          username: username,
+        });
+        await this.activityLogRepository.create(log, manager);
 
         return {
           ballotId: ballot?.ballotNumber,
