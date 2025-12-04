@@ -1,20 +1,18 @@
 import { UserRole } from '@domain/models/user-role.model';
 
 export interface UserRoleRepository<Context = unknown> {
-  createWithManager(userRole: UserRole, context?: Context): Promise<UserRole>;
-  updateWithManager(
+  create(userRole: UserRole, context?: Context): Promise<UserRole>;
+  update(
     id: number,
     updateData: Partial<UserRole>,
     context?: Context,
   ): Promise<boolean>;
-  softDeleteWithManager(id: number, context?: Context): Promise<boolean>;
-  restoreWithManager(id: number, context?: Context): Promise<boolean>;
-  findByIdWithManager(id: number, context?: Context): Promise<UserRole>;
-  findWithFilters(
+  findById(id: number, context?: Context): Promise<UserRole>;
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
   ): Promise<{
     data: UserRole[];
     meta: {
@@ -26,7 +24,6 @@ export interface UserRoleRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  findById(id: number): Promise<UserRole>;
   findByDesc(desc1: string): Promise<UserRole>;
-  findAll(): Promise<UserRole[]>;
+  combobox(): Promise<UserRole[]>;
 }

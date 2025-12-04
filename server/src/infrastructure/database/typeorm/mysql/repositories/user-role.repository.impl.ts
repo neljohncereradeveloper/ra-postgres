@@ -30,7 +30,7 @@ export class UserRoleRepositoryImpl
     }
   }
 
-  async updateWithManager(
+  async update(
     id: number,
     updateFields: Partial<UserRole>,
     manager: EntityManager,
@@ -78,7 +78,7 @@ export class UserRoleRepositoryImpl
     return result.affected > 0; // Return true if a row was restored
   }
 
-  async findWithFilters(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -150,24 +150,14 @@ export class UserRoleRepositoryImpl
     };
   }
 
-  async findById(id: number): Promise<UserRole | null> {
-    const userRoleEntity = await this.userRoleRepo.findOne({
-      where: { id, deletedAt: null },
-    });
-    return userRoleEntity ? this.toModel(userRoleEntity) : null;
-  }
-
-  async findByIdWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<UserRole | null> {
+  async findById(id: number, manager: EntityManager): Promise<UserRole | null> {
     const userRoleEntity = await manager.findOne(UserRoleEntity, {
       where: { id, deletedAt: null },
     });
     return userRoleEntity ? this.toModel(userRoleEntity) : null;
   }
 
-  async findAll(): Promise<UserRole[]> {
+  async combobox(): Promise<UserRole[]> {
     return await this.userRoleRepo.find({
       where: { deletedAt: null },
     });

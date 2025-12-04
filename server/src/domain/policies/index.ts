@@ -1,4 +1,5 @@
 export * from './activity-log/activity-log-validation.policy';
+export * from './application-access/application-access-validation.policy';
 export * from './precinct/precinct-validation.policy';
 export * from './district/district-validation.policy';
 export * from './position/position-validation.policy';
@@ -10,3 +11,5 @@ export * from './election/election-lock.policy';
 export * from './cast-vote/cast-vote-validation.policy';
 export * from './delegate/delegate-validation.policy';
 export * from './candidate/candidate-validation.policy';
+export * from './user-role/user-role-validation.policy';
+export * from './user/user-validation.policy';

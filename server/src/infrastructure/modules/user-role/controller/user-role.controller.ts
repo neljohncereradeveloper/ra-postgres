@@ -16,10 +16,10 @@ import { CreateUserRoleUseCase } from '@application/use-cases/user-role/create-u
 import { CreateUserRoleDto } from '../interface/dto/create-user-role.dto';
 import { UpdateUserRoleDto } from '../interface/dto/update-user-role.dto';
 import { UpdateUserRoleUseCase } from '@application/use-cases/user-role/update-user-role.use-case';
-import { FindUserRolesWithFiltersUseCase } from '@application/use-cases/user-role/find-with-filters-user-role.use-case';
-import { SoftDeleteUserRoleUseCase } from '@application/use-cases/user-role/soft-delete-user-role.use-case';
-import { RestoreDeleteUserRoleUseCase } from '@application/use-cases/user-role/restore-delete-user-role.use-case';
-import { RetrieveComboboxUserRoleUseCase } from '@application/use-cases/user-role/retrieve-combobox-user-role.use-case';
+import { PaginatedUserRoleListUseCase } from '@application/use-cases/user-role/paginated-user-role-list.use-case';
+import { ArchiveUserRoleUseCase } from '@application/use-cases/user-role/archive-user-role.use-case';
+import { RestoreDeleteUserRoleUseCase } from '@application/use-cases/user-role/restore-user-role.use-case';
+import { ComboboxUserRoleUseCase } from '@application/use-cases/user-role/combobox-user-role.use-case';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
 import {
@@ -37,10 +37,10 @@ export class UserRoleController {
   constructor(
     private readonly createUserRoleUseCase: CreateUserRoleUseCase,
     private readonly updateUserRoleUseCase: UpdateUserRoleUseCase,
-    private readonly findUserRolesWithFiltersUseCase: FindUserRolesWithFiltersUseCase,
-    private readonly softDeleteUserRoleUseCase: SoftDeleteUserRoleUseCase,
+    private readonly findUserRolesWithFiltersUseCase: PaginatedUserRoleListUseCase,
+    private readonly softDeleteUserRoleUseCase: ArchiveUserRoleUseCase,
     private readonly restoreDeleteUserRoleUseCase: RestoreDeleteUserRoleUseCase,
-    private readonly retrieveComboboxUserRoleUseCase: RetrieveComboboxUserRoleUseCase,
+    private readonly retrieveComboboxUserRoleUseCase: ComboboxUserRoleUseCase,
   ) {}
 
   @Version('1') // API versioning

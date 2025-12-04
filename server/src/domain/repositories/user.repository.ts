@@ -1,20 +1,18 @@
 import { User } from '@domain/models/user.model';
 
 export interface UserRepository<Context = unknown> {
-  createWithManager(user: User, context?: Context): Promise<User>;
-  updateWithManager(
+  create(user: User, context?: Context): Promise<User>;
+  update(
     id: number,
     updateData: Partial<User>,
     context?: Context,
   ): Promise<boolean>;
-  softDeleteWithManager(id: number, context?: Context): Promise<boolean>;
-  restoreWithManager(id: number, context?: Context): Promise<boolean>;
-  findByIdWithManager(id: number, context?: Context): Promise<User>;
-  findWithFilters(
+  findById(id: number, context?: Context): Promise<User>;
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
   ): Promise<{
     data: User[];
     meta: {
@@ -26,7 +24,5 @@ export interface UserRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  findById(id: number): Promise<User>;
-  findAll(): Promise<User[]>;
   findByUserName(userName: string): Promise<User>;
 }

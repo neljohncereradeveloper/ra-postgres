@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ApplicationAccessController } from './controller/application-access.controller';
 import { CreateApplicationAccessUseCase } from '@application/use-cases/application-access/create-application-access.use-case';
 import { UpdateApplicationAccessUseCase } from '@application/use-cases/application-access/update-application-access.use-case';
-import { FindApplicationAccesssWithFiltersUseCase } from '@application/use-cases/application-access/find-with-filters-application-access.use-case';
-import { SoftDeleteApplicationAccessUseCase } from '@application/use-cases/application-access/soft-delete-application-access.use-case';
-import { RestoreDeleteApplicationAccessUseCase } from '@application/use-cases/application-access/restore-delete-application-access.use-case';
-import { RetrieveComboboxApplicationAccessUseCase } from '@application/use-cases/application-access/retrieve-combobox-application-access.use-case';
+import { PaginatedApplicationAccessListUseCase } from '@application/use-cases/application-access/paginated-application-access-list.use-case';
+import { ArchiveApplicationAccessUseCase } from '@application/use-cases/application-access/archive-application-access.use-case';
+import { RestoreApplicationAccessUseCase } from '@application/use-cases/application-access/restore-application-access.use-case';
+import { ComboboxApplicationAccessUseCase } from '@application/use-cases/application-access/combobox-application-access.use-case';
 import { MysqlDatabaseModule } from '@infrastructure/database/typeorm-mysql/mysql-database.module';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
@@ -31,18 +31,18 @@ import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysq
     }, // Dependency Injection
     CreateApplicationAccessUseCase,
     UpdateApplicationAccessUseCase,
-    FindApplicationAccesssWithFiltersUseCase,
-    SoftDeleteApplicationAccessUseCase,
-    RestoreDeleteApplicationAccessUseCase,
-    RetrieveComboboxApplicationAccessUseCase,
+    PaginatedApplicationAccessListUseCase,
+    ArchiveApplicationAccessUseCase,
+    RestoreApplicationAccessUseCase,
+    ComboboxApplicationAccessUseCase,
   ],
   exports: [
     CreateApplicationAccessUseCase,
     UpdateApplicationAccessUseCase,
-    FindApplicationAccesssWithFiltersUseCase,
-    SoftDeleteApplicationAccessUseCase,
-    RestoreDeleteApplicationAccessUseCase,
-    RetrieveComboboxApplicationAccessUseCase,
+    PaginatedApplicationAccessListUseCase,
+    ArchiveApplicationAccessUseCase,
+    RestoreApplicationAccessUseCase,
+    ComboboxApplicationAccessUseCase,
   ],
 })
 export class ApplicationAccessModule {}

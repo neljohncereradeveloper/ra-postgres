@@ -16,9 +16,9 @@ import { CreateUserUseCase } from '@application/use-cases/user/create-user.use-c
 import { CreateUserDto } from '../interface/dto/create-user.dto';
 import { UpdateUserDto } from '../interface/dto/update-user.dto';
 import { UpdateUserUseCase } from '@application/use-cases/user/update-user.use-case';
-import { FindUsersWithFiltersUseCase } from '@application/use-cases/user/find-with-filters-user.use-case';
-import { SoftDeleteUserUseCase } from '@application/use-cases/user/soft-delete-user.use-case';
-import { RestoreDeleteUserUseCase } from '@application/use-cases/user/restore-delete-user.use-case';
+import { PaginatedUserListUseCase } from '@application/use-cases/user/paginated-user-list.use-case';
+import { ArchiveUserUseCase } from '@application/use-cases/user/archive-user.use-case';
+import { RestoreDeleteUserUseCase } from '@application/use-cases/user/restore-user.use-case';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
 import {
@@ -36,8 +36,8 @@ export class UserController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
-    private readonly findUsersWithFiltersUseCase: FindUsersWithFiltersUseCase,
-    private readonly softDeleteUserUseCase: SoftDeleteUserUseCase,
+    private readonly findUsersWithFiltersUseCase: PaginatedUserListUseCase,
+    private readonly softDeleteUserUseCase: ArchiveUserUseCase,
     private readonly restoreDeleteUserUseCase: RestoreDeleteUserUseCase,
   ) {}
 

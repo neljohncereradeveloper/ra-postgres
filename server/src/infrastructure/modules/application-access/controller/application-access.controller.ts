@@ -16,10 +16,10 @@ import { CreateApplicationAccessUseCase } from '@application/use-cases/applicati
 import { CreateApplicationAccessDto } from '../interface/dto/create-application-access.dto';
 import { UpdateApplicationAccessDto } from '../interface/dto/update-application-access.dto';
 import { UpdateApplicationAccessUseCase } from '@application/use-cases/application-access/update-application-access.use-case';
-import { FindApplicationAccesssWithFiltersUseCase } from '@application/use-cases/application-access/find-with-filters-application-access.use-case';
-import { SoftDeleteApplicationAccessUseCase } from '@application/use-cases/application-access/soft-delete-application-access.use-case';
-import { RestoreDeleteApplicationAccessUseCase } from '@application/use-cases/application-access/restore-delete-application-access.use-case';
-import { RetrieveComboboxApplicationAccessUseCase } from '@application/use-cases/application-access/retrieve-combobox-application-access.use-case';
+import { PaginatedApplicationAccessListUseCase } from '@application/use-cases/application-access/paginated-application-access-list.use-case';
+import { ArchiveApplicationAccessUseCase } from '@application/use-cases/application-access/archive-application-access.use-case';
+import { RestoreApplicationAccessUseCase } from '@application/use-cases/application-access/restore-application-access.use-case';
+import { ComboboxApplicationAccessUseCase } from '@application/use-cases/application-access/combobox-application-access.use-case';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
 import {
@@ -37,10 +37,10 @@ export class ApplicationAccessController {
   constructor(
     private readonly createApplicationAccessUseCase: CreateApplicationAccessUseCase,
     private readonly updateApplicationAccessUseCase: UpdateApplicationAccessUseCase,
-    private readonly findApplicationAccesssWithFiltersUseCase: FindApplicationAccesssWithFiltersUseCase,
-    private readonly softDeleteApplicationAccessUseCase: SoftDeleteApplicationAccessUseCase,
-    private readonly restoreDeleteApplicationAccessUseCase: RestoreDeleteApplicationAccessUseCase,
-    private readonly retrieveComboboxApplicationAccessUseCase: RetrieveComboboxApplicationAccessUseCase,
+    private readonly findApplicationAccesssWithFiltersUseCase: PaginatedApplicationAccessListUseCase,
+    private readonly softDeleteApplicationAccessUseCase: ArchiveApplicationAccessUseCase,
+    private readonly restoreDeleteApplicationAccessUseCase: RestoreApplicationAccessUseCase,
+    private readonly retrieveComboboxApplicationAccessUseCase: ComboboxApplicationAccessUseCase,
   ) {}
 
   @Version('1') // API versioning

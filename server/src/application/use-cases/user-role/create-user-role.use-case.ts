@@ -1,12 +1,13 @@
 import { CreateUserRoleCommand } from '@application/commands/user-role/create-user-role.command';
+import { USER_ROLE_ACTIONS } from '@domain/constants/user-role/user-role-actions.constants';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { UserRole } from '@domain/models/user-role.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 
 @Injectable()
@@ -20,29 +21,35 @@ export class CreateUserRoleUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(dto: CreateUserRoleCommand, userId: number): Promise<UserRole> {
+  async execute(
+    dto: CreateUserRoleCommand,
+    username: string,
+  ): Promise<UserRole> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_USERROLE,
+      USER_ROLE_ACTIONS.CREATE,
       async (manager) => {
         // Create the userRole
-        const userRole = new UserRole({ desc1: dto.desc1 });
-        const createdUserRole = await this.userRoleRepository.createWithManager(
+        const userRole = UserRole.create({
+          desc1: dto.desc1,
+          createdBy: username,
+        });
+        const createdUserRole = await this.userRoleRepository.create(
           userRole,
           manager,
         );
 
         // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_USERROLE,
-          DATABASE_CONSTANTS.MODELNAME_USERROLE,
-          JSON.stringify({
+        const log = ActivityLog.create({
+          action: USER_ROLE_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_USERROLE,
+          details: JSON.stringify({
             id: createdUserRole.id,
             desc1: createdUserRole.desc1,
+            createdBy: username,
+            createdAt: getPHDateTime(createdUserRole.createdAt),
           }),
-          new Date(),
-          userId, // USERI
-        );
-
+          username: username,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return createdUserRole;

@@ -3,9 +3,10 @@ import { ApplicationAccess } from '@domain/models/application-access.model';
 import { Inject } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ApplicationAccessRepository } from '@domains/repositories/application-access.repository';
+import { BadRequestException } from '@domains/exceptions/index';
 
 @Injectable()
-export class FindApplicationAccesssWithFiltersUseCase {
+export class PaginatedApplicationAccessListUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.APPLICATIONACCESS)
     private readonly applicationAccessRepository: ApplicationAccessRepository,
@@ -16,14 +17,14 @@ export class FindApplicationAccesssWithFiltersUseCase {
    * @param term Search term for filtering by applicationAccess description.
    * @param page The current page number for pagination.
    * @param limit The number of items per page.
-   * @param isDeleted Whether to retrieve deleted or non-deleted applicationAccesss.
+   * @param isArchived Whether to retrieve archived or non-archived applicationAccesss.
    * @returns An object containing filtered applicationAccesss and total count.
    */
   async execute(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
   ): Promise<{
     data: ApplicationAccess[];
     meta: {
@@ -37,20 +38,21 @@ export class FindApplicationAccesssWithFiltersUseCase {
   }> {
     // Validate input parameters (optional but recommended)
     if (page < 1) {
-      throw new Error('Page number must be greater than 0');
+      throw new BadRequestException('Page number must be greater than 0');
     }
     if (limit < 1) {
-      throw new Error('Limit must be greater than 0');
+      throw new BadRequestException('Limit must be greater than 0');
     }
 
-    // Call the repository method to get filtered data
-    const result = await this.applicationAccessRepository.findWithFilters(
-      term,
-      page,
-      limit,
-      isDeleted,
-    );
+    // retrieve the paginated list of application accesses
+    const applicationAccesses =
+      await this.applicationAccessRepository.findPaginatedList(
+        term,
+        page,
+        limit,
+        isArchived,
+      );
 
-    return result;
+    return applicationAccesses;
   }
 }

@@ -3,27 +3,28 @@ import { User } from '@domain/models/user.model';
 import { Inject } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { UserRepository } from '@domains/repositories/user.repository';
+import { BadRequestException } from '@domains/exceptions/index';
 
 @Injectable()
-export class FindUsersWithFiltersUseCase {
+export class PaginatedUserListUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.USER)
     private readonly userRepository: UserRepository,
   ) {}
 
   /**
-   * Executes the use case for finding users with filters.
+   * Executes the use case for finding users with pagination.
    * @param term Search term for filtering by user description.
    * @param page The current page number for pagination.
    * @param limit The number of items per page.
-   * @param isDeleted Whether to retrieve deleted or non-deleted users.
-   * @returns An object containing filtered users and total count.
+   * @param isArchived Whether to retrieve archived or non-archived users.
+   * @returns An object containing paginated users and total count.
    */
   async execute(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
   ): Promise<{
     data: User[];
     meta: {
@@ -35,22 +36,22 @@ export class FindUsersWithFiltersUseCase {
       previousPage: number | null;
     };
   }> {
-    // Validate input parameters (optional but recommended)
+    // Validate pagination parameters (Application Layer validation)
     if (page < 1) {
-      throw new Error('Page number must be greater than 0');
+      throw new BadRequestException('Page number must be greater than 0');
     }
     if (limit < 1) {
-      throw new Error('Limit must be greater than 0');
+      throw new BadRequestException('Limit must be greater than 0');
     }
 
-    // Call the repository method to get filtered data
-    const result = await this.userRepository.findWithFilters(
+    // retrieve the paginated list of users
+    const users = await this.userRepository.findPaginatedList(
       term,
       page,
       limit,
-      isDeleted,
+      isArchived,
     );
 
-    return result;
+    return users;
   }
 }

@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { UserController } from './controller/user.controller';
 import { CreateUserUseCase } from '@application/use-cases/user/create-user.use-case';
 import { UpdateUserUseCase } from '@application/use-cases/user/update-user.use-case';
-import { FindUsersWithFiltersUseCase } from '@application/use-cases/user/find-with-filters-user.use-case';
-import { SoftDeleteUserUseCase } from '@application/use-cases/user/soft-delete-user.use-case';
-import { RestoreDeleteUserUseCase } from '@application/use-cases/user/restore-delete-user.use-case';
+import { PaginatedUserListUseCase } from '@application/use-cases/user/paginated-user-list.use-case';
+import { ArchiveUserUseCase } from '@application/use-cases/user/archive-user.use-case';
+import { RestoreDeleteUserUseCase } from '@application/use-cases/user/restore-user.use-case';
 import { BcryptPasswordEncryptionAdapter } from '@infrastructure/modules/user/adapters/password-encryption.adapter';
 import { MysqlDatabaseModule } from '@infrastructure/database/typeorm-mysql/mysql-database.module';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
@@ -54,15 +54,15 @@ import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-m
     }, // Dependency Injection
     CreateUserUseCase,
     UpdateUserUseCase,
-    FindUsersWithFiltersUseCase,
-    SoftDeleteUserUseCase,
+    PaginatedUserListUseCase,
+    ArchiveUserUseCase,
     RestoreDeleteUserUseCase,
   ],
   exports: [
     CreateUserUseCase,
     UpdateUserUseCase,
-    FindUsersWithFiltersUseCase,
-    SoftDeleteUserUseCase,
+    PaginatedUserListUseCase,
+    ArchiveUserUseCase,
     RestoreDeleteUserUseCase,
   ],
 })

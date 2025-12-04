@@ -14,7 +14,7 @@ export class ApplicationAccessRepositoryImpl
     private readonly applicationAccessRepo: Repository<ApplicationAccessEntity>,
   ) {}
 
-  async createWithManager(
+  async create(
     applicationAccess: ApplicationAccess,
     manager: EntityManager,
   ): Promise<ApplicationAccess> {
@@ -33,7 +33,7 @@ export class ApplicationAccessRepositoryImpl
     }
   }
 
-  async updateWithManager(
+  async update(
     id: number,
     updateFields: Partial<ApplicationAccess>,
     manager: EntityManager,
@@ -81,7 +81,7 @@ export class ApplicationAccessRepositoryImpl
     return result.affected > 0; // Return true if a row was restored
   }
 
-  async findWithFilters(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -156,16 +156,7 @@ export class ApplicationAccessRepositoryImpl
     };
   }
 
-  async findById(id: number): Promise<ApplicationAccess | null> {
-    const applicationAccessEntity = await this.applicationAccessRepo.findOne({
-      where: { id, deletedAt: null },
-    });
-    return applicationAccessEntity
-      ? this.toModel(applicationAccessEntity)
-      : null;
-  }
-
-  async findByIdWithManager(
+  async findById(
     id: number,
     manager: EntityManager,
   ): Promise<ApplicationAccess | null> {
@@ -180,7 +171,7 @@ export class ApplicationAccessRepositoryImpl
       : null;
   }
 
-  async findAll(): Promise<ApplicationAccess[]> {
+  async combobox(): Promise<ApplicationAccess[]> {
     return await this.applicationAccessRepo.find({
       where: { deletedAt: null },
     });

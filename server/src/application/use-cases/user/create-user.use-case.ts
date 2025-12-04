@@ -9,16 +9,16 @@ import { ElectionRepository } from '@domains/repositories/election.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { UserRepository } from '@domains/repositories/user.repository';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { PrecinctRepository } from '@domains/repositories/precinct.repository';
+import { USER_ACTIONS } from '@domain/constants/user/user-actions.constants';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@domains/exceptions/index';
 
 @Injectable()
 export class CreateUserUseCase {
@@ -43,9 +43,9 @@ export class CreateUserUseCase {
     private readonly precinctRepository: PrecinctRepository,
   ) {}
 
-  async execute(dto: CreateUserCommand, userId: number): Promise<User> {
+  async execute(dto: CreateUserCommand, username: string): Promise<User> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_USER,
+      USER_ACTIONS.CREATE,
       async (manager) => {
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
@@ -100,36 +100,34 @@ export class CreateUserUseCase {
           dto.password,
         );
 
-        // Create the user
-        const user = new User({
+        // use domain model method to create (encapsulates business logic and validation)
+        const user = User.create({
           precinct: dto.precinct,
           watcher: dto.watcher,
           applicationAccess: dto.applicationAccess,
           userRoles: dto.userRoles,
           userName: dto.userName,
           password: hassPassword,
+          createdBy: username,
         });
-        const createdUser = await this.userRepository.createWithManager(
-          user,
-          manager,
-        );
+        const createdUser = await this.userRepository.create(user, manager);
 
         // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_USER,
-          DATABASE_CONSTANTS.MODELNAME_USER,
-          JSON.stringify({
+        const log = ActivityLog.create({
+          action: USER_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_USER,
+          details: JSON.stringify({
             id: createdUser.id,
-            watcher: dto.watcher,
-            precinct: dto.precinct,
-            applicationAccess: dto.applicationAccess,
-            userRoles: dto.userRoles,
-            userName: dto.userName,
+            userName: createdUser.userName,
+            precinct: createdUser.precinct,
+            watcher: createdUser.watcher,
+            applicationAccess: createdUser.applicationAccess,
+            userRoles: createdUser.userRoles,
+            createdBy: username,
+            createdAt: getPHDateTime(createdUser.createdAt),
           }),
-          new Date(),
-          userId, // USERI
-        );
-
+          username: username,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return createdUser;

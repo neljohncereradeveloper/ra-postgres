@@ -12,7 +12,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     private readonly userRepo: Repository<UserEntity>,
   ) {}
 
-  async createWithManager(user: User, manager: EntityManager): Promise<User> {
+  async create(user: User, manager: EntityManager): Promise<User> {
     try {
       const userEntity = this.toEntity(user);
       const savedEntity = await manager.save(UserEntity, userEntity);
@@ -25,7 +25,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     }
   }
 
-  async updateWithManager(
+  async update(
     id: number,
     updateFields: Partial<User>,
     manager: EntityManager,
@@ -73,7 +73,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     return result.affected > 0; // Return true if a row was restored
   }
 
-  async findWithFilters(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -153,17 +153,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     };
   }
 
-  async findById(id: number): Promise<User | null> {
-    const userEntity = await this.userRepo.findOne({
-      where: { id, deletedAt: null },
-    });
-    return userEntity ? this.toModel(userEntity) : null;
-  }
-
-  async findByIdWithManager(
-    id: number,
-    manager: EntityManager,
-  ): Promise<User | null> {
+  async findById(id: number, manager: EntityManager): Promise<User | null> {
     const userEntity = await manager.findOne(UserEntity, {
       where: { id, deletedAt: null },
     });

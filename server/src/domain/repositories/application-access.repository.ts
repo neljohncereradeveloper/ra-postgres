@@ -1,26 +1,21 @@
 import { ApplicationAccess } from '@domain/models/application-access.model';
 
 export interface ApplicationAccessRepository<Context = unknown> {
-  createWithManager(
+  create(
     applicationAccess: ApplicationAccess,
     context?: Context,
   ): Promise<ApplicationAccess>;
-  updateWithManager(
+  update(
     id: number,
     updateData: Partial<ApplicationAccess>,
     context?: Context,
   ): Promise<boolean>;
-  softDeleteWithManager(id: number, context?: Context): Promise<boolean>;
-  restoreWithManager(id: number, context?: Context): Promise<boolean>;
-  findByIdWithManager(
-    id: number,
-    context?: Context,
-  ): Promise<ApplicationAccess>;
-  findWithFilters(
+  findById(id: number, context?: Context): Promise<ApplicationAccess>;
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
   ): Promise<{
     data: ApplicationAccess[];
     meta: {
@@ -32,7 +27,6 @@ export interface ApplicationAccessRepository<Context = unknown> {
       previousPage: number | null;
     };
   }>;
-  findById(id: number): Promise<ApplicationAccess>;
   findByDesc(desc1: string): Promise<ApplicationAccess>;
-  findAll(): Promise<ApplicationAccess[]>;
+  combobox(): Promise<ApplicationAccess[]>;
 }

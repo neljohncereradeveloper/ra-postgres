@@ -8,17 +8,18 @@ import { ElectionRepository } from '@domains/repositories/election.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { UserRepository } from '@domains/repositories/user.repository';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { PrecinctRepository } from '@domains/repositories/precinct.repository';
+import { USER_ACTIONS } from '@domain/constants/user/user-actions.constants';
+import {
+  BadRequestException,
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class UpdateUserUseCase {
@@ -44,10 +45,10 @@ export class UpdateUserUseCase {
   async execute(
     id: number,
     dto: UpdateUserCommand,
-    userId: number,
+    username: string,
   ): Promise<User> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.UPDATE_USER,
+      USER_ACTIONS.UPDATE,
       async (manager) => {
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
@@ -59,7 +60,7 @@ export class UpdateUserUseCase {
           activeElection.electionId,
           manager,
         );
-        // Can only add user if election is schedule
+        // Can only UPDATE user if election is schedule
         election.validateForUpdate();
 
         const precinct = await this.precinctRepository.findByDescription(
@@ -99,50 +100,47 @@ export class UpdateUserUseCase {
         await Promise.all(applicationAccessPromises);
 
         // validate user existence
-        const userResult = await this.userRepository.findByIdWithManager(
-          id,
-          manager,
-        );
+        const userResult = await this.userRepository.findById(id, manager);
         if (!userResult) {
           throw new NotFoundException('User not found');
         }
 
-        // Update the user
-        const user = new User({
+        // use domain model method to update (encapsulates business logic and validation)
+        userResult.update({
           precinct: dto.precinct,
           watcher: dto.watcher,
           applicationAccess: dto.applicationAccess,
           userRoles: dto.userRoles,
+          updatedBy: username,
         });
-        const updateSuccessfull = await this.userRepository.updateWithManager(
+        const updateSuccessfull = await this.userRepository.update(
           id,
-          user,
+          userResult,
           manager,
         );
 
         if (!updateSuccessfull) {
-          throw new InternalServerErrorException('User update failed');
+          throw new SomethinWentWrongException('User update failed');
         }
 
-        const updateResult = await this.userRepository.findByIdWithManager(
-          id,
-          manager,
-        );
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPDATE_USER,
-          DATABASE_CONSTANTS.MODELNAME_USER,
-          JSON.stringify({
+        const updateResult = await this.userRepository.findById(id, manager);
+
+        // Log the update
+        const log = ActivityLog.create({
+          action: USER_ACTIONS.UPDATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_USER,
+          details: JSON.stringify({
             id: updateResult.id,
-            watcher: dto.watcher,
-            precinct: dto.precinct,
-            applicationAccess: dto.applicationAccess,
-            userRoles: dto.userRoles,
+            userName: updateResult.userName,
+            precinct: updateResult.precinct,
+            watcher: updateResult.watcher,
+            applicationAccess: updateResult.applicationAccess,
+            userRoles: updateResult.userRoles,
+            updatedBy: username,
+            updatedAt: getPHDateTime(updateResult.updatedAt),
           }),
-          new Date(),
-          userId,
-        );
-        // insert log
+          username: username,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return updateResult;
