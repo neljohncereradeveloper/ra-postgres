@@ -1,5 +1,5 @@
 import { CastVoteValidationPolicy } from '../../../../src/domain/policies/cast-vote/cast-vote-validation.policy';
-import { CastVoteValidationException } from '../../../../src/domain/exceptions/cast-vote/cast-vote.exception';
+import { CastVoteBusinessException } from '../../../../src/domain/exceptions/cast-vote/cast-vote-business.exception';
 import { BALLOT_STATUS_CONSTANTS } from '../../../../src/shared/constants/ballot.constants';
 import { ELECTION_STATUS_CONSTANTS } from '../../../../src/shared/constants/election.constants';
 
@@ -13,7 +13,7 @@ describe('CastVotePolicy', () => {
   describe('validateElectionState', () => {
     it('should throw when election is null', () => {
       expect(() => policy.validateElectionState(null)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -24,7 +24,7 @@ describe('CastVotePolicy', () => {
       } as any;
 
       expect(() => policy.validateElectionState(election)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -39,7 +39,7 @@ describe('CastVotePolicy', () => {
       } as any;
 
       expect(() => policy.validateElectionState(election)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -60,7 +60,7 @@ describe('CastVotePolicy', () => {
   describe('validateDelegateEligibility', () => {
     it('should throw when delegate is null', () => {
       expect(() => policy.validateDelegateEligibility(null)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -71,7 +71,7 @@ describe('CastVotePolicy', () => {
       } as any;
 
       expect(() => policy.validateDelegateEligibility(delegate)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -88,7 +88,7 @@ describe('CastVotePolicy', () => {
   describe('validateBallot', () => {
     it('should throw when ballot is null', () => {
       expect(() => policy.validateBallot(null)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -99,7 +99,7 @@ describe('CastVotePolicy', () => {
       } as any;
 
       expect(() => policy.validateBallot(ballot)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -116,7 +116,7 @@ describe('CastVotePolicy', () => {
   describe('validateCandidate', () => {
     it('should throw when candidate is null', () => {
       expect(() => policy.validateCandidate(null, 1)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -127,7 +127,7 @@ describe('CastVotePolicy', () => {
       } as any;
 
       expect(() => policy.validateCandidate(candidate, 1)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -139,7 +139,7 @@ describe('CastVotePolicy', () => {
       } as any;
 
       expect(() => policy.validateCandidate(candidate, 1)).toThrow(
-        CastVoteValidationException,
+        CastVoteBusinessException,
       );
     });
 
@@ -161,7 +161,7 @@ describe('CastVotePolicy', () => {
 
       expect(() =>
         policy.validatePositionLimits(candidatesPerPosition, positions),
-      ).toThrow(CastVoteValidationException);
+      ).toThrow(CastVoteBusinessException);
     });
 
     it('should throw when too many votes for a position', () => {
@@ -179,7 +179,7 @@ describe('CastVotePolicy', () => {
 
       expect(() =>
         policy.validatePositionLimits(candidatesPerPosition, positions),
-      ).toThrow(CastVoteValidationException);
+      ).toThrow(CastVoteBusinessException);
     });
 
     it('should not throw when votes are within limits', () => {

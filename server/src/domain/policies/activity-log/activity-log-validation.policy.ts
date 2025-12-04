@@ -1,7 +1,8 @@
 // domain/policies/activity-log/activity-log-validation.policy.ts
 
 import { ActivityLog } from '@domain/models/activitylog.model';
-import { ActivityLogValidationException } from '@domains/exceptions/activity-log/activity-log-validation.exception';
+import { ActivityLogBusinessException } from '@domains/exceptions/activity-log/activity-log-business.exception';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * ActivityLogValidationPolicy
@@ -25,34 +26,41 @@ export class ActivityLogValidationPolicy {
    */
   validate(activityLog: ActivityLog): void {
     if (!activityLog) {
-      throw new ActivityLogValidationException('Activity log not found');
+      throw new ActivityLogBusinessException(
+        'Activity log not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if action is provided
     if (!activityLog.action || activityLog.action.trim().length === 0) {
-      throw new ActivityLogValidationException(
+      throw new ActivityLogBusinessException(
         'Action is required and cannot be empty.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if action length is within limits (100 characters max based on entity)
     if (activityLog.action.length > 100) {
-      throw new ActivityLogValidationException(
+      throw new ActivityLogBusinessException(
         'Action must not exceed 100 characters.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if entity is provided
     if (!activityLog.entity || activityLog.entity.trim().length === 0) {
-      throw new ActivityLogValidationException(
+      throw new ActivityLogBusinessException(
         'Entity is required and cannot be empty.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if entity length is within limits (100 characters max based on entity)
     if (activityLog.entity.length > 100) {
-      throw new ActivityLogValidationException(
+      throw new ActivityLogBusinessException(
         'Entity must not exceed 100 characters.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
@@ -62,8 +70,9 @@ export class ActivityLogValidationPolicy {
       !(activityLog.timestamp instanceof Date) ||
       isNaN(activityLog.timestamp.getTime())
     ) {
-      throw new ActivityLogValidationException(
+      throw new ActivityLogBusinessException(
         'Timestamp must be a valid date.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
   }

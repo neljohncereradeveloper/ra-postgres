@@ -19,6 +19,8 @@ import { getPHDateTime } from '@shared/utils/format-ph-time';
 import { Election } from '@domain/models/election.model';
 import { User } from '@domain/models/user.model';
 import { GatewayGateway } from '@infrastructure/modules/gateway/gateway.gateway';
+import { NotFoundException } from '@domains/exceptions/index';
+import { CAST_VOTE_ACTIONS } from '@domain/constants/cast-vote/cast-vote-actions.constants';
 
 @Injectable()
 export class CastVoteUseCase {
@@ -48,30 +50,40 @@ export class CastVoteUseCase {
   }
 
   async execute(
-    command: CastVoteCommand,
-    user: User,
+    dto: CastVoteCommand,
+    username: string,
+    precinct: string,
   ): Promise<{ ballotId: string; precinct: string; election: Election }> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CAST_VOTE,
+      CAST_VOTE_ACTIONS.CAST_VOTE,
       async (manager) => {
         // Get active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
-        // Retrieve related entities
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+
+        // retrieve the delegate
         const delegate =
           await this.delegateRepository.findByControlNumberAndElectionId(
-            command.controlNumber,
-            activeElection.electionId,
+            dto.controlNumber,
+            election.id,
             manager,
           );
+
+        // retrieve the ballot
         const ballot = delegate
           ? await this.ballotRepository.retrieveDelegateBallot(
               delegate.id,
@@ -85,7 +97,7 @@ export class CastVoteUseCase {
 
         // Collect all positions for validation
         const positions = await this.positionRepository.findByElection(
-          activeElection.electionId,
+          election.id,
           manager,
         );
 
@@ -94,8 +106,8 @@ export class CastVoteUseCase {
         });
 
         // Collect all candidates for validation if provided
-        if (command.candidates && command.candidates.length > 0) {
-          for (const candidateDto of command.candidates) {
+        if (dto.candidates && dto.candidates.length > 0) {
+          for (const candidateDto of dto.candidates) {
             const candidate = await this.candidateRepository.findById(
               candidateDto.id,
               manager,
@@ -117,19 +129,19 @@ export class CastVoteUseCase {
 
         // Log if no candidates were selected (empty ballot submission)
         if (candidateEntities.length === 0) {
-          const emptyBallotLog = new ActivityLog(
-            LOG_ACTION_CONSTANTS.CAST_VOTE,
-            DATABASE_CONSTANTS.MODELNAME_BALLOT,
-            JSON.stringify({
+          // Log the update
+          const log = ActivityLog.create({
+            action: CAST_VOTE_ACTIONS.CAST_VOTE,
+            entity: DATABASE_CONSTANTS.MODELNAME_CAST_VOTE,
+            details: JSON.stringify({
               ballotNumber: ballot.ballotNumber,
               election: election.name,
               note: 'Empty ballot submitted (no candidates selected)',
               dateSubmitted: getPHDateTime(),
             }),
-            getPHDateTime(),
-            user.id,
-          );
-          await this.activityLogRepository.create(emptyBallotLog, manager);
+            username: username,
+          });
+          await this.activityLogRepository.create(log, manager);
         } else {
           // Process the votes for each selected candidate
           for (const candidate of candidateEntities) {
@@ -137,7 +149,7 @@ export class CastVoteUseCase {
             const newCastVote = new CastVote({
               electionId: activeElection.electionId,
               ballotNumber: ballot.ballotNumber,
-              precinct: user.precinct,
+              precinct: precinct,
               candidateId: candidate.id,
               positionId: candidate.positionId,
               districtId: candidate.districtId,
@@ -148,20 +160,20 @@ export class CastVoteUseCase {
               manager,
             );
 
-            const activityLog = new ActivityLog(
-              LOG_ACTION_CONSTANTS.CAST_VOTE,
-              DATABASE_CONSTANTS.MODELNAME_CAST_VOTE,
-              JSON.stringify({
+            // Log the update
+            const log = ActivityLog.create({
+              action: CAST_VOTE_ACTIONS.CAST_VOTE,
+              entity: DATABASE_CONSTANTS.MODELNAME_CAST_VOTE,
+              details: JSON.stringify({
                 id: castVote.id,
                 election: election.name,
                 ballotNumber: castVote.ballotNumber,
                 candidate: candidate.displayName,
                 dateTimeCast: castVote.dateTimeCast,
               }),
-              getPHDateTime(),
-              user.id,
-            );
-            await this.activityLogRepository.create(activityLog, manager);
+              username: username,
+            });
+            await this.activityLogRepository.create(log, manager);
           }
         }
 
@@ -176,7 +188,7 @@ export class CastVoteUseCase {
 
         return {
           ballotId: ballot.ballotNumber,
-          precinct: user.precinct,
+          precinct: precinct,
           election: election,
         };
       },

@@ -5,9 +5,10 @@ import { Delegate } from '@domain/models/delegate.model';
 import { Ballot } from '@domain/models/ballot.model';
 import { Candidate } from '@domain/models/candidate.model';
 import { Position } from '@domain/models/position.model';
-import { CastVoteValidationException } from '@domains/exceptions/cast-vote/cast-vote.exception';
+import { CastVoteBusinessException } from '@domains/exceptions/cast-vote/cast-vote-business.exception';
 import { ElectionStatus } from '@domain/enums/index';
 import { BALLOT_STATUS_CONSTANTS } from '@domain/constants/ballot/ballot-actions.constants';
+import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
  * CastVotePolicy
@@ -23,25 +24,33 @@ export class CastVoteValidationPolicy {
    */
   validateElectionState(election: Election): void {
     if (!election) {
-      throw new CastVoteValidationException('Election not found');
+      throw new CastVoteBusinessException(
+        'Election not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if the election is not closed
     if (election.electionStatus === ElectionStatus.CLOSED) {
-      throw new CastVoteValidationException(
+      throw new CastVoteBusinessException(
         'Election has already been closed.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if the election is not cancelled
     if (election.electionStatus === ElectionStatus.CANCELLED) {
-      throw new CastVoteValidationException('Election has been cancelled.');
+      throw new CastVoteBusinessException(
+        'Election has been cancelled.',
+        HTTP_STATUS.BAD_REQUEST,
+      );
     }
 
     // Validate if the election has started
     if (election.electionStatus === ElectionStatus.SCHEDULED) {
-      throw new CastVoteValidationException(
+      throw new CastVoteBusinessException(
         'Cannot cast votes. Election has not started.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
   }
@@ -54,13 +63,17 @@ export class CastVoteValidationPolicy {
    */
   validateDelegateEligibility(delegate: Delegate): void {
     if (!delegate) {
-      throw new CastVoteValidationException('Delegate not found');
+      throw new CastVoteBusinessException(
+        'Delegate not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if the delegate has not already voted
     if (delegate.hasVoted) {
-      throw new CastVoteValidationException(
+      throw new CastVoteBusinessException(
         'Delegate has already voted in this election.',
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
@@ -78,13 +91,17 @@ export class CastVoteValidationPolicy {
    */
   validateBallot(ballot: Ballot): void {
     if (!ballot) {
-      throw new CastVoteValidationException('Ballot not found');
+      throw new CastVoteBusinessException(
+        'Ballot not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if the ballot is in issued status
     if (ballot.status !== BALLOT_STATUS_CONSTANTS.ISSUED) {
-      throw new CastVoteValidationException(
+      throw new CastVoteBusinessException(
         `Ballot is in invalid state: ${ballot.status}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
   }
@@ -98,19 +115,26 @@ export class CastVoteValidationPolicy {
    */
   validateCandidate(candidate: Candidate, electionId: number): void {
     if (!candidate) {
-      throw new CastVoteValidationException('Candidate not found');
+      throw new CastVoteBusinessException(
+        'Candidate not found',
+        HTTP_STATUS.NOT_FOUND,
+      );
     }
 
     // Validate if the candidate belongs to the active election
     if (candidate.electionId !== electionId) {
-      throw new CastVoteValidationException(
+      throw new CastVoteBusinessException(
         `Candidate ${candidate.displayName} does not belong to the active election.`,
+        HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if the candidate has not been removed
     if (candidate.deletedAt) {
-      throw new CastVoteValidationException('Candidate has been removed.');
+      throw new CastVoteBusinessException(
+        'Candidate has been removed.',
+        HTTP_STATUS.BAD_REQUEST,
+      );
     }
   }
 
@@ -130,15 +154,17 @@ export class CastVoteValidationPolicy {
 
       // Validate if the position exists
       if (!position) {
-        throw new CastVoteValidationException(
+        throw new CastVoteBusinessException(
           `Position with ID ${positionId} not found.`,
+          HTTP_STATUS.NOT_FOUND,
         );
       }
 
       // Validate if votes per position are within allowed limits
       if (position.maxCandidates && count > position.maxCandidates) {
-        throw new CastVoteValidationException(
+        throw new CastVoteBusinessException(
           `Maximum votes allowed for position ${position.desc1} is ${position.maxCandidates}, but ${count} votes were cast.`,
+          HTTP_STATUS.BAD_REQUEST,
         );
       }
     }
