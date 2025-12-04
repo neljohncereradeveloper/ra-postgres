@@ -104,7 +104,7 @@ export class CandidateRepositoryImpl
     return candidateEntity ? candidateEntity : null;
   }
 
-  async findPaginatedListWithElectionId(
+  async findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -200,7 +200,7 @@ export class CandidateRepositoryImpl
     return count;
   }
 
-  async getCastVoteCandidates(
+  async getElectionCandidates(
     electionId: number,
     manager: EntityManager,
   ): Promise<any[]> {

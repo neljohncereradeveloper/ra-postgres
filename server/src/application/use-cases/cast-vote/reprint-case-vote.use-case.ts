@@ -76,7 +76,7 @@ export class ReprintCastVoteUseCase {
         }
 
         const ballot = delegate
-          ? await this.ballotRepository.retrieveBallotByDelegateId(
+          ? await this.ballotRepository.retrieveDelegateBallot(
               delegate.id,
               manager,
             )

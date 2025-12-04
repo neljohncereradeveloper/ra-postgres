@@ -7,9 +7,6 @@ export interface BallotRepository<Context = unknown> {
   ): Promise<any>;
 
   submitBallot(ballotNumber: string, context?: Context): Promise<any>;
-  retrieveBallotByDelegateId(
-    delegateId: number,
-    context?: Context,
-  ): Promise<any>;
+  retrieveDelegateBallot(delegateId: number, context?: Context): Promise<any>;
   unlinkBallot(electionId: number, context?: Context): Promise<any>;
 }

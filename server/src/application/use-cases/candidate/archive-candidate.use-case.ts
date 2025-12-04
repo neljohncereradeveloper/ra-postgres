@@ -4,14 +4,15 @@ import { NotFoundException } from '@domains/exceptions/shared/not-found.exceptio
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 @Injectable()
-export class SoftDeleteCandidateUseCase {
+export class ArchiveCandidateUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -25,43 +26,64 @@ export class SoftDeleteCandidateUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userId: number): Promise<void> {
+  async execute(id: number, userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.SOFT_DELETE_CANDIDATE,
+      CANDIDATE_ACTIONS.ARCHIVE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only soft delete candidate if election is scheduled
-        election.validateForUpdate();
-
-        const success = await this.candidateRepository.softDelete(id, manager);
-        if (!success) {
-          // If the entity wasn't found, throw a 404 error
+        // retrieve the election
+        if (!election) {
           throw new NotFoundException(
-            `Candidate with ID ${id} not found or already deleted.`,
+            `Election with ID ${activeElection.electionId} not found.`,
           );
         }
+        // Use domain model method to validate if election is scheduled
+        election.validateForUpdate();
 
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.SOFT_DELETE_CANDIDATE,
-          DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
-          JSON.stringify({
-            id,
-            explaination: `Candidate with ID ${id} deleted`,
-          }),
-          new Date(),
-          userId,
+        // Retrieve the candidate
+        const candidate = await this.candidateRepository.findById(id, manager);
+        if (!candidate) {
+          throw new NotFoundException(`Candidate with ID ${id} not found.`);
+        }
+
+        // Use domain method to archive (soft delete)
+        candidate.archive(userName);
+
+        // Save the updated candidate
+        const success = await this.candidateRepository.update(
+          id,
+          candidate,
+          manager,
         );
-        // insert log
+        if (!success) {
+          throw new SomethinWentWrongException(`Candidate archive failed`);
+        }
+
+        // Log the archive
+        const log = ActivityLog.create({
+          action: CANDIDATE_ACTIONS.ARCHIVE,
+          entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
+          details: JSON.stringify({
+            id,
+            displayName: candidate.displayName,
+            explanation: `Candidate with ID : ${id} archived by USER : ${userName}`,
+            archivedBy: userName,
+            archivedAt: candidate.deletedAt,
+          }),
+          username: userName,
+        });
         await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

@@ -73,7 +73,7 @@ export class CastVoteUseCase {
             manager,
           );
         const ballot = delegate
-          ? await this.ballotRepository.retrieveBallotByDelegateId(
+          ? await this.ballotRepository.retrieveDelegateBallot(
               delegate.id,
               manager,
             )

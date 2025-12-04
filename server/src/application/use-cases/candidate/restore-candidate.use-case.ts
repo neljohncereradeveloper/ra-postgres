@@ -2,16 +2,17 @@ import { ActivityLog } from '@domain/models/activitylog.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { NotFoundException } from '@domains/exceptions/shared/not-found.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 @Injectable()
-export class RestoreDeleteCandidateUseCase {
+export class RestoreCandidateUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
@@ -25,46 +26,64 @@ export class RestoreDeleteCandidateUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userId: number): Promise<void> {
+  async execute(id: number, userName: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RESTORE_DELETE_CANDIDATE,
+      CANDIDATE_ACTIONS.RESTORE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
         // Can only restore deleted candidate if election is scheduled
         election.validateForUpdate();
 
-        const success = await this.candidateRepository.restoreDeleted(
+        // retrieve the candidate
+        const candidate = await this.candidateRepository.findById(id, manager);
+        if (!candidate) {
+          throw new NotFoundException(`Candidate with ID ${id} not found.`);
+        }
+
+        // Use domain method to restore (ensures deletedBy is cleared)
+        candidate.restore();
+
+        // Save the restored candidate
+        const success = await this.candidateRepository.update(
           id,
+          candidate,
           manager,
         );
         if (!success) {
-          throw new NotFoundException(
-            `Candidate with ID ${id} not found or already restored.`,
-          );
+          throw new SomethinWentWrongException(`Candidate restore failed`);
         }
 
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.RESTORE_DELETE_CANDIDATE,
-          DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
-          JSON.stringify({
+        // Log the restore
+        const log = ActivityLog.create({
+          action: CANDIDATE_ACTIONS.RESTORE,
+          entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
+          details: JSON.stringify({
             id,
-            explaination: `Candidate with ID ${id} restored`,
+            displayName: candidate.displayName,
+            explanation: `Candidate with ID : ${id} restored by USER : ${userName}`,
+            restoredBy: userName,
+            restoredAt: new Date(),
           }),
-          new Date(),
-          userId,
-        );
-        // insert log
+          username: userName,
+        });
         await this.activityLogRepository.create(log, manager);
+
+        return success;
       },
     );
   }

@@ -4,13 +4,11 @@ export interface CandidateRepository<Context = unknown> {
   create(candidate: Candidate, context?: Context): Promise<Candidate>;
   update(
     id: number,
-    updateData: Partial<Candidate>,
+    dto: Partial<Candidate>,
     context?: Context,
   ): Promise<boolean>;
-  softDelete(id: number, context?: Context): Promise<boolean>;
-  restoreDeleted(id: number, context?: Context): Promise<boolean>;
   findById(id: number, context?: Context): Promise<Candidate>;
-  findPaginatedListWithElectionId(
+  findPaginatedList(
     term: string,
     page: number,
     limit: number,
@@ -29,5 +27,5 @@ export interface CandidateRepository<Context = unknown> {
     };
   }>;
   countByElection(electionId: number, context?: Context): Promise<number>;
-  getCastVoteCandidates(electionId: number, context?: Context): Promise<any[]>;
+  getElectionCandidates(electionId: number, context?: Context): Promise<any[]>;
 }

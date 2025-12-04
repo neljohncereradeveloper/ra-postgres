@@ -6,8 +6,8 @@ import { Ballot } from '@domain/models/ballot.model';
 import { Candidate } from '@domain/models/candidate.model';
 import { Position } from '@domain/models/position.model';
 import { CastVoteValidationException } from '@domains/exceptions/cast-vote/cast-vote.exception';
-import { BALLOT_STATUS_CONSTANTS } from '@shared/constants/ballot.constants';
 import { ElectionStatus } from '@domain/enums/index';
+import { BALLOT_STATUS_CONSTANTS } from '@domain/constants/ballot/ballot-actions.constants';
 
 /**
  * CastVotePolicy

@@ -12,7 +12,7 @@ export interface DistrictRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    isArchived: boolean,
     electionId: number,
     context?: Context,
   ): Promise<{

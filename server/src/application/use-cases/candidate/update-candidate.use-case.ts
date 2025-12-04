@@ -4,9 +4,8 @@ import { NotFoundException } from '@domains/exceptions/shared/not-found.exceptio
 import { SomethinWentWrongException } from '@domains/exceptions/shared/something-wentwrong.exception';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
@@ -15,6 +14,7 @@ import { Candidate } from '@domain/models/candidate.model';
 import { DistrictRepository } from '@domains/repositories/district.repository';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
 
 @Injectable()
 export class UpdateCandidateUseCase {
@@ -40,21 +40,27 @@ export class UpdateCandidateUseCase {
   async execute(
     id: number,
     dto: UpdateCandidateCommand,
-    userId: number,
+    userName: string,
   ): Promise<Candidate> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.UPDATE_CANDIDATE,
+      CANDIDATE_ACTIONS.UPDATE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
-
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
         // Can only update candidate if election is scheduled
         election.validateForUpdate();
 
@@ -63,12 +69,12 @@ export class UpdateCandidateUseCase {
           manager,
         );
         if (!delegate) {
-          throw new BadRequestException('Delegate not found');
+          throw new NotFoundException('Delegate not found');
         }
 
         const position = await this.positionRepository.findByDescription(
           dto.position,
-          activeElection.electionId,
+          election.id,
           manager,
         );
         if (!position) {
@@ -77,30 +83,27 @@ export class UpdateCandidateUseCase {
 
         const district = await this.districtRepository.findByDescription(
           dto.district,
-          activeElection.electionId,
+          election.id,
           manager,
         );
         if (!district) {
           throw new NotFoundException('District not found');
         }
 
-        // validate position existence
-        const candidateResult = await this.candidateRepository.findById(
-          id,
-          manager,
-        );
-        if (!candidateResult) {
+        // retrieve the candidate
+        const candidate = await this.candidateRepository.findById(id, manager);
+        if (!candidate) {
           throw new NotFoundException('Candidate not found');
         }
 
-        // Update the district
-        const candidate = new Candidate({
-          electionId: activeElection.electionId,
-          districtId: district.id,
-          delegateId: delegate.id,
-          positionId: position.id,
+        candidate.update({
           displayName: dto.displayName,
+          updatedBy: userName,
+          positionId: position.id,
+          districtId: district.id,
         });
+
+        // update the candidate in the database
         const updateSuccessfull = await this.candidateRepository.update(
           id,
           candidate,
@@ -115,22 +118,23 @@ export class UpdateCandidateUseCase {
           id,
           manager,
         );
-        // Log the creation
-        const log = new ActivityLog(
-          LOG_ACTION_CONSTANTS.UPDATE_CANDIDATE,
-          DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
-          JSON.stringify({
+
+        // Log the update
+        const log = ActivityLog.create({
+          action: CANDIDATE_ACTIONS.UPDATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
+          details: JSON.stringify({
             id: updateResult.id,
             election: election.name,
-            delegate: delegate.accountName,
+            displayName: updateResult.displayName,
             position: position.desc1,
             district: district.desc1,
-            displayName: updateResult.displayName,
+            delegate: delegate.accountName,
+            updatedBy: userName,
+            updatedAt: updateResult.updatedAt,
           }),
-          new Date(),
-          userId,
-        );
-        // insert log
+          username: userName,
+        });
         await this.activityLogRepository.create(log, manager);
 
         return updateResult;

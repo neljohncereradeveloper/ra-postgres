@@ -8,3 +8,4 @@ export * from './position/position-business.exception';
 export * from './election/election-business.exception';
 export * from './cast-vote/cast-vote.exception';
 export * from './delegate/delegate-business.exception';
+export * from './candidate/candidate-business.exception';

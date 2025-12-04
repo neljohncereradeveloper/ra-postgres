@@ -78,7 +78,7 @@ export class RestoreDistrictUseCase {
             desc1: district.desc1,
             explanation: `District with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
-            restoredAt: district.deletedAt,
+            restoredAt: new Date(),
           }),
           username: userName,
         });

@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { BadRequestException } from '@nestjs/common';
+import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
+import { NotFoundException } from '@domains/exceptions/index';
+import { ElectionRepository } from '@domains/repositories/election.repository';
 
 @Injectable()
-export class GetCastVoteCandidatesUseCase {
+export class GetElectionCandidatesUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.CANDIDATE)
     private readonly candidateRepository: CandidateRepository,
@@ -16,26 +17,40 @@ export class GetCastVoteCandidatesUseCase {
     private readonly activeElectionRepository: ActiveElectionRepository,
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,
+    @Inject(REPOSITORY_TOKENS.ELECTION)
+    private readonly electionRepository: ElectionRepository,
   ) {}
 
   async execute() {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.RETRIEVE_CAST_VOTE_CANDIDATES,
+      CANDIDATE_ACTIONS.GET_ELECTION_CANDIDATES,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
-        // Call the repository method to get filtered data
-        const result = await this.candidateRepository.getCastVoteCandidates(
+        // retrieve the election
+        const election = await this.electionRepository.findById(
           activeElection.electionId,
+          manager,
+        );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionId} not found.`,
+          );
+        }
+
+        // retrieve the candidates for the election
+        const result = await this.candidateRepository.getElectionCandidates(
+          election.id,
           manager,
         );
 
         // Group candidates by position
-        const grouped = result.reduce((acc: any[], curr: any) => {
+        const candidates = result.reduce((acc: any[], curr: any) => {
           // Find if this position already exists in acc
           let group = acc.find(
             (g) =>
@@ -59,7 +74,7 @@ export class GetCastVoteCandidatesUseCase {
           return acc;
         }, []);
 
-        return grouped;
+        return candidates;
       },
     );
   }

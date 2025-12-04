@@ -22,11 +22,11 @@ import { AuthorizeApplicationAccess } from '@infrastructure/modules/auth/decorat
 import { UpdateCandidateDto } from '../interface/dto/update-candidate.dto';
 import { CreateCandidateUseCase } from '@application/use-cases/candidate/create-candidate.use-case';
 import { UpdateCandidateUseCase } from '@application/use-cases/candidate/update-candidate.use-case';
-import { FindCandidatesWithFiltersUseCase } from '@application/use-cases/candidate/find-with-filters-candidate.use-case';
-import { SoftDeleteCandidateUseCase } from '@application/use-cases/candidate/soft-delete-candidate.use-case';
-import { RestoreDeleteCandidateUseCase } from '@application/use-cases/candidate/restore-delete-candidate.use-case';
+import { PaginatedCandidateListUseCase } from '@application/use-cases/candidate/paginated-candidate-list.use-case';
+import { ArchiveCandidateUseCase } from '@application/use-cases/candidate/archive-candidate.use-case';
+import { RestoreCandidateUseCase } from '@application/use-cases/candidate/restore-candidate.use-case';
 import { CreateCandidateDto } from '../interface/dto/create-candidate.dto';
-import { GetCastVoteCandidatesUseCase } from '@application/use-cases/candidate/get-cast-vote-candidates';
+import { GetElectionCandidatesUseCase } from '@application/use-cases/candidate/get-election-candidates';
 // Controller for handling client-related requests
 @Controller('candidates')
 @UseGuards(JwtBearerAuthGuard)
@@ -34,10 +34,10 @@ export class CandidateController {
   constructor(
     private readonly createCandidateUseCase: CreateCandidateUseCase,
     private readonly updateCandidateUseCase: UpdateCandidateUseCase,
-    private readonly findCandidatesWithFiltersUseCase: FindCandidatesWithFiltersUseCase,
-    private readonly softDeleteCandidateUseCase: SoftDeleteCandidateUseCase,
-    private readonly restoreDeleteCandidateUseCase: RestoreDeleteCandidateUseCase,
-    private readonly getCastVoteCandidatesUseCase: GetCastVoteCandidatesUseCase,
+    private readonly findCandidatesWithFiltersUseCase: PaginatedCandidateListUseCase,
+    private readonly softDeleteCandidateUseCase: ArchiveCandidateUseCase,
+    private readonly restoreDeleteCandidateUseCase: RestoreCandidateUseCase,
+    private readonly getCastVoteCandidatesUseCase: GetElectionCandidatesUseCase,
   ) {}
 
   @Version('1') // API versioning

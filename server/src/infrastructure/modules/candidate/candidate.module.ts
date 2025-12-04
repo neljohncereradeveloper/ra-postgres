@@ -9,13 +9,13 @@ import { CandidateController } from './controller/candidate.controller';
 import { CandidateRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/candidate.repository.impl';
 import { CreateCandidateUseCase } from '@application/use-cases/candidate/create-candidate.use-case';
 import { UpdateCandidateUseCase } from '@application/use-cases/candidate/update-candidate.use-case';
-import { FindCandidatesWithFiltersUseCase } from '@application/use-cases/candidate/find-with-filters-candidate.use-case';
-import { SoftDeleteCandidateUseCase } from '@application/use-cases/candidate/soft-delete-candidate.use-case';
-import { RestoreDeleteCandidateUseCase } from '@application/use-cases/candidate/restore-delete-candidate.use-case';
+import { PaginatedCandidateListUseCase } from '@application/use-cases/candidate/paginated-candidate-list.use-case';
+import { ArchiveCandidateUseCase } from '@application/use-cases/candidate/archive-candidate.use-case';
+import { RestoreCandidateUseCase } from '@application/use-cases/candidate/restore-candidate.use-case';
 import { DistrictRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/district.repository.impl';
 import { DelegateRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/delegate.repository.impl';
 import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
-import { GetCastVoteCandidatesUseCase } from '@application/use-cases/candidate/get-cast-vote-candidates';
+import { GetElectionCandidatesUseCase } from '@application/use-cases/candidate/get-election-candidates';
 
 @Module({
   imports: [MysqlDatabaseModule],
@@ -41,18 +41,18 @@ import { GetCastVoteCandidatesUseCase } from '@application/use-cases/candidate/g
     }, // Dependency Injection
     CreateCandidateUseCase,
     UpdateCandidateUseCase,
-    FindCandidatesWithFiltersUseCase,
-    SoftDeleteCandidateUseCase,
-    RestoreDeleteCandidateUseCase,
-    GetCastVoteCandidatesUseCase,
+    PaginatedCandidateListUseCase,
+    ArchiveCandidateUseCase,
+    RestoreCandidateUseCase,
+    GetElectionCandidatesUseCase,
   ],
   exports: [
     CreateCandidateUseCase,
     UpdateCandidateUseCase,
-    FindCandidatesWithFiltersUseCase,
-    SoftDeleteCandidateUseCase,
-    RestoreDeleteCandidateUseCase,
-    GetCastVoteCandidatesUseCase,
+    PaginatedCandidateListUseCase,
+    ArchiveCandidateUseCase,
+    RestoreCandidateUseCase,
+    GetElectionCandidatesUseCase,
   ],
 })
 export class CandidateModule {}

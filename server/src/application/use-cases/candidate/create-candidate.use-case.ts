@@ -9,10 +9,14 @@ import { DistrictRepository } from '@domains/repositories/district.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
+import { Inject, Injectable } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions.constants';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@domains/exceptions/index';
+import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 
 @Injectable()
 export class CreateCandidateUseCase {
@@ -37,33 +41,39 @@ export class CreateCandidateUseCase {
 
   async execute(
     dto: CreateCandidateCommand,
-    userId: number,
+    username: string,
   ): Promise<Candidate> {
     return this.transactionHelper.executeTransaction(
-      LOG_ACTION_CONSTANTS.CREATE_CANDIDATE,
+      CANDIDATE_ACTIONS.CREATE,
       async (manager) => {
+        // retrieve the active election
         const activeElection =
           await this.activeElectionRepository.retrieveActiveElection(manager);
         if (!activeElection) {
-          throw new BadRequestException('No Active election');
+          throw new NotFoundException('No Active election');
         }
 
+        // retrieve the election
         const election = await this.electionRepository.findById(
           activeElection.electionId,
           manager,
         );
-        // Can only add candidate if election is scheduled
+        if (!election) {
+          throw new NotFoundException('Election not found');
+        }
+        // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
+        // retrieve the delegate
         const delegate = await this.delegateRepository.findById(
           dto.delegateId,
           manager,
         );
         if (!delegate) {
-          throw new BadRequestException('Candidate is not a delegate member.');
+          throw new NotFoundException('Delegate not found');
         }
 
-        if (activeElection.electionId !== delegate.electionId) {
+        if (election.id !== delegate.electionId) {
           throw new BadRequestException(
             'Delegate is not part of this election',
           );
@@ -71,50 +81,55 @@ export class CreateCandidateUseCase {
 
         const position = await this.positionRepository.findByDescription(
           dto.position,
-          activeElection.electionId,
+          election.id,
           manager,
         );
         if (!position) {
-          throw new BadRequestException('Position not found');
+          throw new NotFoundException('Position not found');
         }
 
         const district = await this.districtRepository.findByDescription(
           dto.district,
-          activeElection.electionId,
+          election.id,
           manager,
         );
         if (!district) {
-          throw new BadRequestException('District not found');
+          throw new NotFoundException('District not found');
         }
 
-        const newCandidate = new Candidate({
-          electionId: activeElection.electionId,
+        // use domain model method to create (encapsulates business logic and validation)
+        const newCandidate = Candidate.create({
+          electionId: election.id,
           districtId: district.id,
           positionId: position.id,
           delegateId: delegate.id,
           displayName: dto.displayName,
+          createdBy: username,
         });
+        // create the candidate in the database
         const candidate = await this.candidateRepository.create(
           newCandidate,
           manager,
         );
 
-        const activityLog = new ActivityLog(
-          LOG_ACTION_CONSTANTS.CREATE_CANDIDATE,
-          DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
-          JSON.stringify({
+        // Log the creation
+        const log = ActivityLog.create({
+          action: CANDIDATE_ACTIONS.CREATE,
+          entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
+          details: JSON.stringify({
             id: candidate.id,
-            election: election.name,
+            displayName: candidate.displayName,
+            position: position.desc1,
             district: district.desc1,
             delegate: delegate.accountName,
-            position: position.desc1,
-            displayName: candidate.displayName,
+            createdBy: username,
+            createdAt: candidate.createdAt,
           }),
-          new Date(),
-          userId,
-        );
-        await this.activityLogRepository.create(activityLog, manager);
+          username: username,
+        });
+        await this.activityLogRepository.create(log, manager);
 
+        // return the candidate
         return candidate;
       },
     );

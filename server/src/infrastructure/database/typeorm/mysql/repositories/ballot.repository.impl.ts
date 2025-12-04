@@ -3,7 +3,7 @@ import { EntityManager } from 'typeorm';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { BallotEntity } from '../entities/ballot.entity';
 import { Ballot } from '@domain/models/ballot.model';
-import { BALLOT_STATUS_CONSTANTS } from '@shared/constants/ballot.constants';
+import { BALLOT_STATUS_CONSTANTS } from '@domain/constants/ballot/ballot-actions.constants';
 
 @Injectable()
 export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
@@ -46,7 +46,7 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     return ballot;
   }
 
-  async retrieveBallotByDelegateId(
+  async retrieveDelegateBallot(
     delegateId: number,
     context: EntityManager,
   ): Promise<Ballot> {
