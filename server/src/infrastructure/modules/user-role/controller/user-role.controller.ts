@@ -50,8 +50,8 @@ export class UserRoleController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.createUserRoleUseCase.execute(createUserRoleDto, userId);
+    const userName = req.user.userName as string;
+    return this.createUserRoleUseCase.execute(createUserRoleDto, userName);
   }
 
   @Version('1') // API versioning
@@ -60,7 +60,7 @@ export class UserRoleController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isDeleted') isDeleted: boolean,
+    @Query('isArchived') isArchived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -79,7 +79,7 @@ export class UserRoleController {
       term || '',
       parsedPage,
       parsedLimit,
-      isDeleted,
+      isArchived,
     );
   }
 
@@ -96,8 +96,8 @@ export class UserRoleController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.softDeleteUserRoleUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.softDeleteUserRoleUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -107,8 +107,8 @@ export class UserRoleController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.restoreDeleteUserRoleUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.restoreDeleteUserRoleUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -119,7 +119,7 @@ export class UserRoleController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.updateUserRoleUseCase.execute(id, updateUserRoleDto, userId);
+    const userName = req.user.userName as string;
+    return this.updateUserRoleUseCase.execute(id, updateUserRoleDto, userName);
   }
 }

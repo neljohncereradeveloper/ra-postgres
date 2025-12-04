@@ -10,7 +10,6 @@ import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { UserRepository } from '@domains/repositories/user.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { PrecinctRepository } from '@domains/repositories/precinct.repository';
 import { USER_ACTIONS } from '@domain/constants/user/user-actions.constants';

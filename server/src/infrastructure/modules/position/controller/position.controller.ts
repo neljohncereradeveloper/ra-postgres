@@ -51,8 +51,8 @@ export class PositionController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.createPositionUseCase.execute(createPositionDto, userId);
+    const userName = req.user.userName as string;
+    return this.createPositionUseCase.execute(createPositionDto, userName);
   }
 
   @Version('1') // API versioning
@@ -65,7 +65,7 @@ export class PositionController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isDeleted') isDeleted: boolean,
+    @Query('isArchived') isArchived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -84,7 +84,7 @@ export class PositionController {
       term || '',
       parsedPage,
       parsedLimit,
-      isDeleted,
+      isArchived,
     );
   }
 
@@ -109,8 +109,8 @@ export class PositionController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.softDeletePositionUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.softDeletePositionUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -124,8 +124,8 @@ export class PositionController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.restoreDeletePositionUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.restoreDeletePositionUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -140,7 +140,7 @@ export class PositionController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.updatePositionUseCase.execute(id, updatePositionDto, userId);
+    const userName = req.user.userName as string;
+    return this.updatePositionUseCase.execute(id, updatePositionDto, userName);
   }
 }

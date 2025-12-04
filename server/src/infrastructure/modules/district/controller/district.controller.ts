@@ -52,8 +52,8 @@ export class DistrictController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.createDistrictUseCase.execute(createDistrictDto, userId);
+    const userName = req.user.userName as string;
+    return this.createDistrictUseCase.execute(createDistrictDto, userName);
   }
 
   @Version('1') // API versioning
@@ -66,7 +66,7 @@ export class DistrictController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isDeleted') isDeleted: boolean,
+    @Query('isArchived') isArchived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -85,7 +85,7 @@ export class DistrictController {
       term || '',
       parsedPage,
       parsedLimit,
-      isDeleted,
+      isArchived,
     );
   }
 
@@ -110,8 +110,8 @@ export class DistrictController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.softDeleteDistrictUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.softDeleteDistrictUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -125,8 +125,8 @@ export class DistrictController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.restoreDeleteDistrictUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.restoreDeleteDistrictUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -141,7 +141,7 @@ export class DistrictController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.updateDistrictUseCase.execute(id, updateDistrictDto, userId);
+    const userName = req.user.userName as string;
+    return this.updateDistrictUseCase.execute(id, updateDistrictDto, userName);
   }
 }

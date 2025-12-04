@@ -39,8 +39,13 @@ export class CastVoteController {
     @Request()
     req,
   ) {
-    const user = req.user as User;
-    return this.castVoteUseCase.execute(castVoteDto, user);
+    const userName = req.user.userName as string;
+    const precinct = req.user.precinct as string;
+    return this.castVoteUseCase.execute(
+      castVoteDto,
+      userName,
+      precinct as string,
+    );
   }
 
   @Version('1') // API versioning
@@ -54,7 +59,7 @@ export class CastVoteController {
     @Request()
     req,
   ) {
-    const user = req.user as User;
-    return this.reprintCastVoteUseCase.execute(controlNumber, user);
+    const userName = req.user.userName as string;
+    return this.reprintCastVoteUseCase.execute(controlNumber, userName);
   }
 }

@@ -5,7 +5,6 @@ import { ActivityLogEntity } from '../entities/activity-log.entity';
 import { ApplicationAccessEntity } from '../entities/application-access.entity';
 import { DistrictEntity } from '../entities/district.entity';
 import { DelegateEntity } from '../entities/delegate.entity';
-import { SettingEntity } from '../entities/setting.entity';
 import { UserRoleEntity } from '../entities/user-role.entity';
 import { UserEntity } from '../entities/user.entity';
 import { ElectionEntity } from '../entities/election.entity';
@@ -14,6 +13,7 @@ import { CandidateEntity } from '../entities/candidate.entity';
 import { BallotEntity } from '../entities/ballot.entity';
 import { CastVoteEntity } from '../entities/cast-vote.entity';
 import { PrecinctEntity } from '../entities/precinct.entity';
+import { ActiveElectionEntity } from '../entities/active-election.entity';
 config();
 const configService = new ConfigService();
 
@@ -27,16 +27,16 @@ export default new DataSource({
   entities: [
     ActivityLogEntity,
     ApplicationAccessEntity,
+    UserRoleEntity,
+    UserEntity,
+    ActiveElectionEntity,
+    ElectionEntity,
+    DelegateEntity,
     DistrictEntity,
     PositionEntity,
     CandidateEntity,
-    BallotEntity,
-    ElectionEntity,
-    DelegateEntity,
-    SettingEntity,
-    UserRoleEntity,
-    UserEntity,
     CastVoteEntity,
+    BallotEntity,
     PrecinctEntity,
   ], // this uses the compiled entites in the dist folder
   migrations: [

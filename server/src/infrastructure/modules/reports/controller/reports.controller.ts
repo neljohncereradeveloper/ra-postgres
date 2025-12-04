@@ -28,8 +28,8 @@ export class ReportsController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.castVoteReportUseCase.execute(userId);
+    const userName = req.user.userName as string;
+    return this.castVoteReportUseCase.execute(userName);
   }
 
   @Version('1') // API versioning
@@ -42,7 +42,7 @@ export class ReportsController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
-    return this.candidatesReportUseCase.execute(userId);
+    const userName = req.user.userName as string;
+    return this.candidatesReportUseCase.execute(userName);
   }
 }

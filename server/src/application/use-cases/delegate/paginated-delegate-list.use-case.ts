@@ -4,7 +4,6 @@ import { Inject } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import { TransactionPort } from '@domain/ports/transaction-port';
-import { LOG_ACTION_CONSTANTS } from '@shared/constants/log-action.constants';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { NotFoundException } from '@domains/exceptions/index';

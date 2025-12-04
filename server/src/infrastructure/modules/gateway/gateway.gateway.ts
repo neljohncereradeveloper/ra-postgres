@@ -41,7 +41,7 @@ export class GatewayGateway
     if (GatewayGateway.instance) {
       try {
         const result =
-          await GatewayGateway.instance.castVoteReportUseCase.execute(0);
+          await GatewayGateway.instance.castVoteReportUseCase.execute('system');
         GatewayGateway.instance.server.emit('latest-cast-votes', result);
       } catch (error) {
         GatewayGateway.instance.logger.error(
@@ -70,7 +70,7 @@ export class GatewayGateway
   @SubscribeMessage('get-latest-cast-votes')
   async handleGetLatestCastVotes(@ConnectedSocket() client: Socket) {
     try {
-      const result = await this.castVoteReportUseCase.execute(0);
+      const result = await this.castVoteReportUseCase.execute('system');
       client.emit('latest-cast-votes', result);
     } catch (error) {
       this.logger.error('Error fetching latest cast votes', error);

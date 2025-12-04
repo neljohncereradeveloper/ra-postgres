@@ -39,10 +39,10 @@ export class ActiveElectionController {
     @Request()
     req,
   ) {
-    const userId = req.user.id as number;
+    const userName = req.user.userName as string;
     return this.setActiveElectionUseCase.execute(
       setActiveElectionDto.electionName,
-      userId,
+      userName,
     );
   }
 
@@ -53,8 +53,8 @@ export class ActiveElectionController {
   )
   @Patch('reset')
   async reset(@Request() req) {
-    const userId = req.user.id as number;
-    return this.resetActiveElectionUseCase.execute(userId);
+    const userName = req.user.userName as string;
+    return this.resetActiveElectionUseCase.execute(userName);
   }
 
   @Version('1')
@@ -67,4 +67,3 @@ export class ActiveElectionController {
     return this.retrieveActiveElectionUseCase.execute();
   }
 }
-

@@ -44,8 +44,8 @@ export class DelegateController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
-    const userId = req.user.id;
-    return await this.uploadDelegatesFileUseCase.execute(file, userId);
+    const userName = req.user.userName as string;
+    return await this.uploadDelegatesFileUseCase.execute(file, userName);
   }
 
   @Version('1') // API versioning
@@ -58,7 +58,7 @@ export class DelegateController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isDeleted') isDeleted: boolean,
+    @Query('isArchived') isArchived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -77,7 +77,7 @@ export class DelegateController {
       term || '',
       parsedPage,
       parsedLimit,
-      isDeleted,
+      isArchived,
     );
   }
 

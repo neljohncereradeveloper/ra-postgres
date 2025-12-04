@@ -48,8 +48,8 @@ export class UserController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.createUserUseCase.execute(createUserDto, userId);
+    const userName = req.user.userName as string;
+    return this.createUserUseCase.execute(createUserDto, userName);
   }
 
   @Version('1') // API versioning
@@ -58,7 +58,7 @@ export class UserController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isDeleted') isDeleted: boolean,
+    @Query('isArchived') isArchived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -77,7 +77,7 @@ export class UserController {
       term || '',
       parsedPage,
       parsedLimit,
-      isDeleted,
+      isArchived,
     );
   }
 
@@ -88,8 +88,8 @@ export class UserController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.softDeleteUserUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.softDeleteUserUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -99,8 +99,8 @@ export class UserController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.restoreDeleteUserUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.restoreDeleteUserUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -111,7 +111,7 @@ export class UserController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.updateUserUseCase.execute(id, updateUserDto, userId);
+    const userName = req.user.userName as string;
+    return this.updateUserUseCase.execute(id, updateUserDto, userName);
   }
 }

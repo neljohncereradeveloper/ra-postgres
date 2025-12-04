@@ -50,10 +50,10 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
+    const userName = req.user.userName as string;
     return this.createApplicationAccessUseCase.execute(
       createApplicationAccessDto,
-      userId,
+      userName,
     );
   }
 
@@ -63,7 +63,7 @@ export class ApplicationAccessController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isDeleted') isDeleted: boolean,
+    @Query('isArchived') isArchived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -82,7 +82,7 @@ export class ApplicationAccessController {
       term || '',
       parsedPage,
       parsedLimit,
-      isDeleted,
+      isArchived,
     );
   }
 
@@ -99,8 +99,8 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.softDeleteApplicationAccessUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.softDeleteApplicationAccessUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -110,8 +110,8 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
-    return this.restoreDeleteApplicationAccessUseCase.execute(id, userId);
+    const userName = req.user.userName as string;
+    return this.restoreDeleteApplicationAccessUseCase.execute(id, userName);
   }
 
   @Version('1') // API versioning
@@ -122,11 +122,11 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userId = req.user.id;
+    const userName = req.user.userName as string;
     return this.updateApplicationAccessUseCase.execute(
       id,
       updateApplicationAccessDto,
-      userId,
+      userName,
     );
   }
 }
