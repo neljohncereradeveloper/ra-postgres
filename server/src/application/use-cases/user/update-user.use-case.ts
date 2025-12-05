@@ -71,10 +71,9 @@ export class UpdateUserUseCase {
         }
 
         /** validate roles if exist */
-        const userRolesArray = dto.userRoles.split(',');
-        const userRolesPromises = userRolesArray.map(async (role) => {
+        const userRolesPromises = dto.userRoles.map(async (role) => {
           // validate role
-          const userRole = await this.userRoleRepository.findByDesc(role);
+          const userRole = await this.userRoleRepository.findByDesc(role.trim());
           if (!userRole) {
             throw new NotFoundException(`Role ${role} not found`);
           }
@@ -82,12 +81,11 @@ export class UpdateUserUseCase {
         // Execute all promises concurrently using Promise.all.
         await Promise.all(userRolesPromises);
 
-        const applicationAccessArray = dto.applicationAccess.split(',');
-        const applicationAccessPromises = applicationAccessArray.map(
+        const applicationAccessPromises = dto.applicationAccess.map(
           async (value) => {
-            // validate role
+            // validate application access
             const applicationAccess =
-              await this.applicationAccessRepository.findByDesc(value);
+              await this.applicationAccessRepository.findByDesc(value.trim());
             if (!applicationAccess) {
               throw new NotFoundException(
                 `Application Access ${value} not found`,

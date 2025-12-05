@@ -10,7 +10,10 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
-import { NotFoundException } from '@domains/exceptions/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
@@ -68,6 +71,10 @@ export class CreatePositionUseCase {
           newPosition,
           manager,
         );
+
+        if (!createdPosition) {
+          throw new SomethinWentWrongException('Position creation failed');
+        }
 
         // Log the creation
         const log = ActivityLog.create({

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
+import { getFirstRow, extractRows } from '@shared/utils/query-result.util';
 
 @Injectable()
 export class ActivityLogRepositoryImpl
@@ -12,19 +13,20 @@ export class ActivityLogRepositoryImpl
   constructor(private readonly dataSource: DataSource) {}
 
   async create(log: ActivityLog, manager: EntityManager): Promise<ActivityLog> {
-    // Convert JSON string to object for JSON storage
-    let detailsJson: any = null;
+    // Validate that details is valid JSON before storing
+    let detailsJson: string | null = null;
     if (log.details) {
       try {
-        detailsJson =
-          typeof log.details === 'string'
-            ? JSON.parse(log.details)
-            : log.details;
+        // Parse to validate JSON, then use original string for storage
+        // This ensures we're storing valid JSON while preserving the exact format
+        JSON.parse(log.details);
+        detailsJson = log.details;
       } catch (error) {
         this.logger.warn(
-          `Failed to parse details JSON for activity log: ${error.message}`,
+          `Invalid JSON in activity log details, storing as escaped string: ${error.message}`,
         );
-        detailsJson = { raw: log.details };
+        // If invalid JSON, wrap it in an object to preserve the data
+        detailsJson = JSON.stringify({ raw: log.details });
       }
     }
 
@@ -32,32 +34,22 @@ export class ActivityLogRepositoryImpl
     const query = `
       INSERT INTO activitylogs (action, entity, details, timestamp, username)
       VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
     `;
 
     const result = await manager.query(query, [
       log.action,
       log.entity,
-      detailsJson ? JSON.stringify(detailsJson) : null,
+      detailsJson,
       log.timestamp || new Date(),
       log.username || null,
     ]);
 
-    // Get the inserted row
-    const insertId = result.insertId;
-    const selectQuery = `
-      SELECT 
-        id,
-        action,
-        entity,
-        details,
-        timestamp,
-        username
-      FROM activitylogs
-      WHERE id = $1
-    `;
-
-    const savedRow = await manager.query(selectQuery, [insertId]);
-    return this.rowToModel(savedRow[0]);
+    const row = getFirstRow(result);
+    if (!row) {
+      return null;
+    }
+    return this.rowToModel(row);
   }
 
   async findAll(): Promise<ActivityLog[]> {
@@ -73,7 +65,8 @@ export class ActivityLogRepositoryImpl
       ORDER BY timestamp DESC
     `;
 
-    const rows = await this.dataSource.query(query);
+    const result = await this.dataSource.query(query);
+    const rows = extractRows(result);
     return rows.map((row) => this.rowToModel(row));
   }
 
@@ -91,7 +84,8 @@ export class ActivityLogRepositoryImpl
       ORDER BY timestamp DESC
     `;
 
-    const rows = await this.dataSource.query(query, [entity]);
+    const result = await this.dataSource.query(query, [entity]);
+    const rows = extractRows(result);
     return rows.map((row) => this.rowToModel(row));
   }
 
@@ -109,22 +103,29 @@ export class ActivityLogRepositoryImpl
       ORDER BY timestamp DESC
     `;
 
-    const rows = await this.dataSource.query(query, [action]);
+    const result = await this.dataSource.query(query, [action]);
+    const rows = extractRows(result);
     return rows.map((row) => this.rowToModel(row));
   }
 
   /**
    * Converts raw database row to domain model
    * Handles conversion from database result (JSON) to domain model
+   * Works with both MySQL and PostgreSQL JSON columns
    */
   private rowToModel(row: any): ActivityLog {
-    // Handle JSON details - MySQL returns JSON as string or object depending on version
+    // Handle JSON details - database drivers may return JSON as string or parsed object
     let detailsString = '';
-    if (row.details) {
+    if (row.details !== null && row.details !== undefined) {
       if (typeof row.details === 'string') {
+        // Already a string (MySQL or PostgreSQL returning as text)
         detailsString = row.details;
-      } else {
+      } else if (typeof row.details === 'object') {
+        // Parsed object (PostgreSQL driver auto-parsing JSONB/JSON)
         detailsString = JSON.stringify(row.details);
+      } else {
+        // Fallback for unexpected types
+        detailsString = String(row.details);
       }
     }
 

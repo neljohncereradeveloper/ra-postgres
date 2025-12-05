@@ -35,9 +35,7 @@ export class DelegateController {
 
   @Version('1')
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadDelegates(
@@ -50,9 +48,7 @@ export class DelegateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('active-election')
   async findWithElectionIdFilters(
     @Query('term') term: string,
@@ -83,9 +79,7 @@ export class DelegateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin, AuthUserRolesEnum.Precinct)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.CastVoteManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Get('control-number/:controlNumber')
   async findByControlNumber(@Param('controlNumber') controlNumber: string) {
     return await this.findDelegatesWithElectionIdAndControlNumberUseCase.execute(

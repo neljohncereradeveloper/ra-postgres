@@ -32,27 +32,27 @@ export class SeedUsers {
       return;
     }
 
-    // Fetch the 'Admin Module' application access
+    // Fetch the 'Admin module' application access
     const adminModuleApplicationAccess =
       await applicationAccessRepository.findOneBy({
-        desc1: 'Admin Module',
+        desc1: 'Admin module',
       });
 
     if (!adminModuleApplicationAccess) {
       this.logger.error(
-        'Admin Module application access not found. Cannot create admin user.',
+        'Admin module application access not found. Cannot create admin user.',
       );
       return;
     }
 
-    const electionManagementModuleApplicationAccess =
+    const electionModuleApplicationAccess =
       await applicationAccessRepository.findOneBy({
-        desc1: 'Election Management Module',
+        desc1: 'Election module',
       });
 
-    if (!electionManagementModuleApplicationAccess) {
+    if (!electionModuleApplicationAccess) {
       this.logger.error(
-        'Election Management Module application access not found. Cannot create admin user.',
+        'Election module application access not found. Cannot create admin user.',
       );
       return;
     }
@@ -62,11 +62,14 @@ export class SeedUsers {
     const adminUserData = {
       watcher: 'Default',
       precinct: 'Default',
-      applicationaccess: `${adminModuleApplicationAccess.desc1}, ${electionManagementModuleApplicationAccess.desc1}`,
-      userroles: adminRole.desc1,
+      applicationaccess: [
+        adminModuleApplicationAccess.desc1,
+        electionModuleApplicationAccess.desc1,
+      ],
+      userroles: [adminRole.desc1],
       username: 'admin',
       password: hashPassword,
-      createdby: 'System',
+      createdby: 'system',
       createdat: getPHDateTime(),
     };
     // Check if the super admin user already exists

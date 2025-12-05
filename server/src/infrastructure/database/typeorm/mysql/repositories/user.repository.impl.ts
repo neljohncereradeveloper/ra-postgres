@@ -2,6 +2,12 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { User } from '@domain/models/user.model';
 import { UserRepository } from '@domains/repositories/user.repository';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class UserRepositoryImpl implements UserRepository<EntityManager> {
@@ -21,42 +27,25 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
           createdat
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, precinct, watcher, applicationaccess, userroles, username, createdby, createdat
       `;
 
       const result = await manager.query(query, [
         user.precinct,
         user.watcher,
-        user.applicationAccess,
-        user.userRoles,
+        JSON.stringify(user.applicationAccess || []),
+        JSON.stringify(user.userRoles || []),
         user.userName,
         user.password,
         user.createdBy || null,
         user.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          precinct,
-          watcher,
-          applicationaccess as applicationaccess,
-          userroles as userroles,
-          username as username,
-          password,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM users
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row, true);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Username already exists');
@@ -87,12 +76,12 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
 
       if (updateFields.applicationAccess !== undefined) {
         updateParts.push(`applicationaccess = $${paramIndex++}`);
-        values.push(updateFields.applicationAccess);
+        values.push(JSON.stringify(updateFields.applicationAccess || []));
       }
 
       if (updateFields.userRoles !== undefined) {
         updateParts.push(`userroles = $${paramIndex++}`);
-        values.push(updateFields.userRoles);
+        values.push(JSON.stringify(updateFields.userRoles || []));
       }
 
       if (updateFields.userName !== undefined) {
@@ -128,7 +117,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Username already exists');
@@ -199,13 +188,15 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [dataResult, countResult] = await Promise.all([
       this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
       this.dataSource.query(countQuery, queryParams),
     ]);
 
-    // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    // Extract rows and total records
+    const dataRows = extractRows(dataResult);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -248,12 +239,13 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0], true);
+    return this.rowToModel(row, true);
   }
 
   async findByUserName(userName: string): Promise<User | null> {
@@ -273,12 +265,13 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         LIMIT 1
       `;
 
-      const rows = await queryRunner.query(query, [userName]);
-      if (rows.length === 0) {
+      const result = await queryRunner.query(query, [userName]);
+      const row = getFirstRow(result);
+      if (!row) {
         return null;
       }
 
-      return this.rowToModel(rows[0], true);
+      return this.rowToModel(row, true);
     } finally {
       await queryRunner.release();
     }
@@ -286,12 +279,51 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
 
   // Helper: Convert raw query result to domain model
   private rowToModel(row: any, includePassword: boolean = false): User {
+    // Parse JSON strings to arrays, or handle already-parsed arrays
+    let applicationAccess: string[] = [];
+    if (row.applicationaccess) {
+      if (typeof row.applicationaccess === 'string') {
+        try {
+          // Try parsing as JSON first (for JSON columns)
+          applicationAccess = JSON.parse(row.applicationaccess);
+        } catch {
+          // Fallback to comma-separated string (for legacy data)
+          applicationAccess = row.applicationaccess
+            .split(',')
+            .map((item: string) => item.trim())
+            .filter((item: string) => item.length > 0);
+        }
+      } else if (Array.isArray(row.applicationaccess)) {
+        // Already an array (from JSON column that was auto-parsed)
+        applicationAccess = row.applicationaccess;
+      }
+    }
+
+    let userRoles: string[] = [];
+    if (row.userroles) {
+      if (typeof row.userroles === 'string') {
+        try {
+          // Try parsing as JSON first (for JSON columns)
+          userRoles = JSON.parse(row.userroles);
+        } catch {
+          // Fallback to comma-separated string (for legacy data)
+          userRoles = row.userroles
+            .split(',')
+            .map((item: string) => item.trim())
+            .filter((item: string) => item.length > 0);
+        }
+      } else if (Array.isArray(row.userroles)) {
+        // Already an array (from JSON column that was auto-parsed)
+        userRoles = row.userroles;
+      }
+    }
+
     return new User({
       id: row.id,
       precinct: row.precinct,
       watcher: row.watcher,
-      applicationAccess: row.applicationaccess,
-      userRoles: row.userroles,
+      applicationAccess,
+      userRoles,
       userName: row.username,
       password: includePassword ? row.password : undefined,
       deletedBy: row.deletedby,

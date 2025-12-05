@@ -4,6 +4,12 @@ import { District } from '@domain/models/district.model';
 import { DistrictRepository } from '@domains/repositories/district.repository';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import { calculatePagination } from '@shared/utils/pagination.util';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class DistrictRepositoryImpl
@@ -21,6 +27,7 @@ export class DistrictRepositoryImpl
           createdat
         )
         VALUES ($1, $2, $3, $4)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -30,25 +37,11 @@ export class DistrictRepositoryImpl
         district.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          electionid as electionid,
-          desc1,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM districts
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('District name already exists');
@@ -95,7 +88,7 @@ export class DistrictRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('District name already exists');
@@ -173,7 +166,9 @@ export class DistrictRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
@@ -181,7 +176,7 @@ export class DistrictRepositoryImpl
     );
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => this.rowToModel(row));
+    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
 
     return {
       data,
@@ -212,12 +207,13 @@ export class DistrictRepositoryImpl
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async findByDescription(
@@ -241,12 +237,13 @@ export class DistrictRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await manager.query(query, [desc1, electionId]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [desc1, electionId]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async combobox(
@@ -269,7 +266,8 @@ export class DistrictRepositoryImpl
       ORDER BY desc1 ASC
     `;
 
-    const rows = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [electionId]);
+    const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
@@ -284,7 +282,8 @@ export class DistrictRepositoryImpl
     `;
 
     const result = await manager.query(query, [electionId]);
-    return parseInt(result[0]?.count || '0', 10);
+    const row = getFirstRow(result);
+    return parseInt(row?.count || '0', 10);
   }
 
   // Helper: Convert raw query result to domain model

@@ -4,6 +4,12 @@ import { calculatePagination } from '@shared/utils/pagination.util';
 import { Election } from '@domain/models/election.model';
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
+import { ElectionStatus } from '@domain/enums/index';
+import {
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class ElectionRepositoryImpl
@@ -27,6 +33,7 @@ export class ElectionRepositoryImpl
           createdat
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -37,36 +44,16 @@ export class ElectionRepositoryImpl
         election.startTime || null,
         election.endTime || null,
         election.maxAttendees || null,
-        election.electionStatus || 'scheduled',
+        election.electionStatus || ElectionStatus.SCHEDULED,
         election.createdBy || null,
         election.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          name,
-          desc1,
-          address,
-          date,
-          starttime as starttime,
-          endtime as endtime,
-          maxattendees as maxattendees,
-          electionstatus as electionstatus,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM elections
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Election name already exists');
@@ -148,7 +135,7 @@ export class ElectionRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Election name already exists');
@@ -221,7 +208,9 @@ export class ElectionRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
@@ -229,7 +218,7 @@ export class ElectionRepositoryImpl
     );
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => this.rowToModel(row));
+    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
 
     return {
       data,
@@ -273,12 +262,13 @@ export class ElectionRepositoryImpl
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async combobox(): Promise<Election[]> {
@@ -327,11 +317,14 @@ export class ElectionRepositoryImpl
         updatedby as updatedby,
         updatedat as updatedat
       FROM elections
-      WHERE deletedat IS NULL
+      WHERE deletedat IS NULL AND electionstatus = $1
       ORDER BY name ASC
     `;
 
-    const rows = await this.dataSource.query(query);
+    const result = await this.dataSource.query(query, [
+      ElectionStatus.SCHEDULED,
+    ]);
+    const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
@@ -361,12 +354,13 @@ export class ElectionRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await manager.query(query, [name]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [name]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   // Helper: Convert raw query result to domain model

@@ -20,9 +20,7 @@ export class ReportsController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('cast-vote-report')
   async retrieveCastVoteReport(
     @Request()
@@ -34,9 +32,7 @@ export class ReportsController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('candidates-report')
   async retrieveCandidatesReport(
     @Request()

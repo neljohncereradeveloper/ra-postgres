@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { CastVoteRepository } from '@domains/repositories/cast-vote.repository';
 import { CastVote } from '@domain/models/cast-vote.model';
+import { getInsertId, getFirstRow } from '@shared/utils/query-result.util';
 
 @Injectable()
 export class CastVoteRepositoryImpl
@@ -25,6 +26,7 @@ export class CastVoteRepositoryImpl
           datetimecast
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
       `;
 
       const result = await context.query(query, [
@@ -37,25 +39,11 @@ export class CastVoteRepositoryImpl
         castVote.dateTimeCast,
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          electionid as electionid,
-          ballotnumber as ballotnumber,
-          precinct,
-          candidateid as candidateid,
-          positionid as positionid,
-          districtid as districtid,
-          datetimecast as datetimecast,
-          deletedat as deletedat
-        FROM cast_votes
-        WHERE id = $1
-      `;
-
-      const rows = await context.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Duplicate vote');
@@ -86,12 +74,13 @@ export class CastVoteRepositoryImpl
         LIMIT 1
       `;
 
-      const rows = await context.query(query, [ballotNumber, electionId]);
-      if (rows.length === 0) {
+      const result = await context.query(query, [ballotNumber, electionId]);
+      const row = getFirstRow(result);
+      if (!row) {
         return null;
       }
 
-      return this.rowToModel(rows[0]);
+      return this.rowToModel(row);
     } catch (error) {
       throw error;
     }

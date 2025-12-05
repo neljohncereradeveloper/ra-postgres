@@ -2,6 +2,12 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { Delegate } from '@domain/models/delegate.model';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class DelegateRepositoryImpl
@@ -33,6 +39,7 @@ export class DelegateRepositoryImpl
           createdat
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -56,39 +63,11 @@ export class DelegateRepositoryImpl
         delegate.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          electionid as electionid,
-          branch,
-          accountid as accountid,
-          accountname as accountname,
-          age,
-          birthdate as birthdate,
-          address,
-          tell,
-          cell,
-          dateopened as dateopened,
-          clienttype as clienttype,
-          loanstatus as loanstatus,
-          balance,
-          mevstatus as mevstatus,
-          hasvoted as hasvoted,
-          controlnumber as controlnumber,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM delegates
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       console.log('error', error);
       if (error.code === 'ER_DUP_ENTRY') {
@@ -206,7 +185,7 @@ export class DelegateRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException(error.sqlMessage);
@@ -303,10 +282,12 @@ export class DelegateRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => this.rowToModel(row));
+    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -356,12 +337,13 @@ export class DelegateRepositoryImpl
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async findByControlNumberAndElectionId(
@@ -399,12 +381,13 @@ export class DelegateRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await manager.query(query, [controlNumber, electionId]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [controlNumber, electionId]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async countByElection(
@@ -419,7 +402,8 @@ export class DelegateRepositoryImpl
     `;
 
     const result = await manager.query(countQuery, [electionId]);
-    return parseInt(result[0]?.count || '0', 10);
+    const row = getFirstRow(result);
+    return parseInt(row?.count || '0', 10);
   }
 
   async markAsVoted(delegateId: number, manager: EntityManager): Promise<void> {

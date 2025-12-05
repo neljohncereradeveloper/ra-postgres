@@ -30,9 +30,7 @@ export class ActiveElectionController {
 
   @Version('1')
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Patch('set-active')
   async setActive(
     @Body() setActiveElectionDto: SetActiveElectionDto,
@@ -48,9 +46,7 @@ export class ActiveElectionController {
 
   @Version('1')
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Patch('reset')
   async reset(@Request() req) {
     const userName = req.user.userName as string;
@@ -59,9 +55,7 @@ export class ActiveElectionController {
 
   @Version('1')
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get()
   async retrieve() {
     return this.retrieveActiveElectionUseCase.execute();

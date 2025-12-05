@@ -3,6 +3,7 @@ import { APPLICATION_ACCESS_ACTIONS } from '@domain/constants/application-access
 import { ActivityLog } from '@domain/models/activitylog.model';
 import { ApplicationAccess } from '@domain/models/application-access.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 import { ActivityLogRepository } from '@domains/repositories/activity-log.repository';
 import { ApplicationAccessRepository } from '@domains/repositories/application-access.repository';
 import { Inject, Injectable } from '@nestjs/common';
@@ -38,6 +39,12 @@ export class CreateApplicationAccessUseCase {
             applicationAccess,
             manager,
           );
+
+        if (!createdApplicationAccess) {
+          throw new SomethinWentWrongException(
+            'Application access creation failed',
+          );
+        }
 
         // Log the creation
         const log = ActivityLog.create({

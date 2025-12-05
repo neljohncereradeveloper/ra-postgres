@@ -9,6 +9,7 @@ import { CreateElectionCommand } from '@application/commands/election/create-ele
 import { Election } from '@domain/models/election.model';
 import { ELECTION_ACTIONS } from '@domain/constants/index';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 @Injectable()
 export class CreateElectionUseCase {
@@ -42,6 +43,10 @@ export class CreateElectionUseCase {
           election,
           manager,
         );
+
+        if (!createdElection) {
+          throw new SomethinWentWrongException('Election creation failed');
+        }
 
         // Log the creation
         const log = ActivityLog.create({

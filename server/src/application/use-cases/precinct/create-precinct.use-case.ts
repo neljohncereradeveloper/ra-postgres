@@ -10,6 +10,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 @Injectable()
 export class CreatePrecinctUseCase {
@@ -40,6 +41,10 @@ export class CreatePrecinctUseCase {
           precinct,
           manager,
         );
+
+        if (!createdPrecinct) {
+          throw new SomethinWentWrongException('Precinct creation failed');
+        }
 
         // Log the creation
         const log = ActivityLog.create({

@@ -9,9 +9,9 @@ export enum AuthUserRolesEnum {
 
 export enum AuthApplicationAccessEnum {
   /** Admin Module */
-  AdminModule = 'Admin Module',
-  /** Election Management Module */
-  ElectionManagementModule = 'Election Management Module',
-  /** Cast Vote Management Module */
-  CastVoteManagementModule = 'Cast Vote Management Module',
+  AdminModule = 'Admin module',
+  /** Election Module */
+  ElectionModule = 'Election module',
+  /** Cast Vote Module */
+  CastVoteModule = 'Cast vote module',
 }

@@ -35,7 +35,7 @@ import { ComboboxScheduledElectionUseCase } from '@application/use-cases/electio
 // Controller for handling client-related requests
 @Controller('elections')
 @UseGuards(JwtBearerAuthGuard)
-@AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionManagementModule)
+@AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
 export class ElectionController {
   constructor(
     private readonly createElectionUseCase: CreateElectionUseCase,
@@ -47,7 +47,7 @@ export class ElectionController {
     private readonly closeElectionUseCase: CloseElectionUseCase,
     private readonly cancelElectionUseCase: CancelElectionUseCase,
     private readonly retrieveComboboxElectionUseCase: ComboboxElectionUseCase,
-    private readonly retrieveScheduledElectionUseCase: ComboboxScheduledElectionUseCase,
+    private readonly retrieveComboboxScheduledElectionUseCase: ComboboxScheduledElectionUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -58,6 +58,7 @@ export class ElectionController {
     @Request()
     req,
   ) {
+    console.log('req.user : ', req.user);
     const userName = req.user.userName as string;
     return this.createElectionUseCase.execute(createElectionDto, userName);
   }
@@ -101,9 +102,9 @@ export class ElectionController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @Get('scheduled')
-  async retrieveScheduled() {
-    return this.retrieveScheduledElectionUseCase.execute();
+  @Get('combobox/scheduled')
+  async retrieveComboboxScheduled() {
+    return this.retrieveComboboxScheduledElectionUseCase.execute();
   }
 
   @Version('1') // API versioning

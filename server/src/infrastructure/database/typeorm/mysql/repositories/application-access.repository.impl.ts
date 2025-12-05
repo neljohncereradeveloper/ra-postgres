@@ -2,6 +2,11 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { ApplicationAccess } from '@domain/models/application-access.model';
 import { ApplicationAccessRepository } from '@domains/repositories/application-access.repository';
+import {
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class ApplicationAccessRepositoryImpl
@@ -17,6 +22,7 @@ export class ApplicationAccessRepositoryImpl
       const query = `
         INSERT INTO applicationaccess (desc1, createdby, createdat)
         VALUES ($1, $2, $3)
+        RETURNING * 
       `;
 
       const result = await manager.query(query, [
@@ -25,24 +31,11 @@ export class ApplicationAccessRepositoryImpl
         applicationAccess.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          desc1,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM applicationaccess
-        WHERE id = $1
-      `;
-
-      const savedRow = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(savedRow[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Application access already exists');
@@ -89,7 +82,7 @@ export class ApplicationAccessRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Application access already exists');
@@ -170,10 +163,12 @@ export class ApplicationAccessRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => this.rowToModel(row));
+    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -211,12 +206,13 @@ export class ApplicationAccessRepositoryImpl
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async combobox(): Promise<ApplicationAccess[]> {
@@ -255,12 +251,13 @@ export class ApplicationAccessRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await this.dataSource.query(query, [desc1]);
-    if (rows.length === 0) {
+    const result = await this.dataSource.query(query, [desc1]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   // Helper: Convert raw query result to domain model

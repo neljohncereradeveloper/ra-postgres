@@ -2,6 +2,12 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { UserRole } from '@domain/models/user-role.model';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class UserRoleRepositoryImpl
@@ -14,6 +20,7 @@ export class UserRoleRepositoryImpl
       const query = `
         INSERT INTO userroles (desc1, createdby, createdat)
         VALUES ($1, $2, $3)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -22,24 +29,11 @@ export class UserRoleRepositoryImpl
         userRole.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          desc1,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM userroles
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Userrole already exists');
@@ -86,7 +80,7 @@ export class UserRoleRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Userrole already exists');
@@ -164,7 +158,9 @@ export class UserRoleRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalRecords / limit);
@@ -172,7 +168,7 @@ export class UserRoleRepositoryImpl
     const previousPage = page > 1 ? page - 1 : null;
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => this.rowToModel(row));
+    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
 
     return {
       data,
@@ -202,12 +198,13 @@ export class UserRoleRepositoryImpl
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async combobox(): Promise<UserRole[]> {
@@ -246,12 +243,13 @@ export class UserRoleRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await this.dataSource.query(query, [desc1]);
-    if (rows.length === 0) {
+    const result = await this.dataSource.query(query, [desc1]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   // Helper: Convert raw query result to domain model

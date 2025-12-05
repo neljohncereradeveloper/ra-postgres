@@ -19,7 +19,7 @@ export class SeedUserRoles {
     const userRoleRepository = this.dataSource.getRepository(UserRoleEntity);
 
     // Define the roles to seed
-    const roles = ['Admin', 'Precinct'];
+    const roles = ['Admin', 'Precinct', 'Developer'];
 
     for (const roleDesc of roles) {
       // Check if the role already exists

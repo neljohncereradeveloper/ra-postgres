@@ -18,6 +18,8 @@ import { ActivityLogEntity } from '../entities/activity-log.entity';
 import { BallotEntity } from '../entities/ballot.entity';
 import { CandidateEntity } from '../entities/candidate.entity';
 import { PrecinctEntity } from '../entities/precinct.entity';
+import { SeedPrecinct } from './create-default-PRECINT.seed';
+
 // Load environment variables from .env
 dotenvConfig();
 
@@ -72,10 +74,13 @@ class SeedRunner {
       const userSeeder = new SeedUsers(queryRunner.manager);
       const seedActiveElection = new SeedActiveElection(queryRunner.manager);
 
+      const seedPrecinct = new SeedPrecinct(queryRunner.manager);
+
       await userRoleSeeder.run();
       await applicationAccessSeeder.run();
       await userSeeder.run();
       await seedActiveElection.run();
+      await seedPrecinct.run();
 
       // Commit the transaction if all seeds succeed
       await queryRunner.commitTransaction();

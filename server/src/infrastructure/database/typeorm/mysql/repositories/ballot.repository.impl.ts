@@ -3,6 +3,7 @@ import { EntityManager } from 'typeorm';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { Ballot } from '@domain/models/ballot.model';
 import { BALLOT_STATUS_CONSTANTS } from '@domain/constants/ballot/ballot-actions.constants';
+import { getInsertId, getFirstRow } from '@shared/utils/query-result.util';
 
 @Injectable()
 export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
@@ -17,6 +18,7 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const query = `
       INSERT INTO ballots (ballotnumber, delegateid, electionid, ballotstatus)
       VALUES ($1, $2, $3, $4)
+      RETURNING *
     `;
 
     const result = await manager.query(query, [
@@ -26,21 +28,12 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
       BALLOT_STATUS_CONSTANTS.ISSUED,
     ]);
 
-    // Get the inserted row
-    const insertId = result.insertId;
-    const selectQuery = `
-      SELECT 
-        id,
-        ballotnumber as ballotnumber,
-        delegateid as delegateid,
-        electionid as electionid,
-        ballotstatus as ballotstatus
-      FROM ballots
-      WHERE id = $1
-    `;
+    const row = getFirstRow(result);
+    if (!row) {
+      return null;
+    }
 
-    const rows = await manager.query(selectQuery, [insertId]);
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async submitBallot(
@@ -66,12 +59,13 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
       LIMIT 1
     `;
 
-    const rows = await context.query(selectQuery, [ballotNumber]);
-    if (rows.length === 0) {
+    const result = await context.query(selectQuery, [ballotNumber]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async unlinkBallot(
@@ -97,12 +91,13 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
       LIMIT 1
     `;
 
-    const rows = await context.query(selectQuery, [electionId]);
-    if (rows.length === 0) {
+    const result = await context.query(selectQuery, [electionId]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async retrieveDelegateBallot(
@@ -121,12 +116,13 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
       LIMIT 1
     `;
 
-    const rows = await context.query(query, [delegateId]);
-    if (rows.length === 0) {
+    const result = await context.query(query, [delegateId]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   // Helper: Convert raw query result to domain model

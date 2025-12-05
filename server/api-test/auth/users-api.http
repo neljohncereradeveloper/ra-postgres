@@ -1,52 +1,59 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjEsInVzZXJSb2xlcyI6IkFkbWluIiwiYXBwbGljYXRpb25BY2Nlc3MiOiJBZG1pbiBNb2R1bGUsIEVsZWN0aW9uIE1hbmFnZW1lbnQgTW9kdWxlIiwiaWF0IjoxNzQ3MjkxODEzLCJleHAiOjE3NDczMjA2MTN9.rMDffnRDyBcKdDiccur11oMDYYuTMX2gk5kKbiiuTN4
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjMsInVzZXJSb2xlcyI6WyJBZG1pbiJdLCJhcHBsaWNhdGlvbkFjY2VzcyI6WyJBZG1pbiBtb2R1bGUiLCJFbGVjdGlvbiBtb2R1bGUiXSwicHJlY2luY3QiOiJEZWZhdWx0IiwiaWF0IjoxNzY0OTE0NDEzLCJleHAiOjE3NjQ5NDMyMTN9.5RAdKA02BBgTDF3u2KSdtn7yxG7W3tfCLqsKkPcwvlg
 
-# Test Create Client
+###
+# Test Create User
 POST http://localhost:3090/api/v1/users
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "fullName": "teller",
-  "branch": "DEFAULT",
-  "department": "DEFAULT",
-  "designation": "DEFAULT",
-  "applicationAccess": "Cast Vote Management Module",
-  "userRoles": "Voter",
+  "watcher": "Lea Smith",
+  "precinct": "Default",
+  "applicationAccess": ["Cast vote module"],
+  "userRoles": ["Precinct"],
   "userName": "teller1",
   "password": "teller1" 
 }
 
 ###
-# UPDATE 
+# UPDATE User
 PATCH  http://localhost:3090/api/v1/users/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "fullName": "MARK DOE update",
-  "branch": "HEAD OFFICE update",
-  "department": "IT DEPARTMENT update",
-  "designation": "IT SPECIALIST update",
-  "applicationAccess": "Attendance Module",
-  "userRoles": "Admin"
+  "watcher": "MARK DOE update",
+  "precinct": "HEAD OFFICE update",
+  "applicationAccess": ["Attendance Module"],
+  "userRoles": ["Admin"]
 }
 
 ###
-# DELETE 
-DELETE  http://localhost:3000/v1/users/delete/2
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-
-###
-# RESTORE 
-PATCH  http://localhost:3000/v1/users/restore/2
+# DELETE User (Soft Delete)
+DELETE  http://localhost:3090/api/v1/users/delete/2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 ###
-# GET users 
+# RESTORE User
+PATCH  http://localhost:3090/api/v1/users/restore/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET Users (Paginated List)
 GET  http://localhost:3090/api/v1/users?term=&page=1&limit=2
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
+###
+# GET Users (With Search Term)
+GET  http://localhost:3090/api/v1/users?term=teller&page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# GET Users (Archived/Deleted)
+GET  http://localhost:3090/api/v1/users?term=&page=1&limit=10&isArchived=true
+Content-Type: application/json
+Authorization: Bearer {{token}}

@@ -42,9 +42,7 @@ export class CandidateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Post()
   async create(
     @Body() createCandidateDto: CreateCandidateDto,
@@ -57,9 +55,7 @@ export class CandidateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get()
   async findWithFilters(
     @Query('term') term: string,
@@ -90,9 +86,7 @@ export class CandidateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Precinct)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.CastVoteManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Get('cast-vote')
   async getCastVoteCandidates() {
     // Execute the use case
@@ -101,9 +95,7 @@ export class CandidateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Delete('delete/:id')
   async delete(
     @Param('id') id: number,
@@ -116,9 +108,7 @@ export class CandidateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Patch('restore/:id')
   async restore(
     @Param('id') id: number,
@@ -131,9 +121,7 @@ export class CandidateController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.ElectionManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Patch(':id')
   async update(
     @Param('id') id: number,

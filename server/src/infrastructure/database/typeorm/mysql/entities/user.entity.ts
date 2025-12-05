@@ -21,11 +21,11 @@ export class UserEntity {
   @Column({ length: 100 })
   watcher: string;
 
-  @Column({ length: 500 })
-  applicationaccess: string;
+  @Column({ type: 'json' })
+  applicationaccess: string[];
 
-  @Column({ length: 500 })
-  userroles: string;
+  @Column({ type: 'json' })
+  userroles: string[];
 
   @Column({ length: 100 })
   username: string;

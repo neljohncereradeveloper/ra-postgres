@@ -1,6 +1,7 @@
 import { EntityManager } from 'typeorm';
 import { Logger } from '@nestjs/common';
 import { ActiveElectionEntity } from '../entities/active-election.entity';
+import { ACTIVE_ELECTION_ID } from '../../../../../domain/constants/active-election/active-election-actions.constants';
 
 /**
  * SeedActiveElection
@@ -20,9 +21,8 @@ export class SeedActiveElection {
       this.dataSource.getRepository(ActiveElectionEntity);
 
     await activeElectionRepository.insert({
-      id: 1,
+      id: ACTIVE_ELECTION_ID,
     });
     this.logger.log(`Active election record (id: 1) created successfully.`);
   }
 }
-

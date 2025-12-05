@@ -17,8 +17,8 @@ export class ActivityLogEntity {
   @Column({ length: 100 })
   entity: string; // e.g., 'Client'
 
-  @Column({ type: 'jsonb', nullable: true })
-  details: Record<string, any>; // PostgreSQL native JSON type
+  @Column({ type: 'json', nullable: true })
+  details: Record<string, any>; // JSON type for cross-database compatibility
 
   @CreateDateColumn()
   @Index()

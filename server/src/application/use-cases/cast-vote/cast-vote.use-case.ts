@@ -17,7 +17,10 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
 import { Election } from '@domain/models/election.model';
 import { GatewayGateway } from '@infrastructure/modules/gateway/gateway.gateway';
-import { NotFoundException } from '@domains/exceptions/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 import { CAST_VOTE_ACTIONS } from '@domain/constants/cast-vote/cast-vote-actions.constants';
 
 @Injectable()
@@ -157,6 +160,10 @@ export class CastVoteUseCase {
               newCastVote,
               manager,
             );
+
+            if (!castVote) {
+              throw new SomethinWentWrongException('Cast vote creation failed');
+            }
 
             // Log the cast vote
             const log = ActivityLog.create({

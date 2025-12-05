@@ -10,7 +10,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { DISTRICT_ACTIONS } from '@domain/constants/district/district-actions.constants';
-import { NotFoundException } from '@domains/exceptions/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 @Injectable()
@@ -66,6 +69,10 @@ export class CreateDistrictUseCase {
           newDistrict,
           manager,
         );
+
+        if (!createdDistrict) {
+          throw new SomethinWentWrongException('District creation failed');
+        }
 
         // Log the creation
         const log = ActivityLog.create({

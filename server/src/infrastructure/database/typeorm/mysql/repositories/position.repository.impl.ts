@@ -4,6 +4,12 @@ import { calculatePagination } from '@shared/utils/pagination.util';
 import { PositionRepository } from '@domains/repositories/position.repository';
 import { Position } from '@domain/models/position.model';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class PositionRepositoryImpl
@@ -23,6 +29,7 @@ export class PositionRepositoryImpl
           createdat
         )
         VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -34,27 +41,11 @@ export class PositionRepositoryImpl
         position.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          electionid as electionid,
-          desc1,
-          maxcandidates as maxcandidates,
-          termlimit as termlimit,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM positions
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Position name already exists');
@@ -111,7 +102,7 @@ export class PositionRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Position name already exists');
@@ -191,7 +182,9 @@ export class PositionRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
@@ -199,7 +192,7 @@ export class PositionRepositoryImpl
     );
 
     // Map raw results to domain models
-    const data = dataRows.map((row: any) => this.rowToModel(row));
+    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
 
     return {
       data,
@@ -232,12 +225,13 @@ export class PositionRepositoryImpl
       WHERE id = $1 AND deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async findByDescription(
@@ -263,12 +257,13 @@ export class PositionRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await manager.query(query, [desc1, electionId]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [desc1, electionId]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async combobox(
@@ -293,7 +288,8 @@ export class PositionRepositoryImpl
       ORDER BY desc1 ASC
     `;
 
-    const rows = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [electionId]);
+    const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
@@ -319,7 +315,8 @@ export class PositionRepositoryImpl
       ORDER BY desc1 ASC
     `;
 
-    const rows = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [electionId]);
+    const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
@@ -334,7 +331,8 @@ export class PositionRepositoryImpl
     `;
 
     const result = await manager.query(query, [electionId]);
-    return parseInt(result[0]?.count || '0', 10);
+    const row = getFirstRow(result);
+    return parseInt(row?.count || '0', 10);
   }
 
   // Helper: Convert raw query result to domain model

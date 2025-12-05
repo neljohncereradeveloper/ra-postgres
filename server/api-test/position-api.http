@@ -1,6 +1,9 @@
 
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibmVsIiwic3ViIjoyLCJ1c2VyUm9sZXMiOiJBZG1pbiIsImFwcGxpY2F0aW9uQWNjZXNzIjoiRWxlY3Rpb24gTWFuYWdlbWVudCBNb2R1bGUiLCJpYXQiOjE3NDcxODczNzUsImV4cCI6MTc0NzIxNjE3NX0.DYAdXwxckf4LBh7yGM0YjJE6IhJjONIZahoPhzvSLOU
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJzdWIiOjMsInVzZXJSb2xlcyI6WyJBZG1pbiJdLCJhcHBsaWNhdGlvbkFjY2VzcyI6WyJBZG1pbiBtb2R1bGUiLCJFbGVjdGlvbiBtb2R1bGUiXSwicHJlY2luY3QiOiJEZWZhdWx0IiwiaWF0IjoxNzY0OTE0NDEzLCJleHAiOjE3NjQ5NDMyMTN9.5RAdKA02BBgTDF3u2KSdtn7yxG7W3tfCLqsKkPcwvlg
+
+
+
 @baseurl=http://localhost:3090/api/v1
 
 # Test Create Client
@@ -9,7 +12,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "desc1": "BOD DISTRICT 1",
+  "desc1": "AUDIT COMMITTEE",
   "maxCandidates": 2,
   "termLimit": "2 years"
 }

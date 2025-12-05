@@ -19,6 +19,7 @@ import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { UUIDGeneratorPort } from '@domain/ports/uuid-generator.port';
 import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 const schema = {
   branch: { prop: 'branch', type: String },
@@ -134,12 +135,21 @@ export class UploadDelegatesUseCase {
             delegate,
             manager,
           );
-          await this.ballotRepository.issueBallot(
+
+          if (!delegateResult) {
+            throw new SomethinWentWrongException('Delegate creation failed');
+          }
+
+          const ballot = await this.ballotRepository.issueBallot(
             this.uuidGeneratorPort.generateUUID(),
             delegateResult.id,
             election.id,
             manager,
           );
+
+          if (!ballot) {
+            throw new SomethinWentWrongException('Ballot creation failed');
+          }
         }
 
         // Log the finished

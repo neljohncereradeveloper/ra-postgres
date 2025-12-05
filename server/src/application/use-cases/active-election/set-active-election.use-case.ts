@@ -10,6 +10,7 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { ACTIVE_ELECTION_ACTIONS } from '@domain/constants/active-election/active-election-actions.constants';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
+import { ACTIVE_ELECTION_ID } from '@domain/constants/active-election/active-election-actions.constants';
 
 @Injectable()
 export class SetActiveElectionUseCase {
@@ -37,6 +38,13 @@ export class SetActiveElectionUseCase {
           throw new NotFoundException('Election does not exist');
         }
 
+        const activeElection = await this.activeElectionRepository.findById(
+          ACTIVE_ELECTION_ID,
+          manager,
+        );
+        if (!activeElection) {
+          throw new NotFoundException('Active election not found');
+        }
         // Update the active election
         const updateSuccessfull =
           await this.activeElectionRepository.setActiveElection(

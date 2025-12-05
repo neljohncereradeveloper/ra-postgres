@@ -4,6 +4,12 @@ import { calculatePagination } from '@shared/utils/pagination.util';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { Candidate } from '@domain/models/candidate.model';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class CandidateRepositoryImpl
@@ -27,6 +33,7 @@ export class CandidateRepositoryImpl
           createdat
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -39,28 +46,12 @@ export class CandidateRepositoryImpl
         candidate.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          electionid as electionid,
-          delegateid as delegateid,
-          positionid as positionid,
-          districtid as districtid,
-          displayname as displayname,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM candidates
-        WHERE id = $1
-      `;
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
 
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException(
@@ -119,7 +110,7 @@ export class CandidateRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Candidate name already exists');
@@ -153,12 +144,13 @@ export class CandidateRepositoryImpl
       WHERE c.id = $1 AND c.deletedat IS NULL
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return rows[0];
+    return row;
   }
 
   async findPaginatedList(
@@ -233,7 +225,9 @@ export class CandidateRepositoryImpl
     ]);
 
     // Extract total records
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
@@ -264,7 +258,8 @@ export class CandidateRepositoryImpl
     `;
 
     const result = await manager.query(query, [electionId]);
-    return parseInt(result[0]?.count || '0', 10);
+    const row = getFirstRow(result);
+    return parseInt(row?.count || '0', 10);
   }
 
   async getElectionCandidates(
@@ -283,7 +278,8 @@ export class CandidateRepositoryImpl
       WHERE c.deletedat IS NULL AND c.electionid = $1
     `;
 
-    const rows = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [electionId]);
+    const rows = extractRows(result);
     return rows;
   }
 

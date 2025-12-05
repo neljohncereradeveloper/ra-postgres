@@ -15,6 +15,7 @@ import { CANDIDATE_ACTIONS } from '@domain/constants/candidate/candidate-actions
 import {
   BadRequestException,
   NotFoundException,
+  SomethinWentWrongException,
 } from '@domains/exceptions/index';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
@@ -112,6 +113,10 @@ export class CreateCandidateUseCase {
           newCandidate,
           manager,
         );
+
+        if (!candidate) {
+          throw new SomethinWentWrongException('Candidate creation failed');
+        }
 
         // Log the creation
         const log = ActivityLog.create({

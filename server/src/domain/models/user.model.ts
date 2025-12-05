@@ -13,8 +13,8 @@ export class User {
   id: number;
   precinct: string;
   watcher: string;
-  applicationAccess: string;
-  userRoles: string;
+  applicationAccess: string[];
+  userRoles: string[];
   userName: string;
   password: string;
   deletedBy?: string;
@@ -28,8 +28,8 @@ export class User {
     id?: number;
     precinct: string;
     watcher: string;
-    userRoles: string;
-    applicationAccess: string;
+    userRoles: string[];
+    applicationAccess: string[];
     userName?: string;
     password?: string;
     deletedBy?: string;
@@ -71,8 +71,8 @@ export class User {
   static create(params: {
     precinct: string;
     watcher: string;
-    applicationAccess: string;
-    userRoles: string;
+    applicationAccess: string[];
+    userRoles: string[];
     userName: string;
     password: string;
     createdBy?: string;
@@ -106,8 +106,8 @@ export class User {
   update(dto: {
     precinct: string;
     watcher: string;
-    applicationAccess: string;
-    userRoles: string;
+    applicationAccess: string[];
+    userRoles: string[];
     updatedBy?: string;
   }): void {
     if (this.deletedAt) {

@@ -8,8 +8,8 @@ export interface AuthPort {
     payload: {
       name: string;
       sub: number;
-      userRoles: string;
-      applicationAccess: string;
+      userRoles: string[];
+      applicationAccess: string[];
     };
   };
   jwtVerify(token: string): Promise<any>;

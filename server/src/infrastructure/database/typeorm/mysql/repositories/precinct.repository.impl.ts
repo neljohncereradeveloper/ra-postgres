@@ -4,6 +4,12 @@ import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import { calculatePagination } from '@shared/utils/pagination.util';
 import { PrecinctRepository } from '@domains/repositories/precinct.repository';
 import { Precinct } from '@domain/models/precinct.model';
+import {
+  getInsertId,
+  getFirstRow,
+  hasAffectedRows,
+  extractRows,
+} from '@shared/utils/query-result.util';
 
 @Injectable()
 export class PrecinctRepositoryImpl
@@ -15,6 +21,7 @@ export class PrecinctRepositoryImpl
       const query = `
         INSERT INTO precincts (desc1, createdby, createdat)
         VALUES ($1, $2, $3)
+        RETURNING *
       `;
 
       const result = await manager.query(query, [
@@ -23,24 +30,11 @@ export class PrecinctRepositoryImpl
         precinct.createdAt || new Date(),
       ]);
 
-      // Get the inserted row
-      const insertId = result.insertId;
-      const selectQuery = `
-        SELECT 
-          id,
-          desc1,
-          deletedby as deletedby,
-          deletedat as deletedat,
-          createdby as createdby,
-          createdat as createdat,
-          updatedby as updatedby,
-          updatedat as updatedat
-        FROM precincts
-        WHERE id = $1
-      `;
-
-      const rows = await manager.query(selectQuery, [insertId]);
-      return this.rowToModel(rows[0]);
+      const row = getFirstRow(result);
+      if (!row) {
+        return null;
+      }
+      return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Precinct name already exists');
@@ -103,7 +97,7 @@ export class PrecinctRepositoryImpl
       `;
 
       const result = await manager.query(query, values);
-      return result.affectedRows && result.affectedRows > 0;
+      return hasAffectedRows(result);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Precinct name already exists');
@@ -172,8 +166,10 @@ export class PrecinctRepositoryImpl
       this.dataSource.query(countQuery, queryParams),
     ]);
 
-    const data = dataRows.map((row) => this.rowToModel(row));
-    const totalRecords = parseInt(countResult[0]?.totalRecords || '0', 10);
+    const dataRowsArray = extractRows(dataRows);
+    const countRow = getFirstRow(countResult);
+    const data = dataRowsArray.map((row) => this.rowToModel(row));
+    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
     const { totalPages, nextPage, previousPage } = calculatePagination(
       totalRecords,
       page,
@@ -208,12 +204,13 @@ export class PrecinctRepositoryImpl
       WHERE id = $1
     `;
 
-    const rows = await manager.query(query, [id]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [id]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async findByDescription(
@@ -235,12 +232,13 @@ export class PrecinctRepositoryImpl
       LIMIT 1
     `;
 
-    const rows = await manager.query(query, [desc1]);
-    if (rows.length === 0) {
+    const result = await manager.query(query, [desc1]);
+    const row = getFirstRow(result);
+    if (!row) {
       return null;
     }
 
-    return this.rowToModel(rows[0]);
+    return this.rowToModel(row);
   }
 
   async combobox(): Promise<Precinct[]> {

@@ -9,6 +9,7 @@ import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
+import { SomethinWentWrongException } from '@domains/exceptions/index';
 
 @Injectable()
 export class CreateUserRoleUseCase {
@@ -37,6 +38,10 @@ export class CreateUserRoleUseCase {
           userRole,
           manager,
         );
+
+        if (!createdUserRole) {
+          throw new SomethinWentWrongException('User role creation failed');
+        }
 
         // Log the creation
         const log = ActivityLog.create({

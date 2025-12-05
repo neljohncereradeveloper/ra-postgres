@@ -30,9 +30,7 @@ export class CastVoteController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Precinct)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.CastVoteManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Post()
   async castVote(
     @Body() castVoteDto: CastVoteDto,
@@ -50,9 +48,7 @@ export class CastVoteController {
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Precinct)
-  @AuthorizeApplicationAccess(
-    AuthApplicationAccessEnum.CastVoteManagementModule,
-  )
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Get('reprint')
   async reprintCastVote(
     @Query('controlNumber') controlNumber: string,
