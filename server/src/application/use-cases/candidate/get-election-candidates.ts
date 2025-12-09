@@ -49,27 +49,29 @@ export class GetElectionCandidatesUseCase {
           manager,
         );
 
+        console.log('result : ', result);
+
         // Group candidates by position
         const candidates = result.reduce((acc: any[], curr: any) => {
           // Find if this position already exists in acc
           let group = acc.find(
             (g) =>
               g.position === curr.position &&
-              g.positionMaxCandidates === curr.positionMaxCandidates &&
-              g.positionTermLimit === curr.positionTermLimit,
+              g.positionmaxcandidates === curr.positionmaxcandidates &&
+              g.positiontermlimit === curr.positiontermlimit,
           );
           if (!group) {
             group = {
               position: curr.position,
-              positionMaxCandidates: curr.positionMaxCandidates,
-              positionTermLimit: curr.positionTermLimit,
+              positionmaxcandidates: curr.positionmaxcandidates,
+              positiontermlimit: curr.positiontermlimit,
               candidates: [],
             };
             acc.push(group);
           }
           group.candidates.push({
-            candidateId: curr.candidateId,
-            displayName: curr.displayName,
+            candidateid: curr.candidateid,
+            displayname: curr.displayname,
           });
           return acc;
         }, []);
