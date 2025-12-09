@@ -24,7 +24,7 @@ export class SeedUsers {
 
     // Fetch the 'Admin' role
     const adminRole = await userRoleRepository.findOneBy({
-      desc1: 'Admin',
+      desc1: 'admin',
     });
 
     if (!adminRole) {
@@ -35,7 +35,7 @@ export class SeedUsers {
     // Fetch the 'Admin module' application access
     const adminModuleApplicationAccess =
       await applicationAccessRepository.findOneBy({
-        desc1: 'Admin module',
+        desc1: 'admin module',
       });
 
     if (!adminModuleApplicationAccess) {
@@ -47,7 +47,7 @@ export class SeedUsers {
 
     const electionModuleApplicationAccess =
       await applicationAccessRepository.findOneBy({
-        desc1: 'Election module',
+        desc1: 'election module',
       });
 
     if (!electionModuleApplicationAccess) {
@@ -60,8 +60,8 @@ export class SeedUsers {
     const hashPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
 
     const adminUserData = {
-      watcher: 'Default',
-      precinct: 'Default',
+      watcher: 'default',
+      precinct: 'default',
       applicationaccess: [
         adminModuleApplicationAccess.desc1,
         electionModuleApplicationAccess.desc1,

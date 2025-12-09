@@ -22,9 +22,9 @@ export class SeedApplicationAccess {
 
     // Define the application modules to be seeded
     const applicationModules = [
-      'Admin module',
-      'Cast vote module',
-      'Election module',
+      'admin module',
+      'cast vote module',
+      'election module',
     ];
 
     for (const moduleDesc of applicationModules) {

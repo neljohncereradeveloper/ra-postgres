@@ -1,17 +1,17 @@
 export enum AuthUserRolesEnum {
   /** Developer */
-  Developer = 'Developer',
+  Developer = 'developer',
   /** Admin */
-  Admin = 'Admin',
+  Admin = 'admin',
   /** Precinct */
-  Precinct = 'Precinct',
+  Precinct = 'precinct',
 }
 
 export enum AuthApplicationAccessEnum {
   /** Admin Module */
-  AdminModule = 'Admin module',
+  AdminModule = 'admin module',
   /** Election Module */
-  ElectionModule = 'Election module',
+  ElectionModule = 'election module',
   /** Cast Vote Module */
-  CastVoteModule = 'Cast vote module',
+  CastVoteModule = 'cast vote module',
 }

@@ -19,7 +19,7 @@ export class SeedPrecinct {
     const precinctRepository = this.dataSource.getRepository(PrecinctEntity);
 
     // Define the roles to seed
-    const precincts = ['Default', 'Precinct 1', 'Precinct 2', 'Precinct 3'];
+    const precincts = ['default', 'precinct 1', 'precinct 2', 'precinct 3'];
 
     for (const precinctDesc of precincts) {
       // Check if the role already exists
