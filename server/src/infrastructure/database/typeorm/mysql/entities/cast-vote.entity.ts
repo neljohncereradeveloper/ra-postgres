@@ -14,7 +14,6 @@ import { ElectionEntity } from './election.entity';
 import { CandidateEntity } from './candidate.entity';
 import { PositionEntity } from './position.entity';
 import { DistrictEntity } from './district.entity';
-import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('cast_votes')
 @Unique([
@@ -34,11 +33,11 @@ export class CastVoteEntity {
   @Index()
   electionid: number;
 
-  @Column({ length: 100, transformer: lowercaseTransformer })
+  @Column({ length: 100 })
   @Index()
   ballotnumber: string;
 
-  @Column({ length: 100, transformer: lowercaseTransformer })
+  @Column({ length: 100 })
   precinct: string;
 
   @Column()

@@ -8,7 +8,6 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('users')
 @Unique(['username'])
@@ -16,10 +15,10 @@ export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100, transformer: lowercaseTransformer })
+  @Column({ length: 100 })
   precinct: string;
 
-  @Column({ length: 100, transformer: lowercaseTransformer })
+  @Column({ length: 100 })
   watcher: string;
 
   @Column({ type: 'json' })
@@ -28,7 +27,7 @@ export class UserEntity {
   @Column({ type: 'json' })
   userroles: string[];
 
-  @Column({ length: 100, transformer: lowercaseTransformer })
+  @Column({ length: 100 })
   username: string;
 
   @Column({ type: 'varchar', length: 255, select: false })
@@ -37,7 +36,6 @@ export class UserEntity {
   @Column({
     comment: 'username of the user who deleted the user',
     nullable: true,
-    transformer: lowercaseTransformer,
   })
   deletedby?: string;
 
@@ -48,7 +46,6 @@ export class UserEntity {
   @Column({
     comment: 'username of the user who created the user',
     nullable: true,
-    transformer: lowercaseTransformer,
   })
   createdby?: string;
 
@@ -58,7 +55,6 @@ export class UserEntity {
   @Column({
     comment: 'username of the user who updated the user',
     nullable: true,
-    transformer: lowercaseTransformer,
   })
   updatedby?: string;
 

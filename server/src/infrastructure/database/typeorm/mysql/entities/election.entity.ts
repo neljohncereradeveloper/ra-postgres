@@ -18,7 +18,6 @@ import { CastVoteEntity } from './cast-vote.entity';
 import { BallotEntity } from './ballot.entity';
 import { CandidateEntity } from './candidate.entity';
 import { ElectionStatus } from '../../../../../domain/enums/election/election-status.enum';
-import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('elections')
 @Unique(['name'])
@@ -26,13 +25,13 @@ export class ElectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, transformer: lowercaseTransformer })
+  @Column({ length: 255 })
   name: string;
 
-  @Column({ type: 'text', nullable: true, transformer: lowercaseTransformer })
+  @Column({ type: 'text', nullable: true })
   desc1: string;
 
-  @Column({ type: 'text', transformer: lowercaseTransformer })
+  @Column({ type: 'text' })
   address: string;
 
   @Column({ type: 'date', nullable: true })
@@ -58,7 +57,6 @@ export class ElectionEntity {
   @Column({
     comment: 'username of the user who deleted the election',
     nullable: true,
-    transformer: lowercaseTransformer,
   })
   deletedby?: string;
 
@@ -69,7 +67,6 @@ export class ElectionEntity {
   @Column({
     comment: 'username of the user who created the election',
     nullable: true,
-    transformer: lowercaseTransformer,
   })
   createdby?: string;
 
@@ -79,7 +76,6 @@ export class ElectionEntity {
   @Column({
     comment: 'username of the user who updated the election',
     nullable: true,
-    transformer: lowercaseTransformer,
   })
   updatedby?: string;
 
