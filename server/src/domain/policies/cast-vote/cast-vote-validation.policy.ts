@@ -114,6 +114,8 @@ export class CastVoteValidationPolicy {
    * @throws CastVoteValidationException - If candidate is invalid
    */
   validateCandidate(candidate: Candidate, electionId: number): void {
+    console.log('candidate', candidate);
+    console.log('electionId', electionId);
     if (!candidate) {
       throw new CastVoteBusinessException(
         'Candidate not found',

@@ -170,10 +170,10 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        applicationaccess as applicationaccess,
-        userroles as userroles,
-        username as username,
-        deletedat as deletedat
+        applicationaccess as "applicationAccess",
+        userroles as "userRoles",
+        username as "userName",
+        deletedat as "deletedAt"
       FROM users
       ${whereClause}
       ORDER BY id DESC
@@ -182,7 +182,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS totalRecords
+      SELECT COUNT(id) AS "totalRecords"
       FROM users
       ${whereClause}
     `;
@@ -225,16 +225,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        applicationaccess as applicationaccess,
-        userroles as userroles,
-        username as username,
+        applicationaccess as "applicationAccess",
+        userroles as "userRoles",
+        username as "userName",
         password,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM users
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -256,9 +256,9 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
           id,
           precinct,
           watcher,
-          applicationaccess as applicationaccess,
-          userroles as userroles,
-          username as username,
+          applicationaccess as "applicationAccess",
+          userroles as "userRoles",
+          username as "userName",
           password
         FROM users
         WHERE username = $1

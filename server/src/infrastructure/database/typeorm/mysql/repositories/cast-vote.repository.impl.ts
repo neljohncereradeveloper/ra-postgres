@@ -61,14 +61,14 @@ export class CastVoteRepositoryImpl
       const query = `
         SELECT
           cv.id,
-          cv.electionid as electionid,
-          cv.ballotnumber as ballotnumber,
+          cv.electionid as "electionId",
+          cv.ballotnumber as "ballotNumber",
           cv.precinct,
-          cv.candidateid as candidateid,
-          cv.positionid as positionid,
-          cv.districtid as districtid,
-          cv.datetimecast as datetimecast,
-          cv.deletedat as deletedat
+          cv.candidateid as "candidateId",
+          cv.positionid as "positionId",
+          cv.districtid as "districtId",
+          cv.datetimecast as "dateTimeCast",
+          cv.deletedat as "deletedAt"
         FROM cast_votes cv
         WHERE cv.ballotnumber = $1 AND cv.electionid = $2
         LIMIT 1

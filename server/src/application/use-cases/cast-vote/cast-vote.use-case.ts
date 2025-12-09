@@ -70,6 +70,9 @@ export class CastVoteUseCase {
           activeElection.electionId,
           manager,
         );
+
+        console.log('election', election);
+
         if (!election) {
           throw new NotFoundException(
             `Election with ID ${activeElection.electionId} not found.`,
@@ -118,6 +121,9 @@ export class CastVoteUseCase {
             }
           }
         }
+
+        // console.log('candidateEntities', candidateEntities);
+        // console.log('election', election);
 
         // Use the policy for comprehensive validation
         this.castVotePolicy.validateVotingOperation(

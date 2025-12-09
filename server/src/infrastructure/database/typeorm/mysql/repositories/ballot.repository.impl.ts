@@ -50,10 +50,10 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const selectQuery = `
       SELECT 
         id,
-        ballotnumber as ballotnumber,
-        delegateid as delegateid,
-        electionid as electionid,
-        ballotstatus as ballotstatus
+        ballotnumber as "ballotNumber",
+        delegateid as "delegateId",
+        electionid as "electionId",
+        ballotstatus as "ballotStatus"
       FROM ballots
       WHERE ballotnumber = $1
       LIMIT 1
@@ -82,10 +82,10 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const selectQuery = `
       SELECT 
         id,
-        ballotnumber as ballotnumber,
-        delegateid as delegateid,
-        electionid as electionid,
-        ballotstatus as ballotstatus
+        ballotnumber as "ballotNumber",
+        delegateid as "delegateId",
+        electionid as "electionId",
+        ballotstatus as "ballotStatus"
       FROM ballots
       WHERE electionid = $1 AND delegateid IS NULL
       LIMIT 1
@@ -107,10 +107,10 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     const query = `
       SELECT 
         id,
-        ballotnumber as ballotnumber,
-        delegateid as delegateid,
-        electionid as electionid,
-        ballotstatus as ballotstatus
+        ballotnumber as "ballotNumber",
+        delegateid as "delegateId",
+        electionid as "electionId",
+        ballotstatus as "ballotStatus"
       FROM ballots
       WHERE delegateid = $1
       LIMIT 1

@@ -138,14 +138,14 @@ export class DistrictRepositoryImpl
     const dataQuery = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM districts
       ${whereClause}
       ORDER BY id DESC
@@ -154,7 +154,7 @@ export class DistrictRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS totalRecords
+      SELECT COUNT(id) AS "totalRecords"
       FROM districts
       ${whereClause}
     `;
@@ -195,14 +195,14 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM districts
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -224,14 +224,14 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM districts
       WHERE desc1 = $1 AND electionid = $2 AND deletedat IS NULL
       LIMIT 1
@@ -253,14 +253,14 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM districts
       WHERE electionid = $1 AND deletedat IS NULL
       ORDER BY desc1 ASC
@@ -276,7 +276,7 @@ export class DistrictRepositoryImpl
     manager: EntityManager,
   ): Promise<number> {
     const query = `
-      SELECT COUNT(id) AS count
+      SELECT COUNT(id) AS "count"
       FROM districts
       WHERE deletedat IS NULL AND electionid = $1
     `;

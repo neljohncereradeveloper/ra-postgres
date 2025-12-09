@@ -59,11 +59,11 @@ export class ActiveElectionRepositoryImpl
       `
       SELECT 
         ae.id,
-        ae.electionid as electionid,
-        ae.createdby as createdby,
-        ae.createdat as createdat,
-        ae.updatedby as updatedby,
-        ae.updatedat as updatedat
+        ae.electionid,
+        ae.createdby,
+        ae.createdat,
+        ae.updatedby,
+        ae.updatedat
       FROM active_election ae
       INNER JOIN elections e ON ae.electionid = e.id
       WHERE ae.id = $1

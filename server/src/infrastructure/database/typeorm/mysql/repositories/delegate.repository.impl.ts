@@ -241,25 +241,25 @@ export class DelegateRepositoryImpl
     // Build data query
     const dataQuery = `
       SELECT 
-        d.id AS id,
-        d.branch AS branch,
-        d.accountid AS accountid,
-        d.accountname AS accountname,
-        d.age AS age,
-        d.birthdate AS birthdate,
-        d.address AS address,
-        d.tell AS tell,
-        d.cell AS cell,
-        d.dateopened AS dateopened,
-        d.clienttype AS clienttype,
-        d.balance AS balance,
-        d.loanstatus AS loanstatus,
-        d.mevstatus AS mevstatus,
-        d.deletedat AS deletedat,
-        d.electionid AS electionid,
-        e.name AS election,
-        d.hasvoted AS hasvoted,
-        d.controlnumber AS controlnumber
+        d.id AS "id",
+        d.branch AS "branch",
+        d.accountid AS "accountId",
+        d.accountname AS "accountName",
+        d.age AS "age",
+        d.birthdate AS "birthDate",
+        d.address AS "address",
+        d.tell AS "tell",
+        d.cell AS "cell",
+        d.dateopened AS "dateOpened",
+        d.clienttype AS "clientType",
+        d.balance AS "balance",
+        d.loanstatus AS "loanStatus",
+        d.mevstatus AS "mevStatus",
+        d.deletedat AS "deletedAt",
+        d.electionid AS "electionId",
+        e.name AS "election",
+        d.hasvoted AS "hasVoted",
+        d.controlnumber AS "controlNumber"
       FROM delegates d
       INNER JOIN elections e ON d.electionid = e.id
       WHERE ${whereClause}
@@ -269,7 +269,7 @@ export class DelegateRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(d.id) AS totalRecords
+      SELECT COUNT(d.id) AS "totalRecords"
       FROM delegates d
       INNER JOIN elections e ON d.electionid = e.id
       WHERE ${whereClause}
@@ -311,28 +311,28 @@ export class DelegateRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         branch,
-        accountid as accountid,
-        accountname as accountname,
+        accountid as "accountId",
+        accountname as "accountName",
         age,
-        birthdate as birthdate,
+        birthdate as "birthDate",
         address,
         tell,
         cell,
-        dateopened as dateopened,
-        clienttype as clienttype,
-        loanstatus as loanstatus,
+        dateopened as "dateOpened",
+        clienttype as "clientType",
+        loanstatus as "loanStatus",
         balance,
-        mevstatus as mevstatus,
-        hasvoted as hasvoted,
-        controlnumber as controlnumber,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        mevstatus as "mevStatus",
+        hasvoted as "hasVoted",
+        controlnumber as "controlNumber",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM delegates
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -354,28 +354,28 @@ export class DelegateRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+          electionid as "electionId",
         branch,
-        accountid as accountid,
-        accountname as accountname,
+        accountid as "accountId",
+        accountname as "accountName",
         age,
-        birthdate as birthdate,
+        birthdate as "birthDate",
         address,
         tell,
         cell,
-        dateopened as dateopened,
-        clienttype as clienttype,
-        loanstatus as loanstatus,
+        dateopened as "dateOpened",
+        clienttype as "clientType",
+        loanstatus as "loanStatus",
         balance,
-        mevstatus as mevstatus,
-        hasvoted as hasvoted,
-        controlnumber as controlnumber,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        mevstatus as "mevStatus",
+        hasvoted as "hasVoted",
+        controlnumber as "controlNumber",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM delegates
       WHERE controlnumber = $1 AND electionid = $2 AND deletedat IS NULL
       LIMIT 1
@@ -395,7 +395,7 @@ export class DelegateRepositoryImpl
     manager: EntityManager,
   ): Promise<number> {
     const countQuery = `
-      SELECT COUNT(id) AS count
+      SELECT COUNT(id) AS "count"
       FROM delegates
       WHERE deletedat IS NULL
       AND electionid = $1

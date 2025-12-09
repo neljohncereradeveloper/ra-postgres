@@ -132,12 +132,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM userroles
       ${whereClause}
       ORDER BY id DESC
@@ -146,7 +146,7 @@ export class UserRoleRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS totalRecords
+      SELECT COUNT(id) AS "totalRecords"
       FROM userroles
       ${whereClause}
     `;
@@ -188,12 +188,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM userroles
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -212,12 +212,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM userroles
       WHERE deletedat IS NULL
       ORDER BY desc1 ASC
@@ -232,12 +232,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM userroles
       WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1

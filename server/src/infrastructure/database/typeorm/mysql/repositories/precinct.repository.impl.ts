@@ -141,12 +141,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM precincts
       ${whereClause}
       ORDER BY id DESC
@@ -155,7 +155,7 @@ export class PrecinctRepositoryImpl
 
     // Count query
     const countQuery = `
-      SELECT COUNT(id) AS totalRecords
+      SELECT COUNT(id) AS "totalRecords"
       FROM precincts
       ${whereClause}
     `;
@@ -194,12 +194,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM precincts
       WHERE id = $1
     `;
@@ -221,12 +221,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM precincts
       WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1
@@ -245,13 +245,7 @@ export class PrecinctRepositoryImpl
     const query = `
       SELECT 
         id,
-        desc1,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        desc1
       FROM precincts
       WHERE deletedat IS NULL
       ORDER BY desc1 ASC

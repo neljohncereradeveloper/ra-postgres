@@ -125,17 +125,17 @@ export class CandidateRepositoryImpl
   ): Promise<Candidate | null> {
     const query = `
       SELECT 
-        c.id as id,
-        c.electionid as electionid,
-        c.positionid as positionid,
-        c.districtid as districtid,
-        c.delegateid as delegateid,
-        c.displayname as displayname,
-        d.accountid as accountid,
-        d.accountname as accountname,
-        p.desc1 AS position,
-        dist.desc1 AS district,
-        e.name AS election
+        c.id as "id",
+        c.electionid as "electionId",
+        c.positionid as "positionId",
+        c.districtid as "districtId",
+        c.delegateid as "delegateId",
+        c.displayname as "displayName",
+        d.accountid as "accountId",
+        d.accountname as "accountName",
+        p.desc1 AS "position",
+        dist.desc1 AS "district",
+        e.name AS "election"
       FROM candidates c
       LEFT JOIN delegates d ON c.delegateid = d.id
       LEFT JOIN positions p ON c.positionid = p.id
@@ -149,6 +149,8 @@ export class CandidateRepositoryImpl
     if (!row) {
       return null;
     }
+
+    console.log('row', row);
 
     return row;
   }
@@ -193,14 +195,14 @@ export class CandidateRepositoryImpl
     // Build data query
     const dataQuery = `
       SELECT 
-        c.id as id,
-        c.delegateid as delegateid,
-        c.displayname as displayname,
-        d.accountid as accountid,
-        d.accountname as accountname,
-        p.desc1 AS position,
-        dist.desc1 AS district,
-        e.name AS election
+        c.id as "id",
+        c.delegateid as "delegateId",
+        c.displayname as "displayName",
+        d.accountid as "accountId",
+        d.accountname as "accountName",
+        p.desc1 AS "position",
+        dist.desc1 AS "district",
+        e.name AS "election"
       FROM candidates c
       LEFT JOIN delegates d ON c.delegateid = d.id
       LEFT JOIN positions p ON c.positionid = p.id
@@ -213,7 +215,7 @@ export class CandidateRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(c.id) AS totalRecords
+      SELECT COUNT(c.id) AS "totalRecords"
       FROM candidates c
       ${whereClause}
     `;
@@ -252,7 +254,7 @@ export class CandidateRepositoryImpl
     manager: EntityManager,
   ): Promise<number> {
     const query = `
-      SELECT COUNT(id) AS count
+      SELECT COUNT(id) AS "count"
       FROM candidates
       WHERE deletedat IS NULL AND electionid = $1
     `;
@@ -268,11 +270,11 @@ export class CandidateRepositoryImpl
   ): Promise<any[]> {
     const query = `
       SELECT 
-        p.desc1 AS position,
-        p.maxcandidates AS positionmaxcandidates,
-        p.termlimit AS positiontermlimit,
-        c.id as candidateid,
-        c.displayname as displayname
+        p.desc1 AS "position",
+        p.maxcandidates AS "positionMaxCandidates",
+        p.termlimit AS "positionTermLimit",
+        c.id as "candidateId",
+        c.displayname as "displayName"
       FROM candidates c
       LEFT JOIN positions p ON c.positionid = p.id
       WHERE c.deletedat IS NULL AND c.electionid = $1

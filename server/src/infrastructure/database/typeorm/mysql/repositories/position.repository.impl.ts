@@ -152,16 +152,16 @@ export class PositionRepositoryImpl
     const dataQuery = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        maxcandidates as maxcandidates,
-        termlimit as termlimit,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        maxcandidates as "maxCandidates",
+        termlimit as "termLimit",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM positions
       ${whereClause}
       ORDER BY id DESC
@@ -170,7 +170,7 @@ export class PositionRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS totalRecords
+      SELECT COUNT(id) AS "totalRecords"
       FROM positions
       ${whereClause}
     `;
@@ -211,16 +211,16 @@ export class PositionRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        maxcandidates as maxcandidates,
-        termlimit as termlimit,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        maxcandidates as "maxCandidates",
+        termlimit as "termLimit",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM positions
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -242,16 +242,16 @@ export class PositionRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        maxcandidates as maxcandidates,
-        termlimit as termlimit,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        maxcandidates as "maxCandidates",
+        termlimit as "termLimit",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM positions
       WHERE desc1 = $1 AND electionid = $2 AND deletedat IS NULL
       LIMIT 1
@@ -273,16 +273,7 @@ export class PositionRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
-        desc1,
-        maxcandidates as maxcandidates,
-        termlimit as termlimit,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        desc1
       FROM positions
       WHERE electionid = $1 AND deletedat IS NULL
       ORDER BY desc1 ASC
@@ -300,16 +291,16 @@ export class PositionRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as electionid,
+        electionid as "electionId",
         desc1,
-        maxcandidates as maxcandidates,
-        termlimit as termlimit,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        maxcandidates as "maxCandidates",
+        termlimit as "termLimit",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM positions
       WHERE electionid = $1 AND deletedat IS NULL
       ORDER BY desc1 ASC
@@ -325,7 +316,7 @@ export class PositionRepositoryImpl
     manager: EntityManager,
   ): Promise<number> {
     const query = `
-      SELECT COUNT(id) AS count
+      SELECT COUNT(id) AS "count"
       FROM positions
       WHERE deletedat IS NULL AND electionid = $1
     `;

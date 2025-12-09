@@ -183,11 +183,11 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as starttime,
-        endtime as endtime,
-        maxattendees as maxattendees,
-        electionstatus as electionstatus,
-        deletedat as deletedat
+        starttime as "startTime",
+        endtime as "endTime",
+        maxattendees as "maxAttendees",
+        electionstatus as "electionStatus",
+        deletedat as "deletedAt"
       FROM elections
       ${whereClause}
       ORDER BY id DESC
@@ -196,7 +196,7 @@ export class ElectionRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS totalRecords
+      SELECT COUNT(id) AS "totalRecords"
       FROM elections
       ${whereClause}
     `;
@@ -248,16 +248,16 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as starttime,
-        endtime as endtime,
-        maxattendees as maxattendees,
-        electionstatus as electionstatus,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        starttime as "startTime",
+        endtime as "endTime",
+        maxattendees as "maxAttendees",
+        electionstatus as "electionStatus",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM elections
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -279,16 +279,16 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as starttime,
-        endtime as endtime,
-        maxattendees as maxattendees,
-        electionstatus as electionstatus,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        starttime as "startTime",
+        endtime as "endTime",
+        maxattendees as "maxAttendees",
+        electionstatus as "electionStatus",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM elections
       WHERE deletedat IS NULL
       ORDER BY name ASC
@@ -305,17 +305,7 @@ export class ElectionRepositoryImpl
         name,
         desc1,
         address,
-        date,
-        starttime as starttime,
-        endtime as endtime,
-        maxattendees as maxattendees,
-        electionstatus as electionstatus,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        date
       FROM elections
       WHERE deletedat IS NULL AND electionstatus = $1
       ORDER BY name ASC
@@ -339,16 +329,16 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as starttime,
-        endtime as endtime,
-        maxattendees as maxattendees,
-        electionstatus as electionstatus,
-        deletedby as deletedby,
-        deletedat as deletedat,
-        createdby as createdby,
-        createdat as createdat,
-        updatedby as updatedby,
-        updatedat as updatedat
+        starttime as "startTime",
+        endtime as "endTime",
+        maxattendees as "maxAttendees",
+        electionstatus as "electionStatus",
+        deletedby as "deletedBy",
+        deletedat as "deletedAt",
+        createdby as "createdBy",
+        createdat as "createdAt",
+        updatedby as "updatedBy",
+        updatedat as "updatedAt"
       FROM elections
       WHERE name = $1 AND deletedat IS NULL
       LIMIT 1
