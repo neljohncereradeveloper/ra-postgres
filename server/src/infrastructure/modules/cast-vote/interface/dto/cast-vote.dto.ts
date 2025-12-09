@@ -6,6 +6,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { toLowerCase } from '../../../../../shared/utils/dto-transformers.util';
 
 export class CandidateDto {
   @IsNotEmpty()
@@ -13,6 +14,7 @@ export class CandidateDto {
   id: number;
 }
 export class CastVoteDto {
+  @toLowerCase
   @IsNotEmpty()
   @IsString()
   controlNumber: string;
