@@ -15,6 +15,7 @@ import {
 import { ElectionEntity } from './election.entity';
 import { CandidateEntity } from './candidate.entity';
 import { BallotEntity } from './ballot.entity';
+import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('delegates')
 @Unique(['accountid', 'electionid'])
@@ -27,13 +28,13 @@ export class DelegateEntity {
   @Index()
   electionid: number;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, transformer: lowercaseTransformer })
   branch: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, transformer: lowercaseTransformer })
   accountid: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, transformer: lowercaseTransformer })
   accountname: string;
 
   @Column({ nullable: true })
@@ -42,39 +43,40 @@ export class DelegateEntity {
   @Column({ type: 'date', nullable: true })
   birthdate?: Date;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: lowercaseTransformer })
   address?: string;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ length: 50, nullable: true, transformer: lowercaseTransformer })
   tell?: string;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ length: 50, nullable: true, transformer: lowercaseTransformer })
   cell?: string;
 
   @Column({ type: 'date', nullable: true })
   dateopened?: Date;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, transformer: lowercaseTransformer })
   clienttype?: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, transformer: lowercaseTransformer })
   loanstatus: string;
 
   @Column({ type: 'numeric', precision: 15, scale: 2 })
   balance: number;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, transformer: lowercaseTransformer })
   mevstatus: string;
 
   @Column({ type: 'boolean', default: false })
   hasvoted: boolean;
 
-  @Column()
+  @Column({ transformer: lowercaseTransformer })
   controlnumber: string;
 
   @Column({
     comment: 'username of the user who deleted the delegate',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   deletedby?: string;
 
@@ -84,6 +86,7 @@ export class DelegateEntity {
   @Column({
     comment: 'username of the user who created the delegate',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   createdby?: string;
 
@@ -93,6 +96,7 @@ export class DelegateEntity {
   @Column({
     comment: 'username of the user who updated the delegate',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   updatedby?: string;
 

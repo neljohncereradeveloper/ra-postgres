@@ -17,6 +17,7 @@ import { PositionEntity } from './position.entity';
 import { DistrictEntity } from './district.entity';
 import { DelegateEntity } from './delegate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
+import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('candidates')
 @Unique(['electionid', 'delegateid'])
@@ -41,12 +42,13 @@ export class CandidateEntity {
   @Index()
   districtid: number;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, transformer: lowercaseTransformer })
   displayname: string;
 
   @Column({
     comment: 'username of the user who deleted the candidate',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   deletedby?: string;
 
@@ -56,6 +58,7 @@ export class CandidateEntity {
   @Column({
     comment: 'username of the user who created the candidate',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   createdby?: string;
 
@@ -65,6 +68,7 @@ export class CandidateEntity {
   @Column({
     comment: 'username of the user who updated the candidate',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   updatedby?: string;
 

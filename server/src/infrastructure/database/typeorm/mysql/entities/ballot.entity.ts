@@ -12,6 +12,7 @@ import {
 import { ElectionEntity } from './election.entity';
 import { DelegateEntity } from './delegate.entity';
 import { BallotStatus } from '../../../../../domain/enums/ballot/ballot-status.enum';
+import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('ballots')
 @Unique(['ballotnumber', 'electionid'])
@@ -19,7 +20,7 @@ export class BallotEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, transformer: lowercaseTransformer })
   @Index()
   ballotnumber: string;
 

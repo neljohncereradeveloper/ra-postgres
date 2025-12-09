@@ -58,7 +58,6 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    console.log('req.user : ', req.user);
     const userName = req.user.userName as string;
     return this.createElectionUseCase.execute(createElectionDto, userName);
   }

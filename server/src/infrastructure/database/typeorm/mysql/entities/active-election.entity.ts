@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ElectionEntity } from './election.entity';
+import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('active_election')
 export class ActiveElectionEntity {
@@ -22,6 +23,7 @@ export class ActiveElectionEntity {
   @Column({
     comment: 'username of the user who created the active election record',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   createdby: string;
 
@@ -31,6 +33,7 @@ export class ActiveElectionEntity {
   @Column({
     comment: 'username of the user who last updated the active election',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   updatedby: string;
 

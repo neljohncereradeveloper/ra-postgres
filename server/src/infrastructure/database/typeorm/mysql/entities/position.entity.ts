@@ -14,6 +14,7 @@ import {
 import { ElectionEntity } from './election.entity';
 import { CandidateEntity } from './candidate.entity';
 import { CastVoteEntity } from './cast-vote.entity';
+import { lowercaseTransformer } from '../../../../../shared/utils/typeorm-transformers.util';
 
 @Entity('positions')
 @Unique(['electionid', 'desc1'])
@@ -25,18 +26,19 @@ export class PositionEntity {
   @Index()
   electionid: number;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, transformer: lowercaseTransformer })
   desc1: string;
 
   @Column({ nullable: true })
   maxcandidates: number; // Note: Add CHECK constraint in migration: max_candidates > 0 OR max_candidates IS NULL
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, transformer: lowercaseTransformer })
   termlimit: string;
 
   @Column({
     comment: 'username of the user who deleted the position',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   deletedby?: string;
 
@@ -47,6 +49,7 @@ export class PositionEntity {
   @Column({
     comment: 'username of the user who created the position',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   createdby?: string;
 
@@ -56,6 +59,7 @@ export class PositionEntity {
   @Column({
     comment: 'username of the user who updated the position',
     nullable: true,
+    transformer: lowercaseTransformer,
   })
   updatedby?: string;
 
