@@ -11,77 +11,77 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
  */
 export class Delegate {
   id: number;
-  electionid: number;
+  election_id: number;
   branch: string;
-  accountid: string;
-  accountname: string;
+  account_id: string;
+  account_name: string;
   age?: number;
-  birthdate?: Date;
+  birth_date?: Date;
   address?: string;
   tell?: string;
   cell?: string;
-  dateopened?: Date;
-  clienttype?: string;
+  date_opened?: Date;
+  client_type?: string;
   balance: number;
-  loanstatus: string;
-  mevstatus: string;
-  hasvoted?: boolean;
-  controlnumber: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  loan_status: string;
+  mev_status: string;
+  has_voted?: boolean;
+  control_number: string;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
     branch: string;
-    electionid: number;
-    accountid: string;
-    accountname: string;
+    election_id: number;
+    account_id: string;
+    account_name: string;
     age?: number;
     balance: number;
-    loanstatus: string;
-    mevstatus: string;
-    controlnumber: string;
-    clienttype?: string;
+    loan_status: string;
+    mev_status: string;
+    control_number: string;
+    client_type?: string;
     address?: string;
     tell?: string;
     cell?: string;
-    dateopened?: Date;
-    birthdate?: Date;
-    hasvoted?: boolean;
-    deletedat?: Date | null;
-    deletedby?: string;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    date_opened?: Date;
+    birth_date?: Date;
+    has_voted?: boolean;
+    deleted_at?: Date | null;
+    deleted_by?: string;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
     this.branch = params.branch;
-    this.electionid = params.electionid;
-    this.accountid = params.accountid;
-    this.accountname = params.accountname;
+    this.election_id = params.election_id;
+    this.account_id = params.account_id;
+    this.account_name = params.account_name;
     this.age = params.age;
-    this.clienttype = params.clienttype;
+    this.client_type = params.client_type;
     this.balance = params.balance;
-    this.loanstatus = params.loanstatus;
-    this.mevstatus = params.mevstatus;
+    this.loan_status = params.loan_status;
+    this.mev_status = params.mev_status;
     this.address = params.address;
     this.tell = params.tell;
     this.cell = params.cell;
-    this.dateopened = params.dateopened;
-    this.birthdate = params.birthdate;
-    this.hasvoted = params.hasvoted;
-    this.controlnumber = params.controlnumber;
-    this.deletedat = params.deletedat;
-    this.deletedby = params.deletedby;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.date_opened = params.date_opened;
+    this.birth_date = params.birth_date;
+    this.has_voted = params.has_voted;
+    this.control_number = params.control_number;
+    this.deleted_at = params.deleted_at;
+    this.deleted_by = params.deleted_by;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -99,43 +99,43 @@ export class Delegate {
    * @throws DelegateBusinessException - If validation fails
    */
   static create(params: {
-    electionid: number;
+    election_id: number;
     branch: string;
-    accountid: string;
-    accountname: string;
+    account_id: string;
+    account_name: string;
     balance: number;
-    loanstatus: string;
-    mevstatus: string;
-    controlnumber: string;
+    loan_status: string;
+    mev_status: string;
+    control_number: string;
     age?: number;
-    birthdate?: Date;
+    birth_date?: Date;
     address?: string;
     tell?: string;
     cell?: string;
-    dateopened?: Date;
-    clienttype?: string;
-    hasvoted?: boolean;
-    createdby?: string;
+    date_opened?: Date;
+    client_type?: string;
+    has_voted?: boolean;
+    created_by?: string;
   }): Delegate {
     const delegate = new Delegate({
-      electionid: params.electionid,
+      election_id: params.election_id,
       branch: params.branch,
-      accountid: params.accountid,
-      accountname: params.accountname,
+      account_id: params.account_id,
+      account_name: params.account_name,
       balance: params.balance,
-      loanstatus: params.loanstatus,
-      mevstatus: params.mevstatus,
-      controlnumber: params.controlnumber,
+      loan_status: params.loan_status,
+      mev_status: params.mev_status,
+      control_number: params.control_number,
       age: params.age,
-      birthdate: params.birthdate,
+      birth_date: params.birth_date,
       address: params.address,
       tell: params.tell,
       cell: params.cell,
-      dateopened: params.dateopened,
-      clienttype: params.clienttype,
-      hasvoted: params.hasvoted,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      date_opened: params.date_opened,
+      client_type: params.client_type,
+      has_voted: params.has_voted,
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the delegate before returning
     delegate.validate();
@@ -154,23 +154,23 @@ export class Delegate {
    */
   update(dto: {
     branch?: string;
-    accountid?: string;
-    accountname?: string;
+    account_id?: string;
+    account_name?: string;
     age?: number;
-    birthdate?: Date;
+    birth_date?: Date;
     address?: string;
     tell?: string;
     cell?: string;
-    dateopened?: Date;
-    clienttype?: string;
+    date_opened?: Date;
+    client_type?: string;
     balance?: number;
-    loanstatus?: string;
-    mevstatus?: string;
-    controlnumber?: string;
-    hasvoted?: boolean;
-    updatedby?: string;
+    loan_status?: string;
+    mev_status?: string;
+    control_number?: string;
+    has_voted?: boolean;
+    updated_by?: string;
   }): void {
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new DelegateBusinessException(
         'Delegate is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -180,67 +180,68 @@ export class Delegate {
     // Create a temporary delegate with the new values to validate before applying
     const tempDelegate = new Delegate({
       id: this.id,
-      electionid: this.electionid,
+      election_id: this.election_id,
       branch: dto.branch ?? this.branch,
-      accountid: dto.accountid ?? this.accountid,
-      accountname: dto.accountname ?? this.accountname,
+      account_id: dto.account_id ?? this.account_id,
+      account_name: dto.account_name ?? this.account_name,
       balance: dto.balance ?? this.balance,
-      loanstatus: dto.loanstatus ?? this.loanstatus,
-      mevstatus: dto.mevstatus ?? this.mevstatus,
-      controlnumber: dto.controlnumber ?? this.controlnumber,
+      loan_status: dto.loan_status ?? this.loan_status,
+      mev_status: dto.mev_status ?? this.mev_status,
+      control_number: dto.control_number ?? this.control_number,
       age: dto.age ?? this.age,
-      birthdate: dto.birthdate ?? this.birthdate,
+      birth_date: dto.birth_date ?? this.birth_date,
       address: dto.address ?? this.address,
       tell: dto.tell ?? this.tell,
       cell: dto.cell ?? this.cell,
-      dateopened: dto.dateopened ?? this.dateopened,
-      clienttype: dto.clienttype ?? this.clienttype,
-      hasvoted: dto.hasvoted ?? this.hasvoted,
-      updatedby: dto.updatedby,
-      updatedat: getPHDateTime(),
+      date_opened: dto.date_opened ?? this.date_opened,
+      client_type: dto.client_type ?? this.client_type,
+      has_voted: dto.has_voted ?? this.has_voted,
+      updated_by: dto.updated_by,
+      updated_at: getPHDateTime(),
     });
     // Validate the new state before applying changes
     tempDelegate.validate();
 
     // Apply changes only if validation passes (data is already validated)
     if (dto.branch !== undefined) this.branch = dto.branch;
-    if (dto.accountid !== undefined) this.accountid = dto.accountid;
-    if (dto.accountname !== undefined) this.accountname = dto.accountname;
+    if (dto.account_id !== undefined) this.account_id = dto.account_id;
+    if (dto.account_name !== undefined) this.account_name = dto.account_name;
     if (dto.age !== undefined) this.age = dto.age;
-    if (dto.birthdate !== undefined) this.birthdate = dto.birthdate;
+    if (dto.birth_date !== undefined) this.birth_date = dto.birth_date;
     if (dto.address !== undefined) this.address = dto.address;
     if (dto.tell !== undefined) this.tell = dto.tell;
     if (dto.cell !== undefined) this.cell = dto.cell;
-    if (dto.dateopened !== undefined) this.dateopened = dto.dateopened;
-    if (dto.clienttype !== undefined) this.clienttype = dto.clienttype;
+    if (dto.date_opened !== undefined) this.date_opened = dto.date_opened;
+    if (dto.client_type !== undefined) this.client_type = dto.client_type;
     if (dto.balance !== undefined) this.balance = dto.balance;
-    if (dto.loanstatus !== undefined) this.loanstatus = dto.loanstatus;
-    if (dto.mevstatus !== undefined) this.mevstatus = dto.mevstatus;
-    if (dto.controlnumber !== undefined) this.controlnumber = dto.controlnumber;
-    if (dto.hasvoted !== undefined) this.hasvoted = dto.hasvoted;
+    if (dto.loan_status !== undefined) this.loan_status = dto.loan_status;
+    if (dto.mev_status !== undefined) this.mev_status = dto.mev_status;
+    if (dto.control_number !== undefined)
+      this.control_number = dto.control_number;
+    if (dto.has_voted !== undefined) this.has_voted = dto.has_voted;
   }
 
   /**
    * Archives (soft deletes) the delegate
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the delegate is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new DelegateBusinessException(
         'Delegate is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
     }
 
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived delegate
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new DelegateBusinessException(
         `Delegate with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -248,15 +249,15 @@ export class Delegate {
     }
 
     // restore the delegate
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**
    * Validates the delegate against business rules
    *
    * This method enforces domain validation rules such as:
-   * - Electionid must be valid
+   * - Election_id must be valid
    * - Branch, account ID, account name must meet length requirements
    * - Control number must be provided
    * - Balance must be a valid number

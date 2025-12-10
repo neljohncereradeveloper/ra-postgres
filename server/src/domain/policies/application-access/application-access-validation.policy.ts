@@ -18,11 +18,11 @@ export class ApplicationAccessValidationPolicy {
    * - Application access name (desc1) must be provided and meet length requirements (3-255 characters)
    * - Application access name cannot be empty or just whitespace
    *
-   * @param applicationAccess - The application access to validate
+   * @param application_access - The application access to validate
    * @throws ApplicationAccessBusinessException - If application access validation fails
    */
-  validate(applicationAccess: ApplicationAccess): void {
-    if (!applicationAccess) {
+  validate(application_access: ApplicationAccess): void {
+    if (!application_access) {
       throw new ApplicationAccessBusinessException(
         'Application access not found',
         HTTP_STATUS.NOT_FOUND,
@@ -31,8 +31,8 @@ export class ApplicationAccessValidationPolicy {
 
     // Validate if desc1 is provided
     if (
-      !applicationAccess.desc1 ||
-      applicationAccess.desc1.trim().length === 0
+      !application_access.desc1 ||
+      application_access.desc1.trim().length === 0
     ) {
       throw new ApplicationAccessBusinessException(
         'Application access name is required and cannot be empty.',
@@ -41,7 +41,7 @@ export class ApplicationAccessValidationPolicy {
     }
 
     // Validate if desc1 length is within limits (255 characters max based on entity)
-    if (applicationAccess.desc1.length > 255) {
+    if (application_access.desc1.length > 255) {
       throw new ApplicationAccessBusinessException(
         'Application access name must not exceed 255 characters.',
         HTTP_STATUS.BAD_REQUEST,
@@ -49,7 +49,7 @@ export class ApplicationAccessValidationPolicy {
     }
 
     // Validate if desc1 has minimum length
-    if (applicationAccess.desc1.trim().length < 3) {
+    if (application_access.desc1.trim().length < 3) {
       throw new ApplicationAccessBusinessException(
         'Application access name must be at least 3 characters long.',
         HTTP_STATUS.BAD_REQUEST,

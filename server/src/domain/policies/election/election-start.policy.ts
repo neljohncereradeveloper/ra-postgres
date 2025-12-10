@@ -19,16 +19,16 @@ import { getPHDateString } from '@domain/utils/format-ph-time';
 export class ElectionStartPolicy {
   validateElectionStart(
     election: Election,
-    delegatesCount: number,
-    districtCount: number,
-    positionCount: number,
-    candidateCount: number,
+    delegates_count: number,
+    district_count: number,
+    position_count: number,
+    candidate_count: number,
   ): void {
-    const currentDate = getPHDateString();
-    const electionDate = getPHDateString(election.date);
+    const current_date = getPHDateString();
+    const election_date = getPHDateString(election.date);
 
     // Validate if the delegates are uploaded
-    if (delegatesCount === 0) {
+    if (delegates_count === 0) {
       throw new ElectionBusinessException(
         'No delegates. Please upload delegates first',
         HTTP_STATUS.BAD_REQUEST,
@@ -36,7 +36,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the districts are created
-    if (districtCount === 0) {
+    if (district_count === 0) {
       throw new ElectionBusinessException(
         'No districts. Please create districts first',
         HTTP_STATUS.BAD_REQUEST,
@@ -44,7 +44,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the positions are created
-    if (positionCount === 0) {
+    if (position_count === 0) {
       throw new ElectionBusinessException(
         'No positions. Please create positions first',
         HTTP_STATUS.BAD_REQUEST,
@@ -52,7 +52,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the candidates are created
-    if (candidateCount === 0) {
+    if (candidate_count === 0) {
       throw new ElectionBusinessException(
         'No candidates. Please create candidates first',
         HTTP_STATUS.BAD_REQUEST,
@@ -60,7 +60,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is not started
-    if (election.electionstatus === ElectionStatus.STARTED) {
+    if (election.election_status === ElectionStatus.STARTED) {
       throw new ElectionBusinessException(
         'Election has already started.',
         HTTP_STATUS.BAD_REQUEST,
@@ -68,7 +68,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is not cancelled
-    if (election.electionstatus === ElectionStatus.CANCELLED) {
+    if (election.election_status === ElectionStatus.CANCELLED) {
       throw new ElectionBusinessException(
         `Election cancelled.`,
         HTTP_STATUS.BAD_REQUEST,
@@ -76,7 +76,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is not closed
-    if (election.electionstatus === ElectionStatus.CLOSED) {
+    if (election.election_status === ElectionStatus.CLOSED) {
       throw new ElectionBusinessException(
         `Election already closed.`,
         HTTP_STATUS.BAD_REQUEST,
@@ -84,7 +84,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is scheduled for today
-    if (electionDate !== currentDate) {
+    if (election_date !== current_date) {
       throw new ElectionBusinessException(
         'Election is not scheduled for today.',
         HTTP_STATUS.BAD_REQUEST,

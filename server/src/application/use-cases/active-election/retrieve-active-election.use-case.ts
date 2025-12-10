@@ -1,4 +1,5 @@
 import { ACTIVE_ELECTION_ACTIONS } from '@domain/constants/active-election/active-election-actions.constants';
+import { ActiveElection } from '@domain/models/active-election.model';
 import { TransactionPort } from '@domain/ports/transaction-port';
 import { ActiveElectionRepository } from '@domains/repositories/active-election.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -24,7 +25,14 @@ export class RetrieveActiveElectionUseCase {
           throw new BadRequestException('No active election.');
         }
 
-        return activeElection;
+        return {
+          id: activeElection.id,
+          electionId: activeElection.electionid,
+          createdBy: activeElection.createdby,
+          createdAt: activeElection.createdat,
+          updatedBy: activeElection.updatedby,
+          updatedAt: activeElection.updatedat,
+        };
       },
     );
   }

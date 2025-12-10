@@ -14,7 +14,7 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 export class ElectionLockPolicy {
   validate(election: Election): void {
     // Validate if the election is not closed
-    if (election.electionstatus === ElectionStatus.CLOSED) {
+    if (election.election_status === ElectionStatus.CLOSED) {
       throw new ElectionBusinessException(
         'Cannot update election. Election has already closed.',
         HTTP_STATUS.BAD_REQUEST,
@@ -22,7 +22,7 @@ export class ElectionLockPolicy {
     }
 
     // Validate if the election is not cancelled
-    if (election.electionstatus === ElectionStatus.CANCELLED) {
+    if (election.election_status === ElectionStatus.CANCELLED) {
       throw new ElectionBusinessException(
         'Cannot update election. Election is already cancelled.',
         HTTP_STATUS.BAD_REQUEST,
@@ -30,7 +30,7 @@ export class ElectionLockPolicy {
     }
 
     // Validate if the election is not started
-    if (election.electionstatus === ElectionStatus.STARTED) {
+    if (election.election_status === ElectionStatus.STARTED) {
       throw new ElectionBusinessException(
         'Cannot update election. Election has already started.',
         HTTP_STATUS.BAD_REQUEST,

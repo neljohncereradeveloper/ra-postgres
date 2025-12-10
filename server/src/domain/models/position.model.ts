@@ -11,41 +11,41 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
  */
 export class Position {
   id: number;
-  electionid: number;
+  election_id: number;
   desc1: string;
-  maxcandidates: number;
-  termlimit: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  max_candidates: number;
+  term_limit: string;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
-    electionid: number;
+    election_id: number;
     desc1: string;
-    maxcandidates: number;
-    termlimit: string;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    max_candidates: number;
+    term_limit: string;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
-    this.electionid = params.electionid;
+    this.election_id = params.election_id;
     this.desc1 = params.desc1;
-    this.maxcandidates = params.maxcandidates;
-    this.termlimit = params.termlimit;
-    this.deletedby = params.deletedby;
-    this.deletedat = params.deletedat;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.max_candidates = params.max_candidates;
+    this.term_limit = params.term_limit;
+    this.deleted_by = params.deleted_by;
+    this.deleted_at = params.deleted_at;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -63,19 +63,19 @@ export class Position {
    * @throws PositionValidationException - If validation fails
    */
   static create(params: {
-    electionid: number;
+    election_id: number;
     desc1: string;
-    maxcandidates: number;
-    termlimit: string;
-    createdby?: string;
+    max_candidates: number;
+    term_limit: string;
+    created_by?: string;
   }): Position {
     const position = new Position({
-      electionid: params.electionid,
+      election_id: params.election_id,
       desc1: params.desc1,
-      maxcandidates: params.maxcandidates,
-      termlimit: params.termlimit,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      max_candidates: params.max_candidates,
+      term_limit: params.term_limit,
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the position before returning
     position.validate();
@@ -95,11 +95,11 @@ export class Position {
    */
   update(dto: {
     desc1: string;
-    maxcandidates: number;
-    termlimit: string;
-    updatedby?: string;
+    max_candidates: number;
+    term_limit: string;
+    updated_by?: string;
   }): void {
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new PositionBusinessException(
         'Position is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -109,28 +109,28 @@ export class Position {
     // Create a temporary position with the new values to validate before applying
     const tempPosition = new Position({
       id: this.id,
-      electionid: this.electionid,
+      election_id: this.election_id,
       desc1: dto.desc1,
-      maxcandidates: dto.maxcandidates,
-      termlimit: dto.termlimit,
+      max_candidates: dto.max_candidates,
+      term_limit: dto.term_limit,
     });
     // Validate the new state before applying changes
     tempPosition.validate();
 
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
-    this.maxcandidates = dto.maxcandidates;
-    this.termlimit = dto.termlimit;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.max_candidates = dto.max_candidates;
+    this.term_limit = dto.term_limit;
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the position
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the position is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new PositionBusinessException(
         'Position is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
@@ -138,15 +138,15 @@ export class Position {
     }
 
     // Apply archive operation
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived position
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new PositionBusinessException(
         `Position with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -154,8 +154,8 @@ export class Position {
     }
 
     // restore the position
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**

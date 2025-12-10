@@ -12,31 +12,31 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 export class UserRole {
   id: number;
   desc1: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
     desc1: string;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
     this.desc1 = params.desc1;
-    this.deletedby = params.deletedby;
-    this.deletedat = params.deletedat;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.deleted_by = params.deleted_by;
+    this.deleted_at = params.deleted_at;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -53,11 +53,11 @@ export class UserRole {
    * @returns A new validated UserRole instance
    * @throws UserRoleBusinessException - If validation fails
    */
-  static create(params: { desc1: string; createdby?: string }): UserRole {
+  static create(params: { desc1: string; created_by?: string }): UserRole {
     const userRole = new UserRole({
       desc1: params.desc1,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the user role before returning
     userRole.validate();
@@ -75,8 +75,8 @@ export class UserRole {
    * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws UserRoleBusinessException - If validation fails
    */
-  update(dto: { desc1: string; updatedby?: string }): void {
-    if (this.deletedat) {
+  update(dto: { desc1: string; updated_by?: string }): void {
+    if (this.deleted_at) {
       throw new UserRoleBusinessException(
         'User role is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -93,31 +93,31 @@ export class UserRole {
 
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the user role
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the user role is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new UserRoleBusinessException(
         'User role is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
     }
 
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived user role
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new UserRoleBusinessException(
         `User role with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -125,8 +125,8 @@ export class UserRole {
     }
 
     // restore the user role
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**

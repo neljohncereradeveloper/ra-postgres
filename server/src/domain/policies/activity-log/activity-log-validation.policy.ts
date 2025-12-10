@@ -66,12 +66,12 @@ export class ActivityLogValidationPolicy {
 
     // Validate if timestamp is a valid date
     if (
-      !activityLog.timestamp ||
-      !(activityLog.timestamp instanceof Date) ||
-      isNaN(activityLog.timestamp.getTime())
+      !activityLog.occurred_at ||
+      !(activityLog.occurred_at instanceof Date) ||
+      isNaN(activityLog.occurred_at.getTime())
     ) {
       throw new ActivityLogBusinessException(
-        'Timestamp must be a valid date.',
+        'Occurred at must be a valid date.',
         HTTP_STATUS.BAD_REQUEST,
       );
     }

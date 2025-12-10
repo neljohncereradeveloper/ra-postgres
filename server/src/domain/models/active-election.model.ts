@@ -10,62 +10,62 @@ import { getPHDateTime } from '@domain/utils/format-ph-time';
  */
 export class ActiveElection {
   id: number;
-  electionid?: number;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  election_id?: number;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
-    electionid?: number;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    election_id?: number;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
-    this.electionid = params.electionid;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.election_id = params.election_id;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
    * Sets the active election
    *
    * This method encapsulates the logic for setting which election is currently active.
-   * It updates the electionid and audit fields.
+   * It updates the election_id and updated_by fields.
    *
-   * @param electionid - The ID of the election to set as active
-   * @param updatedby - Username of the user performing the update (required for audit)
-   * @throws Error - If electionid is invalid (not provided or <= 0)
+   * @param election_id - The ID of the election to set as active
+   * @param updated_by - Username of the user performing the update (required for audit)
+   * @throws Error - If election_id is invalid (not provided or <= 0)
    */
-  setActiveElection(electionid: number, updatedby: string): void {
-    if (!electionid || electionid <= 0) {
+  setActiveElection(election_id: number, updated_by: string): void {
+    if (!election_id || election_id <= 0) {
       throw new Error(
         'Election id is required and must be a valid positive integer.',
       );
     }
 
-    this.electionid = electionid;
-    this.updatedby = updatedby;
-    this.updatedat = getPHDateTime();
+    this.election_id = election_id;
+    this.updated_by = updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Resets (clears) the active election
    *
-   * This method clears the active election by setting electionid to null.
+   * This method clears the active election by setting election_id to null.
    * This is useful when closing or resetting the system state.
    *
-   * @param updatedby - Username of the user performing the reset (required for audit)
+   * @param updated_by - Username of the user performing the reset (required for audit)
    */
-  reset(updatedby: string): void {
-    this.electionid = null;
-    this.updatedby = updatedby;
-    this.updatedat = getPHDateTime();
+  reset(updated_by: string): void {
+    this.election_id = null;
+    this.updated_by = updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
@@ -74,6 +74,6 @@ export class ActiveElection {
    * @returns true if an election is set as active, false otherwise
    */
   hasActiveElection(): boolean {
-    return this.electionid !== null && this.electionid !== undefined;
+    return this.election_id !== null && this.election_id !== undefined;
   }
 }

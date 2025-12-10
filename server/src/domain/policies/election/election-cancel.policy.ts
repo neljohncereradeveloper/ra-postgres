@@ -16,14 +16,14 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 export class ElectionCancelPolicy {
   validateElectionCancel(election: Election): void {
     // Validate if the election is not cancelled
-    if (election.electionstatus === ElectionStatus.CANCELLED) {
+    if (election.election_status === ElectionStatus.CANCELLED) {
       throw new ElectionBusinessException(
         'Election is already cancelled.',
         HTTP_STATUS.BAD_REQUEST,
       );
     }
     // Validate if the election is not closed
-    if (election.electionstatus === ElectionStatus.CLOSED) {
+    if (election.election_status === ElectionStatus.CLOSED) {
       throw new ElectionBusinessException(
         'Election has already closed. Cannot be cancelled.',
         HTTP_STATUS.BAD_REQUEST,

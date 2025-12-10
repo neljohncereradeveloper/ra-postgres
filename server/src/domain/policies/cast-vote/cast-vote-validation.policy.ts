@@ -31,7 +31,7 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the election is not closed
-    if (election.electionstatus === ElectionStatus.CLOSED) {
+    if (election.election_status === ElectionStatus.CLOSED) {
       throw new CastVoteBusinessException(
         'Election has already been closed.',
         HTTP_STATUS.BAD_REQUEST,
@@ -39,7 +39,7 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the election is not cancelled
-    if (election.electionstatus === ElectionStatus.CANCELLED) {
+    if (election.election_status === ElectionStatus.CANCELLED) {
       throw new CastVoteBusinessException(
         'Election has been cancelled.',
         HTTP_STATUS.BAD_REQUEST,
@@ -47,7 +47,7 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the election has started
-    if (election.electionstatus === ElectionStatus.SCHEDULED) {
+    if (election.election_status === ElectionStatus.SCHEDULED) {
       throw new CastVoteBusinessException(
         'Cannot cast votes. Election has not started.',
         HTTP_STATUS.BAD_REQUEST,
@@ -70,7 +70,7 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the delegate has not already voted
-    if (delegate.hasvoted) {
+    if (delegate.has_voted) {
       throw new CastVoteBusinessException(
         'Delegate has already voted in this election.',
         HTTP_STATUS.BAD_REQUEST,
@@ -98,9 +98,9 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the ballot is in issued status
-    if (ballot.ballotstatus !== BALLOT_STATUS_CONSTANTS.ISSUED) {
+    if (ballot.ballot_status !== BALLOT_STATUS_CONSTANTS.ISSUED) {
       throw new CastVoteBusinessException(
-        `Ballot is in invalid state: ${ballot.ballotstatus}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
+        `Ballot is in invalid state: ${ballot.ballot_status}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
         HTTP_STATUS.BAD_REQUEST,
       );
     }
@@ -110,12 +110,10 @@ export class CastVoteValidationPolicy {
    * Validates a candidate
    *
    * @param candidate - The candidate to validate
-   * @param electionId - The ID of the election
+   * @param election_id - The ID of the election
    * @throws CastVoteValidationException - If candidate is invalid
    */
-  validateCandidate(candidate: Candidate, electionId: number): void {
-    console.log('candidate', candidate);
-    console.log('electionId', electionId);
+  validateCandidate(candidate: Candidate, election_id: number): void {
     if (!candidate) {
       throw new CastVoteBusinessException(
         'Candidate not found',
@@ -124,15 +122,15 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the candidate belongs to the active election
-    if (candidate.electionid !== electionId) {
+    if (candidate.election_id !== election_id) {
       throw new CastVoteBusinessException(
-        `Candidate ${candidate.displayname} does not belong to the active election.`,
+        `Candidate ${candidate.display_name} does not belong to the active election.`,
         HTTP_STATUS.BAD_REQUEST,
       );
     }
 
     // Validate if the candidate has not been removed
-    if (candidate.deletedat) {
+    if (candidate.deleted_at) {
       throw new CastVoteBusinessException(
         'Candidate has been removed.',
         HTTP_STATUS.BAD_REQUEST,
@@ -148,24 +146,24 @@ export class CastVoteValidationPolicy {
    * @throws CastVoteValidationException - If voting limits are exceeded
    */
   validatePositionLimits(
-    candidatesPerPosition: Map<number, number>,
+    candidates_per_position: Map<number, number>,
     positions: Map<number, Position>,
   ): void {
-    for (const [positionId, count] of candidatesPerPosition.entries()) {
-      const position = positions.get(positionId);
+    for (const [position_id, count] of candidates_per_position.entries()) {
+      const position = positions.get(position_id);
 
       // Validate if the position exists
       if (!position) {
         throw new CastVoteBusinessException(
-          `Position with ID ${positionId} not found.`,
+          `Position with ID ${position_id} not found.`,
           HTTP_STATUS.NOT_FOUND,
         );
       }
 
       // Validate if votes per position are within allowed limits
-      if (position.maxcandidates && count > position.maxcandidates) {
+      if (position.max_candidates && count > position.max_candidates) {
         throw new CastVoteBusinessException(
-          `Maximum votes allowed for position ${position.desc1} is ${position.maxcandidates}, but ${count} votes were cast.`,
+          `Maximum votes allowed for position ${position.desc1} is ${position.max_candidates}, but ${count} votes were cast.`,
           HTTP_STATUS.BAD_REQUEST,
         );
       }
@@ -209,13 +207,13 @@ export class CastVoteValidationPolicy {
     }
 
     // Group candidates by position to check limits
-    const candidatesPerPosition = new Map<number, number>();
+    const candidates_per_position = new Map<number, number>();
     for (const candidate of candidates) {
-      const count = candidatesPerPosition.get(candidate.positionid) || 0;
-      candidatesPerPosition.set(candidate.positionid, count + 1);
+      const count = candidates_per_position.get(candidate.position_id) || 0;
+      candidates_per_position.set(candidate.position_id, count + 1);
     }
 
     // Validate position voting limits
-    this.validatePositionLimits(candidatesPerPosition, positions);
+    this.validatePositionLimits(candidates_per_position, positions);
   }
 }

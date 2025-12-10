@@ -12,31 +12,31 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 export class ApplicationAccess {
   id: number;
   desc1: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
     desc1: string;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
     this.desc1 = params.desc1;
-    this.deletedby = params.deletedby;
-    this.deletedat = params.deletedat;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.deleted_by = params.deleted_by;
+    this.deleted_at = params.deleted_at;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -55,12 +55,12 @@ export class ApplicationAccess {
    */
   static create(params: {
     desc1: string;
-    createdby?: string;
+    created_by?: string;
   }): ApplicationAccess {
     const applicationAccess = new ApplicationAccess({
       desc1: params.desc1,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the application access before returning
     applicationAccess.validate();
@@ -75,11 +75,11 @@ export class ApplicationAccess {
    * remains in a valid state. If validation fails, no changes are applied.
    *
    * @param dto - Application access data containing fields to update (desc1 is required)
-   * @param updatedBy - Username of the user performing the update (required for audit)
+   * @param updated_by - Username of the user performing the update (required for audit)
    * @throws ApplicationAccessBusinessException - If validation fails
    */
-  update(dto: { desc1: string; updatedby?: string }): void {
-    if (this.deletedat) {
+  update(dto: { desc1: string; updated_by?: string }): void {
+    if (this.deleted_at) {
       throw new ApplicationAccessBusinessException(
         'Application access is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -96,31 +96,31 @@ export class ApplicationAccess {
 
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the application access
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the application access is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new ApplicationAccessBusinessException(
         'Application access is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
     }
 
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived application access
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new ApplicationAccessBusinessException(
         `Application access with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -128,8 +128,8 @@ export class ApplicationAccess {
     }
 
     // restore the application access
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**

@@ -14,49 +14,49 @@ export class Election {
   desc1: string;
   address: string;
   date: Date;
-  maxattendees: number;
-  electionstatus: ElectionStatus;
-  starttime?: Date;
-  endtime?: Date;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  max_attendees: number;
+  election_status: ElectionStatus;
+  start_time?: Date;
+  end_time?: Date;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
     name?: string;
     desc1?: string;
     address?: string;
-    starttime?: Date;
-    endtime?: Date;
-    maxattendees?: number;
-    electionstatus?: ElectionStatus;
+    start_time?: Date;
+    end_time?: Date;
+    max_attendees?: number;
+    election_status?: ElectionStatus;
     date?: Date;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
     this.name = params.name;
     this.desc1 = params.desc1;
     this.address = params.address;
     this.date = params.date;
-    this.starttime = params.starttime;
-    this.endtime = params.endtime;
-    this.maxattendees = params.maxattendees;
-    this.electionstatus = params.electionstatus;
-    this.deletedby = params.deletedby;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
-    this.deletedat = params.deletedat;
+    this.start_time = params.start_time;
+    this.end_time = params.end_time;
+    this.max_attendees = params.max_attendees;
+    this.election_status = params.election_status;
+    this.deleted_by = params.deleted_by;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
+    this.deleted_at = params.deleted_at;
   }
 
   /**
@@ -78,18 +78,18 @@ export class Election {
     desc1: string;
     address: string;
     date: Date;
-    maxattendees?: number;
-    createdby?: string;
+    max_attendees?: number;
+    created_by?: string;
   }): Election {
     const election = new Election({
       name: params.name,
       desc1: params.desc1,
       address: params.address,
       date: params.date,
-      maxattendees: params.maxattendees,
-      electionstatus: ElectionStatus.SCHEDULED,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      max_attendees: params.max_attendees,
+      election_status: ElectionStatus.SCHEDULED,
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the election before returning
     election.validate();
@@ -105,22 +105,22 @@ export class Election {
    */
 
   startEvent(
-    delegatescount: number,
-    districtcount: number,
-    positioncount: number,
-    candidatecount: number,
+    delegates_count: number,
+    district_count: number,
+    position_count: number,
+    candidate_count: number,
   ): void {
     // Validate if the election can be started
     new ElectionStartPolicy().validateElectionStart(
       this,
-      delegatescount,
-      districtcount,
-      positioncount,
-      candidatecount,
+      delegates_count,
+      district_count,
+      position_count,
+      candidate_count,
     );
     // set election data
-    this.starttime = getPHDateTime();
-    this.electionstatus = ElectionStatus.STARTED;
+    this.start_time = getPHDateTime();
+    this.election_status = ElectionStatus.STARTED;
   }
 
   /**
@@ -130,8 +130,8 @@ export class Election {
     // Validate if the election can be closed
     new ElectionClosePolicy().validateElectionClose(this);
     // set election data
-    this.endtime = getPHDateTime();
-    this.electionstatus = ElectionStatus.CLOSED;
+    this.end_time = getPHDateTime();
+    this.election_status = ElectionStatus.CLOSED;
   }
 
   /**
@@ -143,9 +143,9 @@ export class Election {
     new ElectionCancelPolicy().validateElectionCancel(this);
     // set election data
     this.desc1 = description;
-    this.starttime = null;
-    this.endtime = null;
-    this.electionstatus = ElectionStatus.CANCELLED;
+    this.start_time = null;
+    this.end_time = null;
+    this.election_status = ElectionStatus.CANCELLED;
   }
 
   /**
@@ -164,12 +164,12 @@ export class Election {
     desc1: string;
     address: string;
     date: Date;
-    maxattendees: number;
-    starttime: Date | null;
-    endtime: Date | null;
-    updatedby: string;
+    max_attendees: number;
+    start_time: Date | null;
+    end_time: Date | null;
+    updated_by: string;
   }): void {
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new ElectionBusinessException(
         'Election is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -183,10 +183,10 @@ export class Election {
       desc1: dto.desc1,
       address: dto.address,
       date: dto.date,
-      maxattendees: dto.maxattendees,
-      starttime: dto.starttime,
-      endtime: dto.endtime,
-      electionstatus: this.electionstatus,
+      max_attendees: dto.max_attendees,
+      start_time: dto.start_time,
+      end_time: dto.end_time,
+      election_status: this.election_status,
     });
     // Validate the new state before applying changes
     tempElection.validate();
@@ -196,19 +196,19 @@ export class Election {
     this.desc1 = dto.desc1;
     this.address = dto.address;
     this.date = dto.date;
-    this.maxattendees = dto.maxattendees;
-    this.starttime = dto.starttime;
-    this.endtime = dto.endtime;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.max_attendees = dto.max_attendees;
+    this.start_time = dto.start_time;
+    this.end_time = dto.end_time;
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the election
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the election is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new ElectionBusinessException(
         'Election is already archived.',
         HTTP_STATUS.CONFLICT,
@@ -216,15 +216,15 @@ export class Election {
     }
 
     // archive the election
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived election
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new ElectionBusinessException(
         `Election with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -232,8 +232,8 @@ export class Election {
     }
 
     // restore the election
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**

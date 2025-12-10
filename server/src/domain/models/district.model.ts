@@ -11,35 +11,35 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
  */
 export class District {
   id: number;
-  electionid: number;
+  election_id: number;
   desc1: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
-    electionid: number;
+    election_id: number;
     desc1: string;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
-    this.electionid = params.electionid;
+    this.election_id = params.election_id;
     this.desc1 = params.desc1;
-    this.deletedby = params.deletedby;
-    this.deletedat = params.deletedat;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.deleted_by = params.deleted_by;
+    this.deleted_at = params.deleted_at;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -57,15 +57,15 @@ export class District {
    * @throws DistrictValidationException - If validation fails
    */
   static create(params: {
-    electionid: number;
+    election_id: number;
     desc1: string;
-    createdby?: string;
+    created_by?: string;
   }): District {
     const district = new District({
-      electionid: params.electionid,
+      election_id: params.election_id,
       desc1: params.desc1,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the district before returning
     district.validate();
@@ -83,8 +83,8 @@ export class District {
    * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws DistrictValidationException - If validation fails
    */
-  update(dto: { desc1: string; updatedby?: string }): void {
-    if (this.deletedat) {
+  update(dto: { desc1: string; updated_by?: string }): void {
+    if (this.deleted_at) {
       throw new DistrictBusinessException(
         'District is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -94,7 +94,7 @@ export class District {
     // Create a temporary district with the new values to validate before applying
     const tempDistrict = new District({
       id: this.id,
-      electionid: this.electionid,
+      election_id: this.election_id,
       desc1: dto.desc1,
     });
     // Validate the new state before applying changes
@@ -102,31 +102,31 @@ export class District {
 
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the district
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the district is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new DistrictBusinessException(
         'District is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
     }
 
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived district
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new DistrictBusinessException(
         `District with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -134,8 +134,8 @@ export class District {
     }
 
     // restore the district
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**

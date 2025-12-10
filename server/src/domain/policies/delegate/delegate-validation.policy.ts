@@ -37,7 +37,7 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if electionId is provided (foreign key reference to Election primary key)
-    if (!delegate.electionid || delegate.electionid <= 0) {
+    if (!delegate.election_id || delegate.election_id <= 0) {
       throw new DelegateBusinessException(
         'Election ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -53,7 +53,7 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if accountId is provided
-    if (!delegate.accountid || delegate.accountid.trim().length === 0) {
+    if (!delegate.account_id || delegate.account_id.trim().length === 0) {
       throw new DelegateBusinessException(
         'Account ID is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
@@ -61,7 +61,7 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if accountName is provided
-    if (!delegate.accountname || delegate.accountname.trim().length === 0) {
+    if (!delegate.account_name || delegate.account_name.trim().length === 0) {
       throw new DelegateBusinessException(
         'Account name is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
@@ -69,7 +69,7 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if accountName length is within limits (255 characters max based on entity)
-    if (delegate.accountname.length > 255) {
+    if (delegate.account_name.length > 255) {
       throw new DelegateBusinessException(
         'Account name must not exceed 255 characters.',
         HTTP_STATUS.BAD_REQUEST,
@@ -77,7 +77,10 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if controlNumber is provided
-    if (!delegate.controlnumber || delegate.controlnumber.trim().length === 0) {
+    if (
+      !delegate.control_number ||
+      delegate.control_number.trim().length === 0
+    ) {
       throw new DelegateBusinessException(
         'Control number is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
@@ -100,7 +103,7 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if loanStatus is provided
-    if (!delegate.loanstatus || delegate.loanstatus.trim().length === 0) {
+    if (!delegate.loan_status || delegate.loan_status.trim().length === 0) {
       throw new DelegateBusinessException(
         'Loan status is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
@@ -108,7 +111,7 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if loanStatus length is within limits (100 characters max based on entity)
-    if (delegate.loanstatus.length > 100) {
+    if (delegate.loan_status.length > 100) {
       throw new DelegateBusinessException(
         'Loan status must not exceed 100 characters.',
         HTTP_STATUS.BAD_REQUEST,
@@ -116,14 +119,14 @@ export class DelegateValidationPolicy {
     }
 
     // Validate if mevStatus is provided
-    if (!delegate.mevstatus || delegate.mevstatus.trim().length === 0) {
+    if (!delegate.mev_status || delegate.mev_status.trim().length === 0) {
       throw new DelegateBusinessException(
         'MEV status is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
       );
     }
 
-    if (delegate.clienttype && delegate.clienttype.length > 100) {
+    if (delegate.client_type && delegate.client_type.length > 100) {
       throw new DelegateBusinessException(
         'Client type must not exceed 100 characters.',
         HTTP_STATUS.BAD_REQUEST,

@@ -14,21 +14,21 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 export class ElectionClosePolicy {
   validateElectionClose(election: Election): void {
     // Validate if the election is not closed
-    if (election.electionstatus === ElectionStatus.CLOSED) {
+    if (election.election_status === ElectionStatus.CLOSED) {
       throw new ElectionBusinessException(
         'Election has already closed.',
         HTTP_STATUS.BAD_REQUEST,
       );
     }
     // Validate if the election is started
-    if (election.electionstatus !== ElectionStatus.STARTED) {
+    if (election.election_status !== ElectionStatus.STARTED) {
       throw new ElectionBusinessException(
         'Cannot close election. Election is not started.',
         HTTP_STATUS.BAD_REQUEST,
       );
     }
     // Validate if the start time is before the current time
-    if (election.starttime && new Date() < election.starttime) {
+    if (election.start_time && new Date() < election.start_time) {
       throw new ElectionBusinessException(
         'End time cannot be before the start time.',
         HTTP_STATUS.BAD_REQUEST,

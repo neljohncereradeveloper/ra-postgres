@@ -31,7 +31,7 @@ export class DistrictValidationPolicy {
     }
 
     // Validate if electionId is provided (foreign key reference to Election primary key)
-    if (!district.electionid || district.electionid <= 0) {
+    if (!district.election_id || district.election_id <= 0) {
       throw new DistrictBusinessException(
         'Election ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,

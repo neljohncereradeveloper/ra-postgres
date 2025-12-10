@@ -11,44 +11,44 @@ import { getPHDateTime } from '@domain/utils/format-ph-time';
  */
 export class Candidate {
   id: number;
-  electionid: number;
-  positionid: number;
-  districtid: number;
-  delegateid: number;
-  displayname: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  election_id: number;
+  position_id: number;
+  district_id: number;
+  delegate_id: number;
+  display_name: string;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
-    electionid: number;
-    positionid: number;
-    districtid: number;
-    delegateid: number;
-    displayname: string;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    election_id: number;
+    position_id: number;
+    district_id: number;
+    delegate_id: number;
+    display_name: string;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
-    this.electionid = params.electionid;
-    this.positionid = params.positionid;
-    this.districtid = params.districtid;
-    this.delegateid = params.delegateid;
-    this.displayname = params.displayname;
-    this.deletedby = params.deletedby;
-    this.deletedat = params.deletedat;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.election_id = params.election_id;
+    this.position_id = params.position_id;
+    this.district_id = params.district_id;
+    this.delegate_id = params.delegate_id;
+    this.display_name = params.display_name;
+    this.deleted_by = params.deleted_by;
+    this.deleted_at = params.deleted_at;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -66,21 +66,21 @@ export class Candidate {
    * @throws CandidateBusinessException - If validation fails
    */
   static create(params: {
-    electionid: number;
-    positionid: number;
-    districtid: number;
-    delegateid: number;
-    displayname: string;
-    createdby?: string;
+    election_id: number;
+    position_id: number;
+    district_id: number;
+    delegate_id: number;
+    display_name: string;
+    created_by?: string;
   }): Candidate {
     const candidate = new Candidate({
-      electionid: params.electionid,
-      positionid: params.positionid,
-      districtid: params.districtid,
-      delegateid: params.delegateid,
-      displayname: params.displayname,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      election_id: params.election_id,
+      position_id: params.position_id,
+      district_id: params.district_id,
+      delegate_id: params.delegate_id,
+      display_name: params.display_name,
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the candidate before returning
     candidate.validate();
@@ -99,12 +99,12 @@ export class Candidate {
    * @throws CandidateBusinessException - If validation fails
    */
   update(dto: {
-    displayname: string;
-    positionid: number;
-    districtid: number;
-    updatedby?: string;
+    display_name: string;
+    position_id: number;
+    district_id: number;
+    updated_by?: string;
   }): void {
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new CandidateBusinessException(
         'Candidate is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -114,42 +114,42 @@ export class Candidate {
     // Create a temporary candidate with the new values to validate before applying
     const tempCandidate = new Candidate({
       id: this.id,
-      electionid: this.electionid,
-      positionid: dto.positionid,
-      districtid: dto.districtid,
-      delegateid: this.delegateid,
-      displayname: dto.displayname,
+      election_id: this.election_id,
+      position_id: dto.position_id,
+      district_id: dto.district_id,
+      delegate_id: this.delegate_id,
+      display_name: dto.display_name,
     });
     // Validate the new state before applying changes
     tempCandidate.validate();
 
     // Apply changes only if validation passes (data is already validated)
-    this.displayname = dto.displayname;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.display_name = dto.display_name;
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the candidate
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the candidate is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new CandidateBusinessException(
         'Candidate is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
     }
 
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived candidate
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new CandidateBusinessException(
         `Candidate with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -157,8 +157,8 @@ export class Candidate {
     }
 
     // restore the candidate
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**

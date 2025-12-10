@@ -26,7 +26,7 @@ export class PaginatedApplicationAccessListUseCase {
     limit: number,
     isArchived: boolean,
   ): Promise<{
-    data: ApplicationAccess[];
+    data: { id: number; desc1: string; createdBy: string; createdAt: Date }[];
     meta: {
       page: number;
       limit: number;
@@ -53,6 +53,14 @@ export class PaginatedApplicationAccessListUseCase {
         isArchived,
       );
 
-    return applicationAccesses;
+    return {
+      data: applicationAccesses.data.map((applicationAccess) => ({
+        id: applicationAccess.id,
+        desc1: applicationAccess.desc1,
+        createdBy: applicationAccess.createdby,
+        createdAt: applicationAccess.createdat,
+      })),
+      meta: applicationAccesses.meta,
+    };
   }
 }

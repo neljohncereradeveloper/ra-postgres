@@ -76,9 +76,9 @@ export class UserValidationPolicy {
 
     // Validate if applicationAccess is provided
     if (
-      !user.applicationaccess ||
-      !Array.isArray(user.applicationaccess) ||
-      user.applicationaccess.length === 0
+      !user.application_access ||
+      !Array.isArray(user.application_access) ||
+      user.application_access.length === 0
     ) {
       throw new UserBusinessException(
         'Application access is required and cannot be empty.',
@@ -87,7 +87,7 @@ export class UserValidationPolicy {
     }
 
     // Validate each application access item
-    user.applicationaccess.forEach((access, index) => {
+    user.application_access.forEach((access, index) => {
       if (!access || access.trim().length === 0) {
         throw new UserBusinessException(
           `Application access item at index ${index} cannot be empty.`,
@@ -97,7 +97,7 @@ export class UserValidationPolicy {
     });
 
     // Validate if applicationAccess concatenated length is within limits (500 characters max based on entity)
-    const applicationAccessString = user.applicationaccess.join(', ');
+    const applicationAccessString = user.application_access.join(', ');
     if (applicationAccessString.length > 500) {
       throw new UserBusinessException(
         'Application access must not exceed 500 characters when concatenated.',
@@ -107,9 +107,9 @@ export class UserValidationPolicy {
 
     // Validate if userRoles is provided
     if (
-      !user.userroles ||
-      !Array.isArray(user.userroles) ||
-      user.userroles.length === 0
+      !user.user_roles ||
+      !Array.isArray(user.user_roles) ||
+      user.user_roles.length === 0
     ) {
       throw new UserBusinessException(
         'User roles is required and cannot be empty.',
@@ -118,7 +118,7 @@ export class UserValidationPolicy {
     }
 
     // Validate each user role item
-    user.userroles.forEach((role, index) => {
+    user.user_roles.forEach((role, index) => {
       if (!role || role.trim().length === 0) {
         throw new UserBusinessException(
           `User role item at index ${index} cannot be empty.`,
@@ -128,7 +128,7 @@ export class UserValidationPolicy {
     });
 
     // Validate if userRoles concatenated length is within limits (500 characters max based on entity)
-    const userRolesString = user.userroles.join(', ');
+    const userRolesString = user.user_roles.join(', ');
     if (userRolesString.length > 500) {
       throw new UserBusinessException(
         'User roles must not exceed 500 characters when concatenated.',
@@ -137,7 +137,7 @@ export class UserValidationPolicy {
     }
 
     // Validate if username is provided
-    if (!user.username || user.username.trim().length === 0) {
+    if (!user.user_name || user.user_name.trim().length === 0) {
       throw new UserBusinessException(
         'Username is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
@@ -145,7 +145,7 @@ export class UserValidationPolicy {
     }
 
     // Validate if username length is within limits (30 characters max based on entity)
-    if (user.username.length > 30) {
+    if (user.user_name.length > 30) {
       throw new UserBusinessException(
         'Username must not exceed 30 characters.',
         HTTP_STATUS.BAD_REQUEST,
@@ -153,7 +153,7 @@ export class UserValidationPolicy {
     }
 
     // Validate if username has minimum length
-    if (user.username.trim().length < 3) {
+    if (user.user_name.trim().length < 3) {
       throw new UserBusinessException(
         'Username must be at least 3 characters long.',
         HTTP_STATUS.BAD_REQUEST,

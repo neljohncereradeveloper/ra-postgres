@@ -73,7 +73,15 @@ export class SetActiveElectionUseCase {
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return {
+          id: activeElection.id,
+          electionId: election.id,
+          electionName: election.name,
+          createdBy: updateResult.createdby,
+          createdAt: updateResult.createdat,
+          updatedBy: updateResult.updatedby,
+          updatedAt: updateResult.updatedat,
+        };
       },
     );
   }

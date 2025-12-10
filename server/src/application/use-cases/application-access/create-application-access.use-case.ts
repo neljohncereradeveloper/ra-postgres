@@ -25,7 +25,12 @@ export class CreateApplicationAccessUseCase {
   async execute(
     dto: CreateApplicationAccessCommand,
     username: string,
-  ): Promise<ApplicationAccess> {
+  ): Promise<{
+    id: number;
+    desc1: string;
+    createdBy: string;
+    createdAt: Date;
+  }> {
     return this.transactionHelper.executeTransaction(
       APPLICATION_ACCESS_ACTIONS.CREATE,
       async (manager) => {
@@ -60,7 +65,12 @@ export class CreateApplicationAccessUseCase {
         });
         await this.activityLogRepository.create(log, manager);
 
-        return createdApplicationAccess;
+        return {
+          id: createdApplicationAccess.id,
+          desc1: createdApplicationAccess.desc1,
+          createdBy: createdApplicationAccess.createdby,
+          createdAt: getPHDateTime(createdApplicationAccess.createdat),
+        };
       },
     );
   }

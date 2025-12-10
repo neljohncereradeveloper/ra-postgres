@@ -103,10 +103,10 @@ export class ElectionValidationPolicy {
 
     // Validate if startTime is a valid date if provided
     if (
-      election.starttime !== undefined &&
-      election.starttime !== null &&
-      (!(election.starttime instanceof Date) ||
-        isNaN(election.starttime.getTime()))
+      election.start_time !== undefined &&
+      election.start_time !== null &&
+      (!(election.start_time instanceof Date) ||
+        isNaN(election.start_time.getTime()))
     ) {
       throw new ElectionBusinessException(
         'Start time must be a valid date.',
@@ -116,9 +116,10 @@ export class ElectionValidationPolicy {
 
     // Validate if endTime is a valid date if provided
     if (
-      election.endtime !== undefined &&
-      election.endtime !== null &&
-      (!(election.endtime instanceof Date) || isNaN(election.endtime.getTime()))
+      election.end_time !== undefined &&
+      election.end_time !== null &&
+      (!(election.end_time instanceof Date) ||
+        isNaN(election.end_time.getTime()))
     ) {
       throw new ElectionBusinessException(
         'End time must be a valid date.',
@@ -128,9 +129,9 @@ export class ElectionValidationPolicy {
 
     // Validate if endTime is after startTime when both are provided
     if (
-      election.starttime &&
-      election.endtime &&
-      election.endtime < election.starttime
+      election.start_time &&
+      election.end_time &&
+      election.end_time < election.start_time
     ) {
       throw new ElectionBusinessException(
         'End time must be after start time.',
@@ -139,7 +140,7 @@ export class ElectionValidationPolicy {
     }
 
     // Validate if electionStatus is provided
-    if (!election.electionstatus) {
+    if (!election.election_status) {
       throw new ElectionBusinessException(
         'Election status is required.',
         HTTP_STATUS.BAD_REQUEST,
@@ -148,7 +149,7 @@ export class ElectionValidationPolicy {
 
     // Validate if electionStatus is a valid enum value
     const validStatuses = Object.values(ElectionStatus);
-    if (!validStatuses.includes(election.electionstatus)) {
+    if (!validStatuses.includes(election.election_status)) {
       throw new ElectionBusinessException(
         `Election status must be one of: ${validStatuses.join(', ')}.`,
         HTTP_STATUS.BAD_REQUEST,
@@ -156,8 +157,11 @@ export class ElectionValidationPolicy {
     }
 
     // Validate if maxAttendees is positive if provided
-    if (election.maxattendees !== undefined && election.maxattendees !== null) {
-      if (election.maxattendees <= 0) {
+    if (
+      election.max_attendees !== undefined &&
+      election.max_attendees !== null
+    ) {
+      if (election.max_attendees <= 0) {
         throw new ElectionBusinessException(
           'Maximum attendees must be greater than zero.',
           HTTP_STATUS.BAD_REQUEST,

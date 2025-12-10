@@ -1,4 +1,5 @@
 import { ActivityLogValidationPolicy } from '@domain/policies/activity-log/activity-log-validation.policy';
+import { getPHDateTime } from '@domain/utils/format-ph-time';
 
 /**
  * ActivityLog Domain Model
@@ -12,23 +13,23 @@ export class ActivityLog {
   action: string; // e.g., 'CREATE_CLIENT', 'UPDATE_CLIENT', 'DELETE_CLIENT'
   entity: string; // e.g., 'Client'
   details: string; // JSON string containing the details of the activity
-  timestamp: Date; // Date and time when the activity occurred
-  username?: string;
+  occurred_at: Date; // Date and time when the activity occurred
+  user_name: string;
 
   constructor(params: {
     id?: number;
     action: string;
     entity: string;
     details: string;
-    timestamp: Date;
-    username?: string;
+    occurred_at: Date;
+    user_name?: string;
   }) {
     this.id = params.id;
     this.action = params.action;
     this.entity = params.entity;
     this.details = params.details;
-    this.timestamp = params.timestamp;
-    this.username = params.username;
+    this.occurred_at = params.occurred_at;
+    this.user_name = params.user_name;
   }
 
   /**
@@ -49,14 +50,14 @@ export class ActivityLog {
     action: string;
     entity: string;
     details: string;
-    username?: string;
+    user_name?: string;
   }): ActivityLog {
     const activityLog = new ActivityLog({
       action: params.action,
       entity: params.entity,
       details: params.details,
-      timestamp: new Date(),
-      username: params.username,
+      occurred_at: getPHDateTime(),
+      user_name: params.user_name,
     });
     // Validate the activity log before returning
     activityLog.validate();

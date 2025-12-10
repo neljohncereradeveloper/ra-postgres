@@ -13,45 +13,45 @@ export class User {
   id: number;
   precinct: string;
   watcher: string;
-  applicationaccess: string[];
-  userroles: string[];
-  username: string;
+  application_access: string[];
+  user_roles: string[];
+  user_name: string;
   password: string;
-  deletedby?: string;
-  deletedat?: Date | null;
-  createdby?: string;
-  createdat?: Date;
-  updatedby?: string;
-  updatedat?: Date;
+  deleted_by?: string;
+  deleted_at?: Date | null;
+  created_by?: string;
+  created_at?: Date;
+  updated_by?: string;
+  updated_at?: Date;
 
   constructor(params: {
     id?: number;
     precinct: string;
     watcher: string;
-    userroles: string[];
-    applicationaccess: string[];
-    username?: string;
+    user_roles: string[];
+    application_access: string[];
+    user_name?: string;
     password?: string;
-    deletedby?: string;
-    deletedat?: Date | null;
-    createdby?: string;
-    createdat?: Date;
-    updatedby?: string;
-    updatedat?: Date;
+    deleted_by?: string;
+    deleted_at?: Date | null;
+    created_by?: string;
+    created_at?: Date;
+    updated_by?: string;
+    updated_at?: Date;
   }) {
     this.id = params.id;
     this.precinct = params.precinct;
     this.watcher = params.watcher;
-    this.userroles = params.userroles;
-    this.applicationaccess = params.applicationaccess;
-    this.username = params.username;
+    this.user_roles = params.user_roles;
+    this.application_access = params.application_access;
+    this.user_name = params.user_name;
     this.password = params.password;
-    this.deletedby = params.deletedby;
-    this.deletedat = params.deletedat;
-    this.createdby = params.createdby;
-    this.createdat = params.createdat;
-    this.updatedby = params.updatedby;
-    this.updatedat = params.updatedat;
+    this.deleted_by = params.deleted_by;
+    this.deleted_at = params.deleted_at;
+    this.created_by = params.created_by;
+    this.created_at = params.created_at;
+    this.updated_by = params.updated_by;
+    this.updated_at = params.updated_at;
   }
 
   /**
@@ -71,21 +71,21 @@ export class User {
   static create(params: {
     precinct: string;
     watcher: string;
-    applicationaccess: string[];
-    userroles: string[];
-    username: string;
+    application_access: string[];
+    user_roles: string[];
+    user_name: string;
     password: string;
-    createdby?: string;
+    created_by?: string;
   }): User {
     const user = new User({
       precinct: params.precinct,
       watcher: params.watcher,
-      applicationaccess: params.applicationaccess,
-      userroles: params.userroles,
-      username: params.username,
+      application_access: params.application_access,
+      user_roles: params.user_roles,
+      user_name: params.user_name,
       password: params.password,
-      createdby: params.createdby,
-      createdat: getPHDateTime(),
+      created_by: params.created_by,
+      created_at: getPHDateTime(),
     });
     // Validate the user before returning
     user.validate();
@@ -106,11 +106,11 @@ export class User {
   update(dto: {
     precinct: string;
     watcher: string;
-    applicationaccess: string[];
-    userroles: string[];
-    updatedby?: string;
+    application_access: string[];
+    user_roles: string[];
+    updated_by?: string;
   }): void {
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new UserBusinessException(
         'User is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -122,9 +122,9 @@ export class User {
       id: this.id,
       precinct: dto.precinct,
       watcher: dto.watcher,
-      applicationaccess: dto.applicationaccess,
-      userroles: dto.userroles,
-      username: this.username,
+      application_access: dto.application_access,
+      user_roles: dto.user_roles,
+      user_name: this.user_name,
       password: this.password,
     });
     // Validate the new state before applying changes
@@ -133,33 +133,33 @@ export class User {
     // Apply changes only if validation passes (data is already validated)
     this.precinct = dto.precinct;
     this.watcher = dto.watcher;
-    this.applicationaccess = dto.applicationaccess;
-    this.userroles = dto.userroles;
-    this.updatedby = dto.updatedby;
-    this.updatedat = getPHDateTime();
+    this.application_access = dto.application_access;
+    this.user_roles = dto.user_roles;
+    this.updated_by = dto.updated_by;
+    this.updated_at = getPHDateTime();
   }
 
   /**
    * Archives (soft deletes) the user
    */
-  archive(deletedby: string): void {
+  archive(deleted_by: string): void {
     // Validate if the user is not already archived
-    if (this.deletedat) {
+    if (this.deleted_at) {
       throw new UserBusinessException(
         'User is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
       );
     }
 
-    this.deletedat = getPHDateTime();
-    this.deletedby = deletedby;
+    this.deleted_at = getPHDateTime();
+    this.deleted_by = deleted_by;
   }
 
   /**
    * Restores a previously archived user
    */
   restore(): void {
-    if (!this.deletedat) {
+    if (!this.deleted_at) {
       throw new UserBusinessException(
         `User with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -167,8 +167,8 @@ export class User {
     }
 
     // restore the user
-    this.deletedat = null;
-    this.deletedby = null;
+    this.deleted_at = null;
+    this.deleted_by = null;
   }
 
   /**
