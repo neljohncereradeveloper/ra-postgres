@@ -10,14 +10,14 @@ export class RestoreDatabaseUseCase {
   ) {}
 
   async execute(
-    filePath: string,
-    username: string,
+    file_path: string,
+    user_name: string,
     req: any,
   ): Promise<{ message: string; statusCode: number }> {
     // Perform additional business logic if needed.
     return await this.databaseManagementRepository.performRestore(
-      filePath,
-      username,
+      file_path,
+      user_name,
       req,
     );
   }

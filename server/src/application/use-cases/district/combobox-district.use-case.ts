@@ -25,20 +25,20 @@ export class ComboboxDistrictUseCase {
       DISTRICT_ACTIONS.COMBOBOX,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
 

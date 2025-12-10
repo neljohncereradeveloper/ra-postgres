@@ -68,9 +68,9 @@ export class UploadDelegatesUseCase {
    * Processes the uploaded Excel file and inserts delegates into the database.
    *
    * @param file - The uploaded file
-   * @param username - The username of the authenticated user performing the upload
+   * @param user_name - The username of the authenticated user performing the upload
    */
-  async execute(file: UploadedFileInput, username: string) {
+  async execute(file: UploadedFileInput, user_name: string) {
     return this.transactionHelper.executeTransaction(
       DELEGATE_ACTIONS.UPLOAD_DELEGATES,
       async (manager) => {
@@ -78,18 +78,18 @@ export class UploadDelegatesUseCase {
         this.validateFile(file);
         const rows: any = await this.excelParserPort.parse(file.buffer, schema);
 
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new BadRequestException('No Active election');
         }
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
 
@@ -111,10 +111,10 @@ export class UploadDelegatesUseCase {
           details: JSON.stringify({
             message: `Processing ${rows.rows.length} rows from uploaded file.`,
             election: election.name,
-            uploadProcessAt: getPHDateTime(),
-            uploadedBy: username,
+            upload_process_at: getPHDateTime(),
+            uploaded_by: user_name,
           }),
-          username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(logProcessing, manager);
 
@@ -123,34 +123,34 @@ export class UploadDelegatesUseCase {
           // Create the delegate
           const delegate = new Delegate({
             branch: row.branch,
-            electionid: election?.id,
-            accountid: row.accountid,
-            accountname: row.name,
+            election_id: election?.id,
+            account_id: row.accountid,
+            account_name: row.name,
             age: row.age,
             balance: row.balance,
-            loanstatus: row.loanstatus,
-            mevstatus: row.mevstatus,
-            clienttype: row.clienttype,
+            loan_status: row.loanstatus,
+            mev_status: row.mevstatus,
+            client_type: row.clienttype,
             address: row.address,
             tell: row.tell,
             cell: row.cell,
-            dateopened: row.dateopened,
-            birthdate: row.birthdate,
-            controlnumber: row.controlnumber,
+            date_opened: row.dateopened,
+            birth_date: row.birthdate,
+            control_number: row.controlnumber,
           });
 
-          const delegateResult = await this.delegateRepository.create(
+          const delegate_result = await this.delegateRepository.create(
             delegate,
             manager,
           );
 
-          if (!delegateResult) {
+          if (!delegate_result) {
             throw new SomethinWentWrongException('Delegate creation failed');
           }
 
           const ballot = await this.ballotRepository.issueBallot(
             this.uuidGeneratorPort.generateUUID(),
-            delegateResult.id,
+            delegate_result.id,
             election.id,
             manager,
           );
@@ -167,10 +167,10 @@ export class UploadDelegatesUseCase {
           details: JSON.stringify({
             message: `Uploading ${rows.rows.length} delegates finished.`,
             election: election.name,
-            uploadFinishedAt: getPHDateTime(),
-            uploadedBy: username,
+            upload_finished_at: getPHDateTime(),
+            uploaded_by: user_name,
           }),
-          username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(logFinished, manager);
 
@@ -188,11 +188,11 @@ export class UploadDelegatesUseCase {
     }
 
     // Validate file type
-    const allowedMimeTypes = [
+    const allowed_mime_types = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.ms-excel',
     ];
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    if (!allowed_mime_types.includes(file.mime_type)) {
       throw new BadRequestException(
         'Invalid file type. Only Excel files are allowed.',
       );
@@ -207,11 +207,11 @@ export class UploadDelegatesUseCase {
     }
 
     // Validate file extension (optional but recommended)
-    const allowedExtensions = ['.xlsx', '.xls'];
-    const fileExtension = file.originalname.slice(
-      file.originalname.lastIndexOf('.'),
+    const allowed_extensions = ['.xlsx', '.xls'];
+    const file_extension = file.original_name.slice(
+      file.original_name.lastIndexOf('.'),
     );
-    if (!allowedExtensions.includes(fileExtension)) {
+    if (!allowed_extensions.includes(file_extension)) {
       throw new BadRequestException(
         'Invalid file extension. Only .xlsx and .xls are allowed.',
       );

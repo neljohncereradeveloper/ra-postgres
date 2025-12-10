@@ -9,8 +9,8 @@ export class BackupDatabaseUseCase {
     private readonly databaseManagementRepository: DatabaseManagementRepository,
   ) {}
 
-  async execute(req: any, userId: number): Promise<string> {
+  async execute(req: any, user_id: number): Promise<string> {
     // Perform additional business logic if needed.
-    return await this.databaseManagementRepository.performBackup(req, userId);
+    return await this.databaseManagementRepository.performBackup(req, user_id);
   }
 }

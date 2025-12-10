@@ -27,24 +27,24 @@ export class ArchiveDistrictUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       DISTRICT_ACTIONS.ARCHIVE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -57,7 +57,7 @@ export class ArchiveDistrictUseCase {
         }
 
         // Use domain method to archive (soft delete)
-        district.archive(userName);
+        district.archive(user_name);
 
         // Save the updated district
         const success = await this.districtRepository.update(
@@ -76,11 +76,11 @@ export class ArchiveDistrictUseCase {
           details: JSON.stringify({
             id,
             desc1: district.desc1,
-            explanation: `District with ID : ${id} archived by USER : ${userName}`,
-            archivedBy: userName,
-            archivedAt: getPHDateTime(district.deletedat),
+            explanation: `District with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(district.deleted_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

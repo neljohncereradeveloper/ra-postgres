@@ -20,26 +20,26 @@ export class ArchiveApplicationAccessUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, username: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       APPLICATION_ACCESS_ACTIONS.ARCHIVE,
       async (manager) => {
         // retrieve the application access
-        const applicationAccess =
+        const application_access =
           await this.applicationAccessRepository.findById(id, manager);
-        if (!applicationAccess) {
+        if (!application_access) {
           throw new NotFoundException(
             `ApplicationAccess with ID ${id} not found.`,
           );
         }
 
         // use domain model method to archive (ensures deletedBy is cleared)
-        applicationAccess.archive(username);
+        application_access.archive(user_name);
 
         // save the archived application access
         const success = await this.applicationAccessRepository.update(
           id,
-          applicationAccess,
+          application_access,
           manager,
         );
         if (!success) {
@@ -54,12 +54,12 @@ export class ArchiveApplicationAccessUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_APPLICATIONACCESS,
           details: JSON.stringify({
             id,
-            desc1: applicationAccess.desc1,
-            explanation: `ApplicationAccess with ID : ${id} archived by USER : ${username}`,
-            archivedBy: username,
-            archivedAt: getPHDateTime(applicationAccess.deletedat),
+            desc1: application_access.desc1,
+            explanation: `ApplicationAccess with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(application_access.deleted_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

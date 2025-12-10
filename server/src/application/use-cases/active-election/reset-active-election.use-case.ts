@@ -20,7 +20,7 @@ export class ResetActiveElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(username: string) {
+  async execute(user_name: string) {
     return this.transactionHelper.executeTransaction(
       ACTIVE_ELECTION_ACTIONS.RESET_ACTIVE_ELECTION,
       async (manager) => {
@@ -35,11 +35,11 @@ export class ResetActiveElectionUseCase {
           action: ACTIVE_ELECTION_ACTIONS.RESET_ACTIVE_ELECTION,
           entity: DATABASE_CONSTANTS.MODELNAME_ACTIVE_ELECTION,
           details: JSON.stringify({
-            explanation: `Active election reset by USER : ${username}`,
-            resetBy: username,
-            resetAt: getPHDateTime(),
+            explanation: `Active election reset by USER : ${user_name}`,
+            reset_by: user_name,
+            reset_at: getPHDateTime(),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

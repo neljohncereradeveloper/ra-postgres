@@ -24,28 +24,23 @@ export class CreateApplicationAccessUseCase {
 
   async execute(
     dto: CreateApplicationAccessCommand,
-    username: string,
-  ): Promise<{
-    id: number;
-    desc1: string;
-    createdBy: string;
-    createdAt: Date;
-  }> {
+    user_name: string,
+  ): Promise<ApplicationAccess> {
     return this.transactionHelper.executeTransaction(
       APPLICATION_ACCESS_ACTIONS.CREATE,
       async (manager) => {
         // Create the applicationAccess
-        const applicationAccess = ApplicationAccess.create({
+        const application_access = ApplicationAccess.create({
           desc1: dto.desc1,
-          createdby: username,
+          created_by: user_name,
         });
-        const createdApplicationAccess =
+        const created_application_access =
           await this.applicationAccessRepository.create(
-            applicationAccess,
+            application_access,
             manager,
           );
 
-        if (!createdApplicationAccess) {
+        if (!created_application_access) {
           throw new SomethinWentWrongException(
             'Application access creation failed',
           );
@@ -56,21 +51,16 @@ export class CreateApplicationAccessUseCase {
           action: APPLICATION_ACCESS_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_APPLICATIONACCESS,
           details: JSON.stringify({
-            id: createdApplicationAccess.id,
-            desc1: createdApplicationAccess.desc1,
-            createdBy: username,
-            createdAt: getPHDateTime(createdApplicationAccess.createdat),
+            id: created_application_access.id,
+            desc1: created_application_access.desc1,
+            created_by: user_name,
+            created_at: getPHDateTime(created_application_access.created_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return {
-          id: createdApplicationAccess.id,
-          desc1: createdApplicationAccess.desc1,
-          createdBy: createdApplicationAccess.createdby,
-          createdAt: getPHDateTime(createdApplicationAccess.createdat),
-        };
+        return created_application_access;
       },
     );
   }

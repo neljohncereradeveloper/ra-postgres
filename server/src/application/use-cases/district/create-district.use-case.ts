@@ -33,44 +33,44 @@ export class CreateDistrictUseCase {
 
   async execute(
     dto: CreateDistrictCommand,
-    username: string,
+    user_name: string,
   ): Promise<District> {
     return this.transactionHelper.executeTransaction(
       DISTRICT_ACTIONS.CREATE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
         // use domain model method to create (encapsulates business logic and validation)
-        const newDistrict = District.create({
-          electionid: election.id,
+        const new_district = District.create({
+          election_id: election.id,
           desc1: dto.desc1,
-          createdby: username,
+          created_by: user_name,
         });
         // create the district in the database
-        const createdDistrict = await this.districtRepository.create(
-          newDistrict,
+        const created_district = await this.districtRepository.create(
+          new_district,
           manager,
         );
 
-        if (!createdDistrict) {
+        if (!created_district) {
           throw new SomethinWentWrongException('District creation failed');
         }
 
@@ -79,17 +79,17 @@ export class CreateDistrictUseCase {
           action: DISTRICT_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_DISTRICT,
           details: JSON.stringify({
-            id: createdDistrict.id,
-            desc1: createdDistrict.desc1,
-            createdBy: username,
-            createdAt: getPHDateTime(createdDistrict.createdat),
+            id: created_district.id,
+            desc1: created_district.desc1,
+            created_by: user_name,
+            created_at: getPHDateTime(created_district.created_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
         // log the creation
-        return createdDistrict;
+        return created_district;
       },
     );
   }

@@ -27,24 +27,24 @@ export class RestoreCandidateUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       CANDIDATE_ACTIONS.RESTORE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // Can only restore deleted candidate if election is scheduled
@@ -75,12 +75,12 @@ export class RestoreCandidateUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
           details: JSON.stringify({
             id,
-            displayName: candidate.displayname,
-            explanation: `Candidate with ID : ${id} restored by USER : ${userName}`,
-            restoredBy: userName,
-            restoredAt: getPHDateTime(),
+            display_name: candidate.display_name,
+            explanation: `Candidate with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

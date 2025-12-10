@@ -24,16 +24,16 @@ export class PaginatedApplicationAccessListUseCase {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
-    data: { id: number; desc1: string; createdBy: string; createdAt: Date }[];
+    data: ApplicationAccess[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     // Validate input parameters (optional but recommended)
@@ -45,22 +45,14 @@ export class PaginatedApplicationAccessListUseCase {
     }
 
     // retrieve the paginated list of application accesses
-    const applicationAccesses =
+    const application_accesses =
       await this.applicationAccessRepository.findPaginatedList(
         term,
         page,
         limit,
-        isArchived,
+        is_archived,
       );
 
-    return {
-      data: applicationAccesses.data.map((applicationAccess) => ({
-        id: applicationAccess.id,
-        desc1: applicationAccess.desc1,
-        createdBy: applicationAccess.createdby,
-        createdAt: applicationAccess.createdat,
-      })),
-      meta: applicationAccesses.meta,
-    };
+    return application_accesses;
   }
 }

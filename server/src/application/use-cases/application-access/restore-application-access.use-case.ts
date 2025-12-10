@@ -20,26 +20,26 @@ export class RestoreApplicationAccessUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, username: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       APPLICATION_ACCESS_ACTIONS.RESTORE,
       async (manager) => {
         // retrieve the application access
-        const applicationAccess =
+        const application_access =
           await this.applicationAccessRepository.findById(id, manager);
-        if (!applicationAccess) {
+        if (!application_access) {
           throw new NotFoundException(
             `ApplicationAccess with ID ${id} not found.`,
           );
         }
 
         // use domain model method to restore (ensures deletedBy is cleared)
-        applicationAccess.restore();
+        application_access.restore();
 
         // save the restored application access
         const success = await this.applicationAccessRepository.update(
           id,
-          applicationAccess,
+          application_access,
           manager,
         );
         if (!success) {
@@ -54,12 +54,12 @@ export class RestoreApplicationAccessUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_APPLICATIONACCESS,
           details: JSON.stringify({
             id,
-            desc1: applicationAccess.desc1,
-            explanation: `ApplicationAccess with ID : ${id} restored by USER : ${username}`,
-            restoredBy: username,
-            restoredAt: getPHDateTime(),
+            desc1: application_access.desc1,
+            explanation: `ApplicationAccess with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

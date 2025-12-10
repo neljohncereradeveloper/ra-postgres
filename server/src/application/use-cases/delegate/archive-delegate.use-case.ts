@@ -27,25 +27,25 @@ export class ArchiveDelegateUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       DELEGATE_ACTIONS.ARCHIVE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -58,7 +58,7 @@ export class ArchiveDelegateUseCase {
         }
 
         // Use domain method to archive (soft delete)
-        delegate.archive(userName);
+        delegate.archive(user_name);
 
         // Save the updated delegate
         const success = await this.delegateRepository.update(
@@ -76,12 +76,12 @@ export class ArchiveDelegateUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_DELEGATE,
           details: JSON.stringify({
             id,
-            controlNumber: delegate.controlnumber,
-            explanation: `Delegate with ID : ${id} archived by USER : ${userName}`,
-            archivedBy: userName,
-            archivedAt: getPHDateTime(delegate.deletedat),
+            control_number: delegate.control_number,
+            explanation: `Delegate with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(delegate.deleted_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

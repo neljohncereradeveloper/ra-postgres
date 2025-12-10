@@ -43,21 +43,21 @@ export class CreateCandidateUseCase {
 
   async execute(
     dto: CreateCandidateCommand,
-    username: string,
+    user_name: string,
   ): Promise<Candidate> {
     return this.transactionHelper.executeTransaction(
       CANDIDATE_ACTIONS.CREATE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
@@ -68,14 +68,14 @@ export class CreateCandidateUseCase {
 
         // retrieve the delegate
         const delegate = await this.delegateRepository.findById(
-          dto.delegateId,
+          dto.delegate_id,
           manager,
         );
         if (!delegate) {
           throw new NotFoundException('Delegate not found');
         }
 
-        if (election.id !== delegate.electionid) {
+        if (election.id !== delegate.election_id) {
           throw new BadRequestException(
             'Delegate is not part of this election',
           );
@@ -100,21 +100,21 @@ export class CreateCandidateUseCase {
         }
 
         // use domain model method to create (encapsulates business logic and validation)
-        const newCandidate = Candidate.create({
-          electionid: election.id,
-          districtid: district.id,
-          positionid: position.id,
-          delegateid: delegate.id,
-          displayname: dto.displayName,
-          createdby: username,
+        const new_candidate = Candidate.create({
+          election_id: election.id,
+          district_id: district.id,
+          position_id: position.id,
+          delegate_id: delegate.id,
+          display_name: dto.display_name,
+          created_by: user_name,
         });
         // create the candidate in the database
-        const candidate = await this.candidateRepository.create(
-          newCandidate,
+        const created_candidate = await this.candidateRepository.create(
+          new_candidate,
           manager,
         );
 
-        if (!candidate) {
+        if (!created_candidate) {
           throw new SomethinWentWrongException('Candidate creation failed');
         }
 
@@ -123,20 +123,20 @@ export class CreateCandidateUseCase {
           action: CANDIDATE_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
           details: JSON.stringify({
-            id: candidate.id,
-            displayName: candidate.displayname,
+            id: created_candidate.id,
+            display_name: created_candidate.display_name,
             position: position.desc1,
             district: district.desc1,
-            delegate: delegate.accountname,
-            createdBy: username,
-            createdAt: getPHDateTime(candidate.createdat),
+            delegate: delegate.account_name,
+            created_by: user_name,
+            created_at: getPHDateTime(created_candidate.created_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
         // return the candidate
-        return candidate;
+        return created_candidate;
       },
     );
   }

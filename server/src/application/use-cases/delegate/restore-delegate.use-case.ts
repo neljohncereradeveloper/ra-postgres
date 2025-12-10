@@ -27,25 +27,25 @@ export class RestoreDelegateUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       DELEGATE_ACTIONS.RESTORE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -76,12 +76,12 @@ export class RestoreDelegateUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_DELEGATE,
           details: JSON.stringify({
             id,
-            controlNumber: delegate.controlnumber,
-            explanation: `Delegate with ID : ${id} restored by USER : ${userName}`,
-            restoredBy: userName,
-            restoredAt: getPHDateTime(),
+            control_number: delegate.control_number,
+            explanation: `Delegate with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

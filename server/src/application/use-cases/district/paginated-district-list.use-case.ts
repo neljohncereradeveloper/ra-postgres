@@ -37,16 +37,16 @@ export class PaginatedDistrictsListUseCase {
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    is_deleted: boolean,
   ): Promise<{
     data: District[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     return this.transactionHelper.executeTransaction(
@@ -61,20 +61,20 @@ export class PaginatedDistrictsListUseCase {
         }
 
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
 
@@ -83,7 +83,7 @@ export class PaginatedDistrictsListUseCase {
           term,
           page,
           limit,
-          isDeleted,
+          is_deleted,
           election.id,
           manager,
         );

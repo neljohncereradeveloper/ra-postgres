@@ -26,20 +26,20 @@ export class GetElectionCandidatesUseCase {
       CANDIDATE_ACTIONS.GET_ELECTION_CANDIDATES,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
 
@@ -49,29 +49,27 @@ export class GetElectionCandidatesUseCase {
           manager,
         );
 
-        console.log('result : ', result);
-
         // Group candidates by position
         const candidates = result.reduce((acc: any[], curr: any) => {
           // Find if this position already exists in acc
           let group = acc.find(
             (g) =>
               g.position === curr.position &&
-              g.positionmaxcandidates === curr.positionmaxcandidates &&
-              g.positiontermlimit === curr.positiontermlimit,
+              g.position_max_candidates === curr.position_max_candidates &&
+              g.position_term_limit === curr.position_term_limit,
           );
           if (!group) {
             group = {
               position: curr.position,
-              positionmaxcandidates: curr.positionmaxcandidates,
-              positiontermlimit: curr.positiontermlimit,
+              position_max_candidates: curr.position_max_candidates,
+              position_term_limit: curr.position_term_limit,
               candidates: [],
             };
             acc.push(group);
           }
           group.candidates.push({
-            candidateid: curr.candidateid,
-            displayname: curr.displayname,
+            candidate_id: curr.candidate_id,
+            display_name: curr.display_name,
           });
           return acc;
         }, []);

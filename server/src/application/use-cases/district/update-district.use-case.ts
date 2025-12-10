@@ -32,26 +32,26 @@ export class UpdateDistrictUseCase {
   async execute(
     id: number,
     dto: UpdateDistrictCommand,
-    userName: string,
+    user_name: string,
   ): Promise<District> {
     return this.transactionHelper.executeTransaction(
       DISTRICT_ACTIONS.UPDATE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new BadRequestException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
@@ -66,21 +66,21 @@ export class UpdateDistrictUseCase {
         // use domain model method to update (encapsulates business logic and validation)
         district.update({
           desc1: dto.desc1,
-          updatedby: userName,
+          updated_by: user_name,
         });
 
         // update the district in the database
-        const updateSuccessfull = await this.districtRepository.update(
+        const update_successfull = await this.districtRepository.update(
           id,
           district,
           manager,
         );
-        if (!updateSuccessfull) {
+        if (!update_successfull) {
           throw new SomethinWentWrongException('District update failed');
         }
 
         // retrieve the updated district
-        const updateResult = await this.districtRepository.findById(
+        const update_result = await this.districtRepository.findById(
           id,
           manager,
         );
@@ -90,16 +90,16 @@ export class UpdateDistrictUseCase {
           action: DISTRICT_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_DISTRICT,
           details: JSON.stringify({
-            id: updateResult.id,
-            desc1: updateResult.desc1,
-            updatedBy: userName,
-            updatedAt: getPHDateTime(updateResult.updatedat),
+            id: update_result.id,
+            desc1: update_result.desc1,
+            updated_by: user_name,
+            updated_at: getPHDateTime(update_result.updated_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

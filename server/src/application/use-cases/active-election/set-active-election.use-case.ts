@@ -25,37 +25,37 @@ export class SetActiveElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(electionName: string, username: string) {
+  async execute(election_name: string, user_name: string) {
     return this.transactionHelper.executeTransaction(
       ACTIVE_ELECTION_ACTIONS.SET_ACTIVE_ELECTION,
       async (manager) => {
         // validate existence
         const election = await this.electionRepository.findByName(
-          electionName,
+          election_name,
           manager,
         );
         if (!election) {
           throw new NotFoundException('Election does not exist');
         }
 
-        const activeElection = await this.activeElectionRepository.findById(
+        const active_election = await this.activeElectionRepository.findById(
           ACTIVE_ELECTION_ID,
           manager,
         );
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('Active election not found');
         }
         // Update the active election
-        const updateSuccessfull =
+        const update_successfull =
           await this.activeElectionRepository.setActiveElection(
             election.id,
             manager,
           );
 
-        if (!updateSuccessfull) {
+        if (!update_successfull) {
           throw new SomethinWentWrongException('Active election update failed');
         }
-        const updateResult =
+        const update_result =
           await this.activeElectionRepository.retrieveActiveElection(manager);
 
         // Log the set active election
@@ -63,25 +63,18 @@ export class SetActiveElectionUseCase {
           action: ACTIVE_ELECTION_ACTIONS.SET_ACTIVE_ELECTION,
           entity: DATABASE_CONSTANTS.MODELNAME_ACTIVE_ELECTION,
           details: JSON.stringify({
-            electionId: election.id,
-            election: election.name,
-            explanation: `Active election set by USER : ${username}`,
-            setBy: username,
-            setAt: getPHDateTime(),
+            id: active_election.id,
+            election_id: election.id,
+            election_name: election.name,
+            explanation: `Active election set by USER : ${user_name}`,
+            set_by: user_name,
+            set_at: getPHDateTime(),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return {
-          id: activeElection.id,
-          electionId: election.id,
-          electionName: election.name,
-          createdBy: updateResult.createdby,
-          createdAt: updateResult.createdat,
-          updatedBy: updateResult.updatedby,
-          updatedAt: updateResult.updatedat,
-        };
+        return update_result;
       },
     );
   }

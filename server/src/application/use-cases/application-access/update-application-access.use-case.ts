@@ -28,25 +28,25 @@ export class UpdateApplicationAccessUseCase {
   async execute(
     id: number,
     dto: UpdateApplicationAccessCommand,
-    username: string,
+    user_name: string,
   ): Promise<ApplicationAccess> {
     return this.transactionHelper.executeTransaction(
       APPLICATION_ACCESS_ACTIONS.UPDATE,
       async (manager) => {
         // validate applicationAccess existence
-        const applicationAccess =
+        const application_access =
           await this.applicationAccessRepository.findById(id, manager);
-        if (!applicationAccess) {
+        if (!application_access) {
           throw new NotFoundException('ApplicationAccess not found');
         }
 
         // Update the applicationAccess
-        applicationAccess.update({ desc1: dto.desc1, updatedby: username });
+        application_access.update({ desc1: dto.desc1, updated_by: user_name });
 
         // save the updated application access
         const success = await this.applicationAccessRepository.update(
           id,
-          applicationAccess,
+          application_access,
           manager,
         );
         if (!success) {
@@ -55,7 +55,7 @@ export class UpdateApplicationAccessUseCase {
           );
         }
 
-        const updateResult = await this.applicationAccessRepository.findById(
+        const update_result = await this.applicationAccessRepository.findById(
           id,
           manager,
         );
@@ -65,16 +65,16 @@ export class UpdateApplicationAccessUseCase {
           action: APPLICATION_ACCESS_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_APPLICATIONACCESS,
           details: JSON.stringify({
-            id: updateResult.id,
-            desc1: updateResult.desc1,
-            updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedat),
+            id: update_result.id,
+            desc1: update_result.desc1,
+            updated_by: user_name,
+            updated_at: getPHDateTime(update_result.updated_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

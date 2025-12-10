@@ -23,35 +23,35 @@ export class FindByControllNumberUseCase {
 
   /**
    * Executes the use case for finding a delegate by control number.
-   * @param controlNumber The control number of the delegate.
+   * @param control_number The control number of the delegate.
    * @returns The delegate.
    */
-  async execute(controlNumber: string) {
+  async execute(control_number: string) {
     return this.transactionHelper.executeTransaction(
       DELEGATE_ACTIONS.FIND_BY_CONTROL_NUMBER,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new BadRequestException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
 
         // Call the repository method to get the delegate
         const delegate =
           await this.delegateRepository.findByControlNumberAndElectionId(
-            controlNumber,
+            control_number,
             election.id,
             manager,
           );

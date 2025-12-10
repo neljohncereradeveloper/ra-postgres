@@ -10,10 +10,10 @@ export class ComboboxApplicationAccessUseCase {
   ) {}
 
   async execute(): Promise<{ value: string; label: string }[]> {
-    const applicationAccesss =
+    const application_accesss =
       await this.applicationAccessRepository.combobox();
 
-    return applicationAccesss.map((val: { desc1: string }) => ({
+    return application_accesss.map((val: { desc1: string }) => ({
       value: val.desc1,
       label:
         val.desc1.charAt(0).toUpperCase() + val.desc1.slice(1).toLowerCase(),

@@ -43,46 +43,46 @@ export class ReprintCastVoteUseCase {
   ) {}
 
   async execute(
-    controlNumber: string,
-    username: string,
+    control_number: string,
+    user_name: string,
   ): Promise<{
-    ballotId: string;
+    ballot_id: string;
     precinct: string;
     election: Election;
-    groupCandidates: any;
+    group_candidates: any;
   }> {
     return this.transactionHelper.executeTransaction(
       CAST_VOTE_ACTIONS.REPRINT_CAST_VOTE,
       async (manager) => {
         // Get active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // Retrieve election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
 
         const delegate =
           await this.delegateRepository.findByControlNumberAndElectionId(
-            controlNumber,
-            activeElection.electionid,
+            control_number,
+            active_election.election_id,
             manager,
           );
 
         if (!delegate) {
           throw new NotFoundException('Delegate not found');
         }
-        if (!delegate.hasvoted) {
+        if (!delegate.has_voted) {
           throw new BadRequestException('Delegate has not yet voted');
         }
 
@@ -93,58 +93,58 @@ export class ReprintCastVoteUseCase {
             )
           : null;
 
-        const castVotes = await this.castVoteRepository.reprintCastVote(
+        const cast_votes = await this.castVoteRepository.reprintCastVote(
           election.id,
-          ballot.ballotnumber,
+          ballot.ballot_number,
           manager,
         );
 
         // Ensure castVotes is always an array
-        const castVotesArray = Array.isArray(castVotes)
-          ? castVotes
-          : castVotes
-            ? [castVotes]
+        const cast_votes_array = Array.isArray(cast_votes)
+          ? cast_votes
+          : cast_votes
+            ? [cast_votes]
             : [];
 
         // Group by position_name and precinct, then collect candidates
-        const candidatesMap = new Map();
-        for (const vote of castVotesArray) {
-          const position = vote.positionName || 'Unknown Position';
+        const candidates_map = new Map();
+        for (const vote of cast_votes_array) {
+          const position = vote.position_name || 'Unknown Position';
           const key = `${position}`;
-          if (!candidatesMap.has(key)) {
-            candidatesMap.set(key, {
+          if (!candidates_map.has(key)) {
+            candidates_map.set(key, {
               position,
               candidates: [],
             });
           }
-          candidatesMap.get(key).candidates.push({
+          candidates_map.get(key).candidates.push({
             id: vote.id,
-            name: vote.candidatename,
+            name: vote.candidate_name,
           });
         }
-        const groupCandidates = Array.from(candidatesMap.values());
+        const group_candidates = Array.from(candidates_map.values());
 
         // Log the cast vote
         const log = ActivityLog.create({
           action: CAST_VOTE_ACTIONS.REPRINT_CAST_VOTE,
           entity: DATABASE_CONSTANTS.MODELNAME_CAST_VOTE,
           details: JSON.stringify({
-            id: castVotes.id,
+            id: cast_votes.id,
             election: election.name,
-            ballotNumber: ballot.ballotnumber,
-            delegate: delegate.accountname,
-            dateTimeReprint: getPHDateTime(),
+            ballot_number: ballot.ballot_number,
+            delegate: delegate.account_name,
+            date_time_reprint: getPHDateTime(),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
         return {
-          ballotId: ballot?.ballotnumber,
+          ballot_id: ballot?.ballot_number,
           precinct:
-            castVotesArray.length > 0 ? castVotesArray[0].precinct : null,
+            cast_votes_array.length > 0 ? cast_votes_array[0].precinct : null,
           election: election,
-          groupCandidates,
+          group_candidates,
         };
       },
     );

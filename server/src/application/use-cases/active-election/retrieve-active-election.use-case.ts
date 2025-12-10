@@ -18,21 +18,14 @@ export class RetrieveActiveElectionUseCase {
     return this.transactionHelper.executeTransaction(
       ACTIVE_ELECTION_ACTIONS.RETRIEVE_ACTIVE_ELECTION,
       async (manager) => {
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
 
-        if (!activeElection) {
+        if (!active_election) {
           throw new BadRequestException('No active election.');
         }
 
-        return {
-          id: activeElection.id,
-          electionId: activeElection.electionid,
-          createdBy: activeElection.createdby,
-          createdAt: activeElection.createdat,
-          updatedBy: activeElection.updatedby,
-          updatedAt: activeElection.updatedat,
-        };
+        return active_election;
       },
     );
   }
