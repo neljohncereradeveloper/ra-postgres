@@ -51,6 +51,8 @@ export class ApplicationAccessGuard implements CanActivate {
     const user: User = await this.authPort.jwtVerify(token);
     const _applicationAccess = user.applicationAccess;
 
+    console.log('user', user);
+
     // validate applicationAccess if match for the route required applicationAccess
     const isAuthorized = requiredApplicationAccess.some((applicationAccess) =>
       _applicationAccess.includes(applicationAccess),

@@ -52,6 +52,8 @@ export class UserRolesGuard implements CanActivate {
     const user: User = await this.authPort.jwtVerify(token);
     const _roles = user.userRoles;
 
+    console.log('user', user);
+
     // validate roles if match for the route required role
     const isAuthorized = requiredRoles.some((role) => _roles.includes(role));
 

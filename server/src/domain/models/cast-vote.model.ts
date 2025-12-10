@@ -1,32 +1,32 @@
 export class CastVote {
   id: number;
-  electionId: number;
-  ballotNumber: string;
+  electionid: number;
+  ballotnumber: string;
   precinct: string;
-  candidateId: number;
-  positionId: number;
-  districtId: number;
-  dateTimeCast: Date;
-  deletedAt?: Date | null;
+  candidateid: number;
+  positionid: number;
+  districtid: number;
+  datetimecast: Date;
+  deletedat?: Date | null;
   constructor(params: {
     id?: number;
-    electionId: number;
-    ballotNumber: string;
+    electionid: number;
+    ballotnumber: string;
     precinct: string;
-    candidateId: number;
-    positionId: number;
-    districtId: number;
-    dateTimeCast: Date;
-    deletedAt?: Date | null;
+    candidateid: number;
+    positionid: number;
+    districtid: number;
+    datetimecast: Date;
+    deletedat?: Date | null;
   }) {
     this.id = params.id;
-    this.electionId = params.electionId;
-    this.ballotNumber = params.ballotNumber;
+    this.electionid = params.electionid;
+    this.ballotnumber = params.ballotnumber;
     this.precinct = params.precinct;
-    this.candidateId = params.candidateId;
-    this.positionId = params.positionId;
-    this.districtId = params.districtId;
-    this.dateTimeCast = params.dateTimeCast;
-    this.deletedAt = params.deletedAt;
+    this.candidateid = params.candidateid;
+    this.positionid = params.positionid;
+    this.districtid = params.districtid;
+    this.datetimecast = params.datetimecast;
+    this.deletedat = params.deletedat;
   }
 }

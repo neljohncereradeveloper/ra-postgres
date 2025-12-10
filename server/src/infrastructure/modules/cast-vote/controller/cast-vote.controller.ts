@@ -37,6 +37,7 @@ export class CastVoteController {
     @Request()
     req,
   ) {
+    console.log('req.user', req.user);
     const userName = req.user.userName as string;
     const precinct = req.user.precinct as string;
     return this.castVoteUseCase.execute(
