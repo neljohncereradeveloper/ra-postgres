@@ -7,7 +7,7 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
   constructor() {}
 
   async electionCastVoteReport(
-    electionId: number,
+    election_id: number,
     context?: EntityManager,
   ): Promise<any> {
     try {
@@ -15,23 +15,23 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
         `
           SELECT
             p.desc1 AS position,
-            c.displayname AS candidate,
-            COUNT(cv.id) AS voteCount
+            c.display_name AS candidate,
+            COUNT(cv.id) AS vote_count
           FROM positions p
-          JOIN candidates c ON c.positionid = p.id
+          JOIN candidates c ON c.position_id = p.id
           LEFT JOIN cast_votes cv
-            ON cv.candidateid = c.id
-            AND cv.positionid = p.id
-            AND cv.electionid = $1
-            AND cv.deletedat IS NULL
-          WHERE p.deletedat IS NULL
-            AND c.deletedat IS NULL
-            AND p.electionid = $2
-            AND c.electionid = $3
+            ON cv.candidate_id = c.id
+            AND cv.position_id = p.id
+            AND cv.election_id = $1
+            AND cv.deleted_at IS NULL
+          WHERE p.deleted_at IS NULL
+            AND c.deleted_at IS NULL
+            AND p.election_id = $2
+            AND c.election_id = $3
           GROUP BY p.id, c.id
-          ORDER BY p.id, voteCount DESC, c.displayname;
+          ORDER BY p.id, vote_count DESC, c.display_name;
         `,
-        [electionId, electionId, electionId],
+        [election_id, election_id, election_id],
       );
       return castVoteReport;
     } catch (error) {
@@ -40,7 +40,7 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
   }
 
   async electionCandidatesReport(
-    electionId: number,
+    election_id: number,
     context?: EntityManager,
   ): Promise<any> {
     try {
@@ -48,22 +48,22 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
         `
           SELECT
             p.desc1 AS position,
-            c.displayname AS candidate
+            c.display_name AS candidate
           FROM positions p
-          JOIN candidates c ON c.positionid = p.id
+          JOIN candidates c ON c.position_id = p.id
           LEFT JOIN cast_votes cv
-            ON cv.candidateid = c.id
-            AND cv.positionid = p.id
-            AND cv.electionid = $1
-            AND cv.deletedat IS NULL
-          WHERE p.deletedat IS NULL
-            AND c.deletedat IS NULL
-            AND p.electionid = $2
-            AND c.electionid = $3
+            ON cv.candidate_id = c.id
+            AND cv.position_id = p.id
+            AND cv.election_id = $1
+            AND cv.deleted_at IS NULL
+          WHERE p.deleted_at IS NULL
+            AND c.deleted_at IS NULL
+            AND p.election_id = $2
+            AND c.election_id = $3
           GROUP BY p.id, c.id
-          ORDER BY p.id, c.displayname;
+          ORDER BY p.id, c.display_name;
         `,
-        [electionId, electionId, electionId],
+        [election_id, election_id, election_id],
       );
       return candidatesReport;
     } catch (error) {

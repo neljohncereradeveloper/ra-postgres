@@ -24,29 +24,29 @@ export class PrecinctEntity {
     comment: 'username of the user who deleted the precinct',
     nullable: true,
   })
-  deletedby?: string;
+  deleted_by?: string;
 
   @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedat: Date | null; // For soft delete
+  deleted_at: Date | null; // For soft delete
 
   @Column({
     comment: 'username of the user who created the precinct',
     nullable: true,
   })
-  createdby?: string;
+  created_by?: string;
 
   @CreateDateColumn()
-  createdat: Date;
+  created_at: Date;
 
   @Column({
     comment: 'username of the user who updated the precinct',
     nullable: true,
   })
-  updatedby?: string;
+  updated_by?: string;
 
   @UpdateDateColumn()
-  updatedat: Date;
+  updated_at: Date;
 
   @OneToMany(() => UserEntity, (user) => user.precinct)
   users: UserEntity[];

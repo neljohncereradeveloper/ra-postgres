@@ -17,31 +17,31 @@ export class ActiveElectionEntity {
 
   @Column({ nullable: true })
   @Index()
-  electionid: number;
+  election_id: number;
 
   @Column({
     comment: 'username of the user who created the active election record',
     nullable: true,
   })
-  createdby: string;
+  created_by: string;
 
   @CreateDateColumn()
-  createdat: Date;
+  created_at: Date;
 
   @Column({
     comment: 'username of the user who last updated the active election',
     nullable: true,
   })
-  updatedby: string;
+  updated_by: string;
 
   @UpdateDateColumn()
-  updatedat: Date;
+  updated_at: Date;
 
-  @OneToOne(() => ElectionEntity, (election) => election.activeElection, {
+  @OneToOne(() => ElectionEntity, (election) => election.active_election, {
     nullable: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionid' }) // Specifies the foreign key column
+  @JoinColumn({ name: 'election_id' }) // Specifies the foreign key column
   election: ElectionEntity; // This defines the OneToOne relationship
 }

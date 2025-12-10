@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { CastVoteRepository } from '@domains/repositories/cast-vote.repository';
 import { CastVote } from '@domain/models/cast-vote.model';
-import { getInsertId, getFirstRow } from '@shared/utils/query-result.util';
+import { getFirstRow } from '@shared/utils/query-result.util';
 
 @Injectable()
 export class CastVoteRepositoryImpl
@@ -11,32 +11,32 @@ export class CastVoteRepositoryImpl
   constructor() {}
 
   async castVote(
-    castVote: CastVote,
+    cast_vote: CastVote,
     context: EntityManager,
   ): Promise<CastVote> {
     try {
       const query = `
         INSERT INTO cast_votes (
-          electionid,
-          ballotnumber,
+          election_id,
+          ballot_number,
           precinct,
-          candidateid,
-          positionid,
-          districtid,
-          datetimecast
+          candidate_id,
+          position_id,
+          district_id,
+          datetime_cast
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
       `;
 
       const result = await context.query(query, [
-        castVote.electionid,
-        castVote.ballotnumber,
-        castVote.precinct,
-        castVote.candidateid,
-        castVote.positionid,
-        castVote.districtid,
-        castVote.datetimecast,
+        cast_vote.election_id,
+        cast_vote.ballot_number,
+        cast_vote.precinct,
+        cast_vote.candidate_id,
+        cast_vote.position_id,
+        cast_vote.district_id,
+        cast_vote.datetime_cast,
       ]);
 
       const row = getFirstRow(result);
@@ -53,28 +53,28 @@ export class CastVoteRepositoryImpl
   }
 
   async reprintCastVote(
-    electionid: number,
-    ballotnumber: string,
+    election_id: number,
+    ballot_number: string,
     context: EntityManager,
   ): Promise<CastVote> {
     try {
       const query = `
         SELECT
           cv.id,
-          cv.electionid,
-          cv.ballotnumber,
+          cv.election_id,
+          cv.ballot_number,
           cv.precinct,
-          cv.candidateid,
-          cv.positionid,
-          cv.districtid,
-          cv.datetimecast,
+          cv.candidate_id,
+          cv.position_id,
+          cv.district_id,
+          cv.datetime_cast,
           cv.deletedat,
         FROM cast_votes cv
-        WHERE cv.ballotnumber = $1 AND cv.electionid = $2
+        WHERE cv.ballot_number = $1 AND cv.election_id = $2
         LIMIT 1
       `;
 
-      const result = await context.query(query, [ballotnumber, electionid]);
+      const result = await context.query(query, [ballot_number, election_id]);
       const row = getFirstRow(result);
       if (!row) {
         return null;
@@ -90,14 +90,14 @@ export class CastVoteRepositoryImpl
   private rowToModel(row: any): CastVote {
     return new CastVote({
       id: row.id,
-      electionid: row.electionid,
-      ballotnumber: row.ballotnumber,
+      election_id: row.election_id,
+      ballot_number: row.ballot_number,
       precinct: row.precinct,
-      candidateid: row.candidateid,
-      positionid: row.positionid,
-      districtid: row.districtid,
-      datetimecast: row.datetimecast,
-      deletedat: row.deletedat,
+      candidate_id: row.candidate_id,
+      position_id: row.position_id,
+      district_id: row.district_id,
+      datetime_cast: row.datetime_cast,
+      deleted_at: row.deleted_at,
     });
   }
 }

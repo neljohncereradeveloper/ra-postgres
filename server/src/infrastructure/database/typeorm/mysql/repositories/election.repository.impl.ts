@@ -25,12 +25,12 @@ export class ElectionRepositoryImpl
           desc1,
           address,
           date,
-          starttime,
-          endtime,
-          maxattendees,
-          electionstatus,
-          createdby,
-          createdat
+          start_time,
+          end_time,
+          max_attendees,
+          election_status,
+          created_by,
+          created_at
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
@@ -41,12 +41,12 @@ export class ElectionRepositoryImpl
         election.desc1 || null,
         election.address,
         election.date || null,
-        election.starttime || null,
-        election.endtime || null,
-        election.maxattendees || null,
-        election.electionstatus || ElectionStatus.SCHEDULED,
-        election.createdby || null,
-        election.createdat || new Date(),
+        election.start_time || null,
+        election.end_time || null,
+        election.max_attendees || null,
+        election.election_status || ElectionStatus.SCHEDULED,
+        election.created_by || null,
+        election.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -64,7 +64,7 @@ export class ElectionRepositoryImpl
 
   async update(
     id: number,
-    updateFields: Partial<Election>,
+    update_fields: Partial<Election>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -72,54 +72,54 @@ export class ElectionRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.name !== undefined) {
+      if (update_fields.name !== undefined) {
         updateParts.push(`name = $${paramIndex++}`);
-        values.push(updateFields.name);
+        values.push(update_fields.name);
       }
 
-      if (updateFields.desc1 !== undefined) {
+      if (update_fields.desc1 !== undefined) {
         updateParts.push(`desc1 = $${paramIndex++}`);
-        values.push(updateFields.desc1);
+        values.push(update_fields.desc1);
       }
 
-      if (updateFields.address !== undefined) {
+      if (update_fields.address !== undefined) {
         updateParts.push(`address = $${paramIndex++}`);
-        values.push(updateFields.address);
+        values.push(update_fields.address);
       }
 
-      if (updateFields.date !== undefined) {
+      if (update_fields.date !== undefined) {
         updateParts.push(`date = $${paramIndex++}`);
-        values.push(updateFields.date);
+        values.push(update_fields.date);
       }
 
-      if (updateFields.starttime !== undefined) {
-        updateParts.push(`starttime = $${paramIndex++}`);
-        values.push(updateFields.starttime);
+      if (update_fields.start_time !== undefined) {
+        updateParts.push(`start_time = $${paramIndex++}`);
+        values.push(update_fields.start_time);
       }
 
-      if (updateFields.endtime !== undefined) {
-        updateParts.push(`endtime = $${paramIndex++}`);
-        values.push(updateFields.endtime);
+      if (update_fields.end_time !== undefined) {
+        updateParts.push(`end_time = $${paramIndex++}`);
+        values.push(update_fields.end_time);
       }
 
-      if (updateFields.maxattendees !== undefined) {
-        updateParts.push(`maxattendees = $${paramIndex++}`);
-        values.push(updateFields.maxattendees);
+      if (update_fields.max_attendees !== undefined) {
+        updateParts.push(`max_attendees = $${paramIndex++}`);
+        values.push(update_fields.max_attendees);
       }
 
-      if (updateFields.electionstatus !== undefined) {
-        updateParts.push(`electionstatus = $${paramIndex++}`);
-        values.push(updateFields.electionstatus);
+      if (update_fields.election_status !== undefined) {
+        updateParts.push(`election_status = $${paramIndex++}`);
+        values.push(update_fields.election_status);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -131,7 +131,7 @@ export class ElectionRepositoryImpl
       const query = `
         UPDATE elections
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deletedat IS NULL
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -148,10 +148,17 @@ export class ElectionRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: Election[];
-    meta: PaginationMeta;
+    meta: {
+      page: number;
+      limit: number;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
+    };
   }> {
     const skip = (page - 1) * limit;
 
@@ -160,10 +167,10 @@ export class ElectionRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Apply search filter on name
@@ -183,11 +190,11 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime,
-        endtime,
-        maxattendees,
-        electionstatus,
-        deletedat
+        start_time,
+        end_time,
+        max_attendees,
+        election_status,
+        deleted_at
       FROM elections
       ${whereClause}
       ORDER BY id DESC
@@ -202,33 +209,32 @@ export class ElectionRepositoryImpl
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
       this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
-    const { totalPages, nextPage, previousPage } = calculatePagination(
-      totalRecords,
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
+    const { total_pages, next_page, previous_page } = calculatePagination(
+      total_records,
       page,
       limit,
     );
-
     // Map raw results to domain models
-    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -248,18 +254,18 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime,
-        endtime,
-        maxattendees,
-        electionstatus,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        start_time,
+        end_time,
+        max_attendees,
+        election_status,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
       FROM elections
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -279,18 +285,12 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime,
-        endtime,
-        maxattendees,
-        electionstatus,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        start_time,
+        end_time,
+        max_attendees,
+        election_status
       FROM elections
-      WHERE deletedat IS NULL
+      WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
 
@@ -307,7 +307,7 @@ export class ElectionRepositoryImpl
         address,
         date
       FROM elections
-      WHERE deletedat IS NULL AND electionstatus = $1
+      WHERE deleted_at IS NULL AND election_status = $1
       ORDER BY name ASC
     `;
 
@@ -329,18 +329,18 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime,
-        endtime,
-        maxattendees,
-        electionstatus,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        start_time,
+        end_time,
+        max_attendees,
+        election_status,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
       FROM elections
-      WHERE name = $1 AND deletedat IS NULL
+      WHERE name = $1 AND deleted_at IS NULL
       LIMIT 1
     `;
 
@@ -361,16 +361,16 @@ export class ElectionRepositoryImpl
       desc1: row.desc1,
       address: row.address,
       date: row.date,
-      starttime: row.starttime,
-      endtime: row.endtime,
-      maxattendees: row.maxattendees,
-      electionstatus: row.electionstatus,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      start_time: row.start_time,
+      end_time: row.end_time,
+      max_attendees: row.max_attendees,
+      election_status: row.election_status,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

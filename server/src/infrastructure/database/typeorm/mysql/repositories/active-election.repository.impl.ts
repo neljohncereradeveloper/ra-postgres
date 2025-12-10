@@ -9,18 +9,18 @@ export class ActiveElectionRepositoryImpl
   implements ActiveElectionRepository<EntityManager>
 {
   async setActiveElection(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
       const result = await manager.query(
         `
         UPDATE active_election
-        SET electionid = $1
+        SET election_id = $1
         WHERE id = $2
         RETURNING *
         `,
-        [electionId, ACTIVE_ELECTION_ID],
+        [election_id, ACTIVE_ELECTION_ID],
       );
 
       // Handle PostgreSQL result format: [rows, rowCount] or direct array
@@ -59,15 +59,15 @@ export class ActiveElectionRepositoryImpl
       `
       SELECT 
         ae.id,
-        ae.electionid,
-        ae.createdby,
-        ae.createdat,
-        ae.updatedby,
-        ae.updatedat
+        ae.election_id,
+        ae.created_by,
+        ae.created_at,
+        ae.updated_by,
+        ae.updated_at
       FROM active_election ae
-      INNER JOIN elections e ON ae.electionid = e.id
+      INNER JOIN elections e ON ae.election_id = e.id
       WHERE ae.id = $1
-        AND ae.electionid IS NOT NULL
+        AND ae.election_id IS NOT NULL
       `,
       [ACTIVE_ELECTION_ID],
     );
@@ -84,7 +84,7 @@ export class ActiveElectionRepositoryImpl
       const result = await manager.query(
         `
         UPDATE active_election
-        SET electionid = NULL
+        SET election_id = NULL
         WHERE id = $1
         RETURNING *
         `,
@@ -136,11 +136,11 @@ export class ActiveElectionRepositoryImpl
   private toModel(row: any): ActiveElection {
     return new ActiveElection({
       id: row.id,
-      electionid: row.electionid,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      election_id: row.election_id,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

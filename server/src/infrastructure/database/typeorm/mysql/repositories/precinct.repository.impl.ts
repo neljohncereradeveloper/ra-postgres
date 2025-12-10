@@ -18,15 +18,15 @@ export class PrecinctRepositoryImpl
   async create(precinct: Precinct, manager: EntityManager): Promise<Precinct> {
     try {
       const query = `
-        INSERT INTO precincts (desc1, createdby, createdat)
+        INSERT INTO precincts (desc1, created_by, created_at)
         VALUES ($1, $2, $3)
         RETURNING *
       `;
 
       const result = await manager.query(query, [
         precinct.desc1,
-        precinct.createdby || null,
-        precinct.createdat || new Date(),
+        precinct.created_by || null,
+        precinct.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -44,7 +44,7 @@ export class PrecinctRepositoryImpl
 
   async update(
     id: number,
-    updateFields: Partial<Precinct>,
+    update_fields: Partial<Precinct>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -52,29 +52,29 @@ export class PrecinctRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.desc1 !== undefined) {
+      if (update_fields.desc1 !== undefined) {
         updateParts.push(`desc1 = $${paramIndex++}`);
-        values.push(updateFields.desc1);
+        values.push(update_fields.desc1);
       }
 
-      if (updateFields.deletedat !== undefined) {
-        updateParts.push(`deletedat = $${paramIndex++}`);
-        values.push(updateFields.deletedat);
+      if (update_fields.deleted_at !== undefined) {
+        updateParts.push(`deleted_at = $${paramIndex++}`);
+        values.push(update_fields.deleted_at);
       }
 
-      if (updateFields.deletedby !== undefined) {
-        updateParts.push(`deletedby = $${paramIndex++}`);
-        values.push(updateFields.deletedby);
+      if (update_fields.deleted_by !== undefined) {
+        updateParts.push(`deleted_by = $${paramIndex++}`);
+        values.push(update_fields.deleted_by);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -82,8 +82,8 @@ export class PrecinctRepositoryImpl
       }
 
       // Always update updatedat if not explicitly set
-      if (updateFields.updatedat === undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
+      if (update_fields.updated_at === undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
         values.push(new Date());
       }
 
@@ -109,10 +109,17 @@ export class PrecinctRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: Precinct[];
-    meta: PaginationMeta;
+    meta: {
+      page: number;
+      limit: number;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
+    };
   }> {
     const skip = (page - 1) * limit;
 
@@ -120,10 +127,10 @@ export class PrecinctRepositoryImpl
     const whereConditions: string[] = [];
     const queryParams: any[] = [];
 
-    if (isArchived) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Add search term if provided
@@ -140,12 +147,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM precincts
       ${whereClause}
       ORDER BY id DESC
@@ -160,17 +167,17 @@ export class PrecinctRepositoryImpl
     `;
 
     // Execute both queries using DataSource
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
       this.dataSource.query(countQuery, queryParams),
     ]);
 
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const data = dataRowsArray.map((row) => this.rowToModel(row));
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
-    const { totalPages, nextPage, previousPage } = calculatePagination(
-      totalRecords,
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
+    const total_records = parseInt(count_row?.total_records || '0', 10);
+    const { total_pages, next_page, previous_page } = calculatePagination(
+      total_records,
       page,
       limit,
     );
@@ -180,10 +187,10 @@ export class PrecinctRepositoryImpl
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -193,12 +200,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM precincts
       WHERE id = $1
     `;
@@ -220,14 +227,14 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM precincts
-      WHERE desc1 = $1 AND deletedat IS NULL
+      WHERE desc1 = $1 AND deleted_at IS NULL
       LIMIT 1
     `;
 
@@ -246,7 +253,7 @@ export class PrecinctRepositoryImpl
         id,
         desc1
       FROM precincts
-      WHERE deletedat IS NULL
+      WHERE deleted_at IS NULL
       ORDER BY desc1 ASC
     `;
 
@@ -259,12 +266,12 @@ export class PrecinctRepositoryImpl
     return new Precinct({
       id: row.id,
       desc1: row.desc1,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

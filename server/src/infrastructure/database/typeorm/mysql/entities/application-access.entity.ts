@@ -22,27 +22,27 @@ export class ApplicationAccessEntity {
     comment: 'username of the user who deleted the application access',
     nullable: true,
   })
-  deletedby?: string;
+  deleted_by?: string;
 
   @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedat?: Date | null;
+  deleted_at?: Date | null;
 
   @Column({
     comment: 'username of the user who created the application access',
     nullable: true,
   })
-  createdby?: string;
+  created_by?: string;
 
   @CreateDateColumn()
-  createdat: Date;
+  created_at: Date;
 
   @Column({
     comment: 'username of the user who updated the application access',
     nullable: true,
   })
-  updatedby?: string;
+  updated_by?: string;
 
   @UpdateDateColumn()
-  updatedat: Date;
+  updated_at: Date;
 }

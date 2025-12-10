@@ -17,30 +17,30 @@ import { CandidateEntity } from './candidate.entity';
 import { BallotEntity } from './ballot.entity';
 
 @Entity('delegates')
-@Unique(['accountid', 'electionid'])
-@Unique(['electionid', 'controlnumber'])
+@Unique(['account_id', 'election_id'])
+@Unique(['election_id', 'control_number'])
 export class DelegateEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   @Index()
-  electionid: number;
+  election_id: number;
 
   @Column({ length: 100 })
   branch: string;
 
   @Column({ length: 100 })
-  accountid: string;
+  account_id: string;
 
   @Column({ length: 255 })
-  accountname: string;
+  account_name: string;
 
   @Column({ nullable: true })
   age: number; // Note: Add CHECK constraint in migration: age >= 0 OR age IS NULL
 
   @Column({ type: 'date', nullable: true })
-  birthdate?: Date;
+  birth_date?: Date;
 
   @Column({ type: 'text', nullable: true })
   address?: string;
@@ -52,52 +52,52 @@ export class DelegateEntity {
   cell?: string;
 
   @Column({ type: 'date', nullable: true })
-  dateopened?: Date;
+  date_opened?: Date;
 
   @Column({ length: 100, nullable: true })
-  clienttype?: string;
+  client_type?: string;
 
   @Column({ length: 100, nullable: true })
-  loanstatus: string;
+  loan_status: string;
 
   @Column({ type: 'numeric', precision: 15, scale: 2 })
   balance: number;
 
   @Column({ length: 100 })
-  mevstatus: string;
+  mev_status: string;
 
   @Column({ type: 'boolean', default: false })
-  hasvoted: boolean;
+  has_voted: boolean;
 
   @Column()
-  controlnumber: string;
+  control_number: string;
 
   @Column({
     comment: 'username of the user who deleted the delegate',
     nullable: true,
   })
-  deletedby?: string;
+  deleted_by?: string;
 
   @DeleteDateColumn({ nullable: true })
-  deletedat?: Date | null;
+  deleted_at?: Date | null;
 
   @Column({
     comment: 'username of the user who created the delegate',
     nullable: true,
   })
-  createdby?: string;
+  created_by?: string;
 
   @CreateDateColumn()
-  createdat: Date;
+  created_at: Date;
 
   @Column({
     comment: 'username of the user who updated the delegate',
     nullable: true,
   })
-  updatedby?: string;
+  updated_by?: string;
 
   @UpdateDateColumn()
-  updatedat: Date;
+  updated_at: Date;
 
   /**
    * Relationships
@@ -107,7 +107,7 @@ export class DelegateEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'electionid' })
+  @JoinColumn({ name: 'election_id' })
   election: ElectionEntity;
 
   @OneToMany(() => BallotEntity, (ballot) => ballot.delegate)

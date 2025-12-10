@@ -22,9 +22,9 @@ export class ActivityLogEntity {
 
   @CreateDateColumn()
   @Index()
-  timestamp: Date; // Automatically sets the current date and time
+  occurred_at: Date; // Automatically sets the current date and time
 
   @Column()
   @Index()
-  username: string;
+  user_name: string;
 }

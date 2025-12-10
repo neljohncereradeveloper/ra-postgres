@@ -5,7 +5,6 @@ import { PositionRepository } from '@domains/repositories/position.repository';
 import { Position } from '@domain/models/position.model';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
@@ -21,24 +20,24 @@ export class PositionRepositoryImpl
     try {
       const query = `
         INSERT INTO positions (
-          electionid,
+          election_id,
           desc1,
-          maxcandidates,
-          termlimit,
-          createdby,
-          createdat
+          max_candidates,
+          term_limit,
+          created_by,
+          created_at
         )
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
       `;
 
       const result = await manager.query(query, [
-        position.electionid,
+        position.election_id,
         position.desc1,
-        position.maxcandidates || null,
-        position.termlimit || null,
-        position.createdby || null,
-        position.createdat || new Date(),
+        position.max_candidates || null,
+        position.term_limit || null,
+        position.created_by || null,
+        position.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -56,7 +55,7 @@ export class PositionRepositoryImpl
 
   async update(
     id: number,
-    updateFields: Partial<Position>,
+    update_fields: Partial<Position>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -64,29 +63,29 @@ export class PositionRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.desc1 !== undefined) {
+      if (update_fields.desc1 !== undefined) {
         updateParts.push(`desc1 = $${paramIndex++}`);
-        values.push(updateFields.desc1);
+        values.push(update_fields.desc1);
       }
 
-      if (updateFields.maxcandidates !== undefined) {
-        updateParts.push(`maxcandidates = $${paramIndex++}`);
-        values.push(updateFields.maxcandidates);
+      if (update_fields.max_candidates !== undefined) {
+        updateParts.push(`max_candidates = $${paramIndex++}`);
+        values.push(update_fields.max_candidates);
       }
 
-      if (updateFields.termlimit !== undefined) {
-        updateParts.push(`termlimit = $${paramIndex++}`);
-        values.push(updateFields.termlimit);
+      if (update_fields.term_limit !== undefined) {
+        updateParts.push(`term_limit = $${paramIndex++}`);
+        values.push(update_fields.term_limit);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -98,7 +97,7 @@ export class PositionRepositoryImpl
       const query = `
         UPDATE positions
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deletedat IS NULL
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -115,12 +114,19 @@ export class PositionRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    electionId: number,
-    isDeleted: boolean,
+    election_id: number,
+    is_archived: boolean,
     manager: EntityManager,
   ): Promise<{
     data: Position[];
-    meta: PaginationMeta;
+    meta: {
+      page: number;
+      limit: number;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
+    };
   }> {
     const skip = (page - 1) * limit;
 
@@ -129,16 +135,16 @@ export class PositionRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Filter by election
     let paramIndex = 1;
-    whereConditions.push(`electionid = $${paramIndex++}`);
-    queryParams.push(electionId);
+    whereConditions.push(`election_id = $${paramIndex++}`);
+    queryParams.push(election_id);
 
     // Apply search filter on description
     if (term) {
@@ -152,16 +158,16 @@ export class PositionRepositoryImpl
     const dataQuery = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        maxcandidates,
-        termlimit,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        max_candidates,
+        term_limit,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM positions
       ${whereClause}
       ORDER BY id DESC
@@ -176,33 +182,33 @@ export class PositionRepositoryImpl
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       manager.query(dataQuery, [...queryParams, limit, skip]),
       manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
-    const { totalPages, nextPage, previousPage } = calculatePagination(
-      totalRecords,
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
+    const { total_pages, next_page, previous_page } = calculatePagination(
+      total_records,
       page,
       limit,
     );
 
     // Map raw results to domain models
-    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -211,18 +217,18 @@ export class PositionRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        maxcandidates,
-        termlimit,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        max_candidates,
+        term_limit,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM positions
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -236,28 +242,28 @@ export class PositionRepositoryImpl
 
   async findByDescription(
     desc1: string,
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<Position | null> {
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        maxcandidates,
-        termlimit,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        max_candidates,
+        term_limit,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM positions
-      WHERE desc1 = $1 AND electionid = $2 AND deletedat IS NULL
+      WHERE desc1 = $1 AND election_id = $2 AND deleted_at IS NULL
       LIMIT 1
     `;
 
-    const result = await manager.query(query, [desc1, electionId]);
+    const result = await manager.query(query, [desc1, election_id]);
     const row = getFirstRow(result);
     if (!row) {
       return null;
@@ -267,7 +273,7 @@ export class PositionRepositoryImpl
   }
 
   async combobox(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<Position[]> {
     const query = `
@@ -275,53 +281,53 @@ export class PositionRepositoryImpl
         id,
         desc1
       FROM positions
-      WHERE electionid = $1 AND deletedat IS NULL
+      WHERE election_id = $1 AND deleted_at IS NULL
       ORDER BY desc1 ASC
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
   async findByElection(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<Position[]> {
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        maxcandidates,
-        termlimit,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        max_candidates,
+        term_limit,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM positions
-      WHERE electionid = $1 AND deletedat IS NULL
+      WHERE election_id = $1 AND deleted_at IS NULL
       ORDER BY desc1 ASC
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
   async countByElection(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<number> {
     const query = `
       SELECT COUNT(id) AS "count"
       FROM positions
-      WHERE deletedat IS NULL AND electionid = $1
+      WHERE deleted_at IS NULL AND election_id = $1
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const row = getFirstRow(result);
     return parseInt(row?.count || '0', 10);
   }
@@ -330,16 +336,16 @@ export class PositionRepositoryImpl
   private rowToModel(row: any): Position {
     return new Position({
       id: row.id,
-      electionid: row.electionid,
+      election_id: row.election_id,
       desc1: row.desc1,
-      maxcandidates: row.maxcandidates,
-      termlimit: row.termlimit,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      max_candidates: row.max_candidates,
+      term_limit: row.term_limit,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

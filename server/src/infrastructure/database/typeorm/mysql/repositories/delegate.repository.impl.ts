@@ -19,48 +19,48 @@ export class DelegateRepositoryImpl
     try {
       const query = `
         INSERT INTO delegates (
-          electionid,
+          election_id,
           branch,
-          accountid,
-          accountname,
+          account_id,
+          account_name,
           age,
-          birthdate,
+          birth_date,
           address,
           tell,
           cell,
-          dateopened,
-          clienttype,
-          loanstatus,
+          date_opened,
+          client_type,
+          loan_status,
           balance,
-          mevstatus,
-          hasvoted,
-          controlnumber,
-          createdby,
-          createdat
+          mev_status,
+          has_voted,
+          control_number,
+          created_by,
+          created_at
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
         RETURNING *
       `;
 
       const result = await manager.query(query, [
-        delegate.electionid,
+        delegate.election_id,
         delegate.branch,
-        delegate.accountid,
-        delegate.accountname,
+        delegate.account_id,
+        delegate.account_name,
         delegate.age || null,
-        delegate.birthdate || null,
+        delegate.birth_date || null,
         delegate.address || null,
         delegate.tell || null,
         delegate.cell || null,
-        delegate.dateopened || null,
-        delegate.clienttype || null,
-        delegate.loanstatus,
+        delegate.date_opened || null,
+        delegate.client_type || null,
+        delegate.loan_status,
         delegate.balance,
-        delegate.mevstatus,
-        delegate.hasvoted || false,
-        delegate.controlnumber,
-        delegate.createdby || null,
-        delegate.createdat || new Date(),
+        delegate.mev_status,
+        delegate.has_voted || false,
+        delegate.control_number,
+        delegate.created_by || null,
+        delegate.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -78,7 +78,7 @@ export class DelegateRepositoryImpl
 
   async update(
     id: number,
-    updateFields: Partial<Delegate>,
+    update_fields: Partial<Delegate>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -86,89 +86,89 @@ export class DelegateRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.branch !== undefined) {
+      if (update_fields.branch !== undefined) {
         updateParts.push(`branch = $${paramIndex++}`);
-        values.push(updateFields.branch);
+        values.push(update_fields.branch);
       }
 
-      if (updateFields.accountid !== undefined) {
-        updateParts.push(`accountid = $${paramIndex++}`);
-        values.push(updateFields.accountid);
+      if (update_fields.account_id !== undefined) {
+        updateParts.push(`account_id = $${paramIndex++}`);
+        values.push(update_fields.account_id);
       }
 
-      if (updateFields.accountname !== undefined) {
-        updateParts.push(`accountname = $${paramIndex++}`);
-        values.push(updateFields.accountname);
+      if (update_fields.account_name !== undefined) {
+        updateParts.push(`account_name = $${paramIndex++}`);
+        values.push(update_fields.account_name);
       }
 
-      if (updateFields.age !== undefined) {
+      if (update_fields.age !== undefined) {
         updateParts.push(`age = $${paramIndex++}`);
-        values.push(updateFields.age);
+        values.push(update_fields.age);
       }
 
-      if (updateFields.birthdate !== undefined) {
+      if (update_fields.birth_date !== undefined) {
         updateParts.push(`birthdate = $${paramIndex++}`);
-        values.push(updateFields.birthdate);
+        values.push(update_fields.birth_date);
       }
 
-      if (updateFields.address !== undefined) {
+      if (update_fields.address !== undefined) {
         updateParts.push(`address = $${paramIndex++}`);
-        values.push(updateFields.address);
+        values.push(update_fields.address);
       }
 
-      if (updateFields.tell !== undefined) {
+      if (update_fields.tell !== undefined) {
         updateParts.push(`tell = $${paramIndex++}`);
-        values.push(updateFields.tell);
+        values.push(update_fields.tell);
       }
 
-      if (updateFields.cell !== undefined) {
+      if (update_fields.cell !== undefined) {
         updateParts.push(`cell = $${paramIndex++}`);
-        values.push(updateFields.cell);
+        values.push(update_fields.cell);
       }
 
-      if (updateFields.dateopened !== undefined) {
-        updateParts.push(`dateopened = $${paramIndex++}`);
-        values.push(updateFields.dateopened);
+      if (update_fields.date_opened !== undefined) {
+        updateParts.push(`date_opened = $${paramIndex++}`);
+        values.push(update_fields.date_opened);
       }
 
-      if (updateFields.clienttype !== undefined) {
-        updateParts.push(`clienttype = $${paramIndex++}`);
-        values.push(updateFields.clienttype);
+      if (update_fields.client_type !== undefined) {
+        updateParts.push(`client_type = $${paramIndex++}`);
+        values.push(update_fields.client_type);
       }
 
-      if (updateFields.balance !== undefined) {
+      if (update_fields.balance !== undefined) {
         updateParts.push(`balance = $${paramIndex++}`);
-        values.push(updateFields.balance);
+        values.push(update_fields.balance);
       }
 
-      if (updateFields.loanstatus !== undefined) {
-        updateParts.push(`loanstatus = $${paramIndex++}`);
-        values.push(updateFields.loanstatus);
+      if (update_fields.loan_status !== undefined) {
+        updateParts.push(`loan_status = $${paramIndex++}`);
+        values.push(update_fields.loan_status);
       }
 
-      if (updateFields.mevstatus !== undefined) {
-        updateParts.push(`mevstatus = $${paramIndex++}`);
-        values.push(updateFields.mevstatus);
+      if (update_fields.mev_status !== undefined) {
+        updateParts.push(`mev_status = $${paramIndex++}`);
+        values.push(update_fields.mev_status);
       }
 
-      if (updateFields.hasvoted !== undefined) {
-        updateParts.push(`hasvoted = $${paramIndex++}`);
-        values.push(updateFields.hasvoted);
+      if (update_fields.has_voted !== undefined) {
+        updateParts.push(`has_voted = $${paramIndex++}`);
+        values.push(update_fields.has_voted);
       }
 
-      if (updateFields.controlnumber !== undefined) {
-        updateParts.push(`controlnumber = $${paramIndex++}`);
-        values.push(updateFields.controlnumber);
+      if (update_fields.control_number !== undefined) {
+        updateParts.push(`control_number = $${paramIndex++}`);
+        values.push(update_fields.control_number);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -180,7 +180,7 @@ export class DelegateRepositoryImpl
       const query = `
         UPDATE delegates
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deletedat IS NULL
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -197,18 +197,18 @@ export class DelegateRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
-    electionId: number,
+    is_archived: boolean,
+    election_id: number,
     manager: EntityManager,
   ): Promise<{
     data: Delegate[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     const skip = (page - 1) * limit;
@@ -218,20 +218,20 @@ export class DelegateRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('d.deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('d.deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('d.deletedat IS NULL');
+      whereConditions.push('d.deleted_at IS NULL');
     }
 
     // Filter by election ID
     let paramIndex = 1;
-    whereConditions.push(`d.electionid = $${paramIndex++}`);
-    queryParams.push(electionId);
+    whereConditions.push(`d.election_id = $${paramIndex++}`);
+    queryParams.push(election_id);
 
     // Apply search filter on account name
     if (term) {
-      whereConditions.push(`LOWER(d.accountname) LIKE $${paramIndex++}`);
+      whereConditions.push(`LOWER(d.account_name) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -242,27 +242,27 @@ export class DelegateRepositoryImpl
       SELECT 
         d.id,
         d.branch,
-        d.accountid,
-        d.accountname,
+        d.account_id,
+        d.account_name,
         d.age,
-        d.birthdate,
+        d.birth_date,
         d.address,
         d.tell,
         d.cell,
-        d.dateopened,
-        d.clienttype,
+        d.date_opened,
+        d.client_type,
         d.balance,
-        d.loanstatus,
-        d.mevstatus,
-        d.deletedat,
-        d.electionid,
+        d.loan_status,
+        d.mev_status,
+        d.deleted_at,
+        d.election_id,
         e.name,
-        d.hasvoted,
-        d.controlnumber,
+        d.has_voted,
+        d.control_number,
       FROM delegates d
-      INNER JOIN elections e ON d.electionid = e.id
+      INNER JOIN elections e ON d.election_id = e.id
       WHERE ${whereClause}
-      ORDER BY d.accountname ASC
+      ORDER BY d.account_name ASC
       LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
 
@@ -270,38 +270,38 @@ export class DelegateRepositoryImpl
     const countQuery = `
       SELECT COUNT(d.id) AS "totalRecords"
       FROM delegates d
-      INNER JOIN elections e ON d.electionid = e.id
+      INNER JOIN elections e ON d.election_id = e.id
       WHERE ${whereClause}
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       manager.query(dataQuery, [...queryParams, limit, skip]),
       manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
 
     // Map raw results to domain models
-    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
     // Calculate pagination metadata
-    const totalPages = Math.ceil(totalRecords / limit);
-    const nextPage = page < totalPages ? page + 1 : null;
-    const previousPage = page > 1 ? page - 1 : null;
+    const total_pages = Math.ceil(total_records / limit);
+    const next_page = page < total_pages ? page + 1 : null;
+    const previous_page = page > 1 ? page - 1 : null;
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -310,30 +310,30 @@ export class DelegateRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         branch,
-        accountid,
-        accountname,
+        account_id,
+        account_name,
         age,
-        birthdate,
+        birth_date,
         address,
         tell,
         cell,
-        dateopened,
-        clienttype,
-        loanstatus,
+        date_opened,
+        client_type,
+        loan_status,
         balance,
-        mevstatus,
-        hasvoted,
-        controlnumber,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        mev_status,
+        has_voted,
+        control_number,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM delegates
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -346,41 +346,41 @@ export class DelegateRepositoryImpl
   }
 
   async findByControlNumberAndElectionId(
-    controlNumber: string,
-    electionId: number,
+    control_number: string,
+    election_id: number,
     manager: EntityManager,
   ): Promise<Delegate> {
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         branch,
-        accountid,
-        accountname,
+        account_id,
+        account_name,
         age,
-        birthdate,
+        birth_date,
         address,
         tell,
         cell,
-        dateopened,
-        clienttype,
-        loanstatus,
+        date_opened,
+        client_type,
+        loan_status,
         balance,
-        mevstatus,
-        hasvoted,
-        controlnumber,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        mev_status,
+        has_voted,
+        control_number,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM delegates
-      WHERE controlnumber = $1 AND electionid = $2 AND deletedat IS NULL
+      WHERE control_number = $1 AND election_id = $2 AND deleted_at IS NULL
       LIMIT 1
     `;
 
-    const result = await manager.query(query, [controlNumber, electionId]);
+    const result = await manager.query(query, [control_number, election_id]);
     const row = getFirstRow(result);
     if (!row) {
       return null;
@@ -390,29 +390,32 @@ export class DelegateRepositoryImpl
   }
 
   async countByElection(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<number> {
     const countQuery = `
       SELECT COUNT(id) AS "count"
       FROM delegates
-      WHERE deletedat IS NULL
-      AND electionid = $1
+      WHERE deleted_at IS NULL
+      AND election_id = $1
     `;
 
-    const result = await manager.query(countQuery, [electionId]);
+    const result = await manager.query(countQuery, [election_id]);
     const row = getFirstRow(result);
     return parseInt(row?.count || '0', 10);
   }
 
-  async markAsVoted(delegateId: number, manager: EntityManager): Promise<void> {
+  async markAsVoted(
+    delegate_id: number,
+    manager: EntityManager,
+  ): Promise<void> {
     const query = `
       UPDATE delegates
-      SET hasvoted = $1
+      SET has_voted = $1
       WHERE id = $2
     `;
 
-    await manager.query(query, [true, delegateId]);
+    await manager.query(query, [true, delegate_id]);
   }
 
   // Helper: Convert raw query result to domain model
@@ -420,27 +423,27 @@ export class DelegateRepositoryImpl
     return new Delegate({
       id: row.id,
       branch: row.branch,
-      electionid: row.electionid,
-      accountid: row.accountid,
-      accountname: row.accountname,
+      election_id: row.election_id,
+      account_id: row.account_id,
+      account_name: row.account_name,
       age: row.age,
       balance: row.balance,
-      loanstatus: row.loanstatus,
-      mevstatus: row.mevstatus,
-      clienttype: row.clienttype,
+      loan_status: row.loan_status,
+      mev_status: row.mev_status,
+      client_type: row.client_type,
       address: row.address,
       tell: row.tell,
       cell: row.cell,
-      dateopened: row.dateopened,
-      birthdate: row.birthdate,
-      hasvoted: row.hasvoted,
-      controlnumber: row.controlnumber,
-      deletedat: row.deletedat,
-      deletedby: row.deletedby,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      date_opened: row.date_opened,
+      birth_date: row.birth_date,
+      has_voted: row.has_voted,
+      control_number: row.control_number,
+      deleted_at: row.deleted_at,
+      deleted_by: row.deleted_by,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

@@ -16,10 +16,10 @@ export class TransactionAdapter implements TransactionPort {
   constructor(private readonly dataSource: DataSource) {}
 
   async executeTransaction<T>(
-    actionlog: string,
+    action_log: string,
     operation: (manager: EntityManager) => Promise<T>,
   ): Promise<T> {
-    const logger = new Logger(actionlog);
+    const logger = new Logger(action_log);
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
     let isTransactionActive = false;
 
@@ -53,7 +53,7 @@ export class TransactionAdapter implements TransactionPort {
 
       // Enhanced error logging
       logger.error(
-        `Transaction failed for action: ${actionlog}`,
+        `Transaction failed for action: ${action_log}`,
         error instanceof Error ? error.stack : String(error),
       );
 

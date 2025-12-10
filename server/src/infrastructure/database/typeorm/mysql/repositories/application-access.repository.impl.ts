@@ -20,15 +20,15 @@ export class ApplicationAccessRepositoryImpl
   ): Promise<ApplicationAccess> {
     try {
       const query = `
-        INSERT INTO applicationaccess (desc1, createdby, createdat)
+        INSERT INTO applicationaccess (desc1, created_by, created_at)
         VALUES ($1, $2, $3)
         RETURNING * 
       `;
 
       const result = await manager.query(query, [
         applicationAccess.desc1,
-        applicationAccess.createdby || null,
-        applicationAccess.createdat || new Date(),
+        applicationAccess.created_by || null,
+        applicationAccess.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -59,14 +59,14 @@ export class ApplicationAccessRepositoryImpl
         values.push(updateFields.desc1);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (updateFields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(updateFields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (updateFields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(updateFields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -95,16 +95,16 @@ export class ApplicationAccessRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: ApplicationAccess[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     const skip = (page - 1) * limit;
@@ -114,10 +114,10 @@ export class ApplicationAccessRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Apply search filter on description
@@ -137,12 +137,12 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
       FROM applicationaccess
       ${whereClause}
       ORDER BY id DESC
@@ -157,33 +157,33 @@ export class ApplicationAccessRepositoryImpl
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
       this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
 
     // Map raw results to domain models
-    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
     // Calculate pagination metadata
-    const totalPages = Math.ceil(totalRecords / limit);
-    const nextPage = page < totalPages ? page + 1 : null;
-    const previousPage = page > 1 ? page - 1 : null;
+    const total_pages = Math.ceil(total_records / limit);
+    const next_page = page < total_pages ? page + 1 : null;
+    const previous_page = page > 1 ? page - 1 : null;
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -196,14 +196,14 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
       FROM applicationaccess
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -219,15 +219,9 @@ export class ApplicationAccessRepositoryImpl
     const query = `
       SELECT 
         id,
-        desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        desc1
       FROM applicationaccess
-      WHERE deletedat IS NULL
+      WHERE deleted_at IS NULL
       ORDER BY desc1 ASC
     `;
 
@@ -240,14 +234,14 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
       FROM applicationaccess
-      WHERE desc1 = $1 AND deletedat IS NULL
+      WHERE desc1 = $1 AND deleted_at IS NULL
       LIMIT 1
     `;
 
@@ -265,12 +259,12 @@ export class ApplicationAccessRepositoryImpl
     return new ApplicationAccess({
       id: row.id,
       desc1: row.desc1,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

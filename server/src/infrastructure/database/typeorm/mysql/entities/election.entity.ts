@@ -38,13 +38,13 @@ export class ElectionEntity {
   date: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  starttime: Date;
+  start_time: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  endtime: Date;
+  end_time: Date;
 
   @Column({ nullable: true })
-  maxattendees: number; // Note: Add CHECK constraint in migration: max_attendees > 0 OR max_attendees IS NULL
+  max_attendees: number; // Note: Add CHECK constraint in migration: max_attendees > 0 OR max_attendees IS NULL
 
   @Column({
     type: 'enum',
@@ -52,35 +52,35 @@ export class ElectionEntity {
     default: ElectionStatus.SCHEDULED,
   })
   @Index()
-  electionstatus: ElectionStatus;
+  election_status: ElectionStatus;
 
   @Column({
     comment: 'username of the user who deleted the election',
     nullable: true,
   })
-  deletedby?: string;
+  deleted_by?: string;
 
   @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedat: Date | null; // For soft delete
+  deleted_at: Date | null; // For soft delete
 
   @Column({
     comment: 'username of the user who created the election',
     nullable: true,
   })
-  createdby?: string;
+  created_by?: string;
 
   @CreateDateColumn()
-  createdat: Date;
+  created_at: Date;
 
   @Column({
     comment: 'username of the user who updated the election',
     nullable: true,
   })
-  updatedby?: string;
+  updated_by?: string;
 
   @UpdateDateColumn()
-  updatedat: Date;
+  updated_at: Date;
 
   /** One to many */
   @OneToMany(() => DelegateEntity, (member) => member.election)
@@ -93,13 +93,13 @@ export class ElectionEntity {
       nullable: true,
     },
   )
-  activeElection: ActiveElectionEntity; // Reverse relationship (optional)
+  active_election: ActiveElectionEntity; // Reverse relationship (optional)
 
   @OneToMany(() => PositionEntity, (position) => position.election)
   positions: PositionEntity[];
 
-  @OneToMany(() => CastVoteEntity, (castVote) => castVote.election)
-  castVotes: CastVoteEntity[];
+  @OneToMany(() => CastVoteEntity, (cast_vote) => cast_vote.election)
+  cast_votes: CastVoteEntity[];
 
   @OneToMany(() => DistrictEntity, (district) => district.election)
   districts: DistrictEntity[];

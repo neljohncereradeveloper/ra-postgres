@@ -18,26 +18,26 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         INSERT INTO users (
           precinct,
           watcher,
-          applicationaccess,
-          userroles,
-          username,
+          application_access,
+          user_roles,
+          user_name,
           password,
-          createdby,
-          createdat
+          created_by,
+          created_at
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, precinct, watcher, applicationaccess, userroles, username, createdby, createdat
+        RETURNING id, precinct, watcher, application_access, user_roles, user_name, created_by, created_at
       `;
 
       const result = await manager.query(query, [
         user.precinct,
         user.watcher,
-        JSON.stringify(user.applicationaccess || []),
-        JSON.stringify(user.userroles || []),
-        user.username,
+        JSON.stringify(user.application_access || []),
+        JSON.stringify(user.user_roles || []),
+        user.user_name,
         user.password,
-        user.createdby || null,
-        user.createdat || new Date(),
+        user.created_by || null,
+        user.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -55,7 +55,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
 
   async update(
     id: number,
-    updateFields: Partial<User>,
+    update_fields: Partial<User>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -63,44 +63,44 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.precinct !== undefined) {
+      if (update_fields.precinct !== undefined) {
         updateParts.push(`precinct = $${paramIndex++}`);
-        values.push(updateFields.precinct);
+        values.push(update_fields.precinct);
       }
 
-      if (updateFields.watcher !== undefined) {
+      if (update_fields.watcher !== undefined) {
         updateParts.push(`watcher = $${paramIndex++}`);
-        values.push(updateFields.watcher);
+        values.push(update_fields.watcher);
       }
 
-      if (updateFields.applicationaccess !== undefined) {
-        updateParts.push(`applicationaccess = $${paramIndex++}`);
-        values.push(JSON.stringify(updateFields.applicationaccess || []));
+      if (update_fields.application_access !== undefined) {
+        updateParts.push(`application_access = $${paramIndex++}`);
+        values.push(JSON.stringify(update_fields.application_access || []));
       }
 
-      if (updateFields.userroles !== undefined) {
-        updateParts.push(`userroles = $${paramIndex++}`);
-        values.push(JSON.stringify(updateFields.userroles || []));
+      if (update_fields.user_roles !== undefined) {
+        updateParts.push(`user_roles = $${paramIndex++}`);
+        values.push(JSON.stringify(update_fields.user_roles || []));
       }
 
-      if (updateFields.username !== undefined) {
-        updateParts.push(`username = $${paramIndex++}`);
-        values.push(updateFields.username);
+      if (update_fields.user_name !== undefined) {
+        updateParts.push(`user_name = $${paramIndex++}`);
+        values.push(update_fields.user_name);
       }
 
-      if (updateFields.password !== undefined) {
+      if (update_fields.password !== undefined) {
         updateParts.push(`password = $${paramIndex++}`);
-        values.push(updateFields.password);
+        values.push(update_fields.password);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -112,7 +112,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       const query = `
         UPDATE users
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deletedat IS NULL
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -129,16 +129,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: User[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     const skip = (page - 1) * limit;
@@ -148,10 +148,10 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Apply search filter on watcher
@@ -169,10 +169,10 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        applicationaccess,
-        userroles,
-        username,
-        deletedat,
+        application_access,
+        user_roles,
+        user_name,
+        deleted_at,
       FROM users
       ${whereClause}
       ORDER BY id DESC
@@ -187,33 +187,33 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     `;
 
     // Execute both queries simultaneously
-    const [dataResult, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
       this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract rows and total records
-    const dataRows = extractRows(dataResult);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
 
     // Calculate pagination metadata
-    const totalPages = Math.ceil(totalRecords / limit);
-    const nextPage = page < totalPages ? page + 1 : null;
-    const previousPage = page > 1 ? page - 1 : null;
+    const total_pages = Math.ceil(total_records / limit);
+    const next_page = page < total_pages ? page + 1 : null;
+    const previous_page = page > 1 ? page - 1 : null;
 
     // Map raw results to domain models (without password)
-    const data = dataRows.map((row: any) => this.rowToModel(row, false));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row, false));
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -224,18 +224,18 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        applicationaccess,
-        userroles,
-        username,
+        application_access,
+        user_roles,
+        user_name,
         password,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM users
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -255,12 +255,12 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
           id,
           precinct,
           watcher,
-          applicationaccess,
-          userroles,
-          username,
+          application_access,
+          user_roles,
+          user_name,
           password
         FROM users
-        WHERE username = $1
+        WHERE user_name = $1
         LIMIT 1
       `;
 
@@ -279,41 +279,41 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
   // Helper: Convert raw query result to domain model
   private rowToModel(row: any, includePassword: boolean = false): User {
     // Parse JSON strings to arrays, or handle already-parsed arrays
-    let applicationAccess: string[] = [];
-    if (row.applicationaccess) {
-      if (typeof row.applicationaccess === 'string') {
+    let application_access: string[] = [];
+    if (row.application_access) {
+      if (typeof row.application_access === 'string') {
         try {
           // Try parsing as JSON first (for JSON columns)
-          applicationAccess = JSON.parse(row.applicationaccess);
+          application_access = JSON.parse(row.application_access);
         } catch {
           // Fallback to comma-separated string (for legacy data)
-          applicationAccess = row.applicationaccess
+          application_access = row.application_access
             .split(',')
             .map((item: string) => item.trim())
             .filter((item: string) => item.length > 0);
         }
-      } else if (Array.isArray(row.applicationaccess)) {
+      } else if (Array.isArray(row.application_access)) {
         // Already an array (from JSON column that was auto-parsed)
-        applicationAccess = row.applicationaccess;
+        application_access = row.application_access;
       }
     }
 
-    let userRoles: string[] = [];
-    if (row.userroles) {
-      if (typeof row.userroles === 'string') {
+    let user_roles: string[] = [];
+    if (row.user_roles) {
+      if (typeof row.user_roles === 'string') {
         try {
           // Try parsing as JSON first (for JSON columns)
-          userRoles = JSON.parse(row.userroles);
+          user_roles = JSON.parse(row.user_roles);
         } catch {
           // Fallback to comma-separated string (for legacy data)
-          userRoles = row.userroles
+          user_roles = row.user_roles
             .split(',')
             .map((item: string) => item.trim())
             .filter((item: string) => item.length > 0);
         }
-      } else if (Array.isArray(row.userroles)) {
+      } else if (Array.isArray(row.user_roles)) {
         // Already an array (from JSON column that was auto-parsed)
-        userRoles = row.userroles;
+        user_roles = row.user_roles;
       }
     }
 
@@ -321,16 +321,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       id: row.id,
       precinct: row.precinct,
       watcher: row.watcher,
-      applicationaccess: applicationAccess,
-      userroles: userRoles,
-      username: row.username,
+      application_access: application_access,
+      user_roles: user_roles,
+      user_name: row.user_name,
       password: includePassword ? row.password : undefined,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

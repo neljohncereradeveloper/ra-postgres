@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity('users')
-@Unique(['username'])
+@Unique(['user_name'])
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -22,13 +22,13 @@ export class UserEntity {
   watcher: string;
 
   @Column({ type: 'json' })
-  applicationaccess: string[];
+  application_access: string[];
 
   @Column({ type: 'json' })
-  userroles: string[];
+  user_roles: string[];
 
   @Column({ length: 100 })
-  username: string;
+  user_name: string;
 
   @Column({ type: 'varchar', length: 255, select: false })
   password: string;
@@ -37,27 +37,27 @@ export class UserEntity {
     comment: 'username of the user who deleted the user',
     nullable: true,
   })
-  deletedby?: string;
+  deleted_by?: string;
 
   @DeleteDateColumn({ nullable: true })
   @Index()
-  deletedat?: Date | null;
+  deleted_at?: Date | null;
 
   @Column({
     comment: 'username of the user who created the user',
     nullable: true,
   })
-  createdby?: string;
+  created_by?: string;
 
   @CreateDateColumn()
-  createdat: Date;
+  created_at: Date;
 
   @Column({
     comment: 'username of the user who updated the user',
     nullable: true,
   })
-  updatedby?: string;
+  updated_by?: string;
 
   @UpdateDateColumn()
-  updatedat: Date;
+  updated_at: Date;
 }

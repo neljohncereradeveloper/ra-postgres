@@ -21,20 +21,20 @@ export class DistrictRepositoryImpl
     try {
       const query = `
         INSERT INTO districts (
-          electionid,
+          election_id,
           desc1,
-          createdby,
-          createdat
+          created_by,
+          created_at
         )
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `;
 
       const result = await manager.query(query, [
-        district.electionid,
+        district.election_id,
         district.desc1,
-        district.createdby || null,
-        district.createdat || new Date(),
+        district.created_by || null,
+        district.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -52,7 +52,7 @@ export class DistrictRepositoryImpl
 
   async update(
     id: number,
-    updateFields: Partial<District>,
+    update_fields: Partial<District>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -60,19 +60,19 @@ export class DistrictRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.desc1 !== undefined) {
+      if (update_fields.desc1 !== undefined) {
         updateParts.push(`desc1 = $${paramIndex++}`);
-        values.push(updateFields.desc1);
+        values.push(update_fields.desc1);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -84,7 +84,7 @@ export class DistrictRepositoryImpl
       const query = `
         UPDATE districts
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deletedat IS NULL
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -101,12 +101,19 @@ export class DistrictRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
-    electionId: number,
+    is_archived: boolean,
+    election_id: number,
     manager: EntityManager,
   ): Promise<{
     data: District[];
-    meta: PaginationMeta;
+    meta: {
+      page: number;
+      limit: number;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
+    };
   }> {
     const skip = (page - 1) * limit;
 
@@ -115,16 +122,16 @@ export class DistrictRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Filter by election
     let paramIndex = 1;
-    whereConditions.push(`electionid = $${paramIndex++}`);
-    queryParams.push(electionId);
+    whereConditions.push(`election_id = $${paramIndex++}`);
+    queryParams.push(election_id);
 
     // Apply search filter on description
     if (term) {
@@ -138,14 +145,14 @@ export class DistrictRepositoryImpl
     const dataQuery = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM districts
       ${whereClause}
       ORDER BY id DESC
@@ -160,33 +167,33 @@ export class DistrictRepositoryImpl
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       manager.query(dataQuery, [...queryParams, limit, skip]),
       manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
-    const { totalPages, nextPage, previousPage } = calculatePagination(
-      totalRecords,
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
+    const { total_pages, next_page, previous_page } = calculatePagination(
+      total_records,
       page,
       limit,
     );
 
     // Map raw results to domain models
-    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -195,16 +202,16 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM districts
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -218,26 +225,26 @@ export class DistrictRepositoryImpl
 
   async findByDescription(
     desc1: string,
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<District | null> {
     const query = `
       SELECT 
         id,
-        electionid,
+        election_id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM districts
-      WHERE desc1 = $1 AND electionid = $2 AND deletedat IS NULL
+      WHERE desc1 = $1 AND election_id = $2 AND deleted_at IS NULL
       LIMIT 1
     `;
 
-    const result = await manager.query(query, [desc1, electionId]);
+    const result = await manager.query(query, [desc1, election_id]);
     const row = getFirstRow(result);
     if (!row) {
       return null;
@@ -247,41 +254,34 @@ export class DistrictRepositoryImpl
   }
 
   async combobox(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<District[]> {
     const query = `
       SELECT 
         id,
-        electionid,
-        desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        desc1
       FROM districts
-      WHERE electionid = $1 AND deletedat IS NULL
+      WHERE election_id = $1 AND deleted_at IS NULL
       ORDER BY desc1 ASC
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const rows = extractRows(result);
     return rows.map((row: any) => this.rowToModel(row));
   }
 
   async countByElection(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<number> {
     const query = `
       SELECT COUNT(id) AS "count"
       FROM districts
-      WHERE deletedat IS NULL AND electionid = $1
+      WHERE deleted_at IS NULL AND election_id = $1
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const row = getFirstRow(result);
     return parseInt(row?.count || '0', 10);
   }
@@ -290,14 +290,14 @@ export class DistrictRepositoryImpl
   private rowToModel(row: any): District {
     return new District({
       id: row.id,
-      electionid: row.electionid,
+      election_id: row.election_id,
       desc1: row.desc1,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

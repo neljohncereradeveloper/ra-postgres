@@ -32,7 +32,7 @@ export class ActivityLogRepositoryImpl
 
     // Use raw SQL query for insert
     const query = `
-      INSERT INTO activitylogs (action, entity, details, timestamp, username)
+      INSERT INTO activitylogs (action, entity, details, occurred_at, user_name)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
@@ -41,8 +41,8 @@ export class ActivityLogRepositoryImpl
       log.action,
       log.entity,
       detailsJson,
-      log.timestamp || new Date(),
-      log.username || null,
+      log.occurred_at || new Date(),
+      log.user_name || null,
     ]);
 
     const row = getFirstRow(result);
@@ -59,10 +59,10 @@ export class ActivityLogRepositoryImpl
         action,
         entity,
         details,
-        timestamp,
-        username
+        occurred_at,
+        user_name
       FROM activitylogs
-      ORDER BY timestamp DESC
+      ORDER BY occurred_at DESC
     `;
 
     const result = await this.dataSource.query(query);
@@ -77,11 +77,11 @@ export class ActivityLogRepositoryImpl
         action,
         entity,
         details,
-        timestamp,
-        username
+        occurred_at,
+        user_name
       FROM activitylogs
       WHERE entity = $1
-      ORDER BY timestamp DESC
+      ORDER BY occurred_at DESC
     `;
 
     const result = await this.dataSource.query(query, [entity]);
@@ -96,11 +96,11 @@ export class ActivityLogRepositoryImpl
         action,
         entity,
         details,
-        timestamp,
-        username
+        occurred_at,
+        user_name
       FROM activitylogs
       WHERE action = $1
-      ORDER BY timestamp DESC
+      ORDER BY occurred_at DESC
     `;
 
     const result = await this.dataSource.query(query, [action]);
@@ -134,8 +134,8 @@ export class ActivityLogRepositoryImpl
       action: row.action,
       entity: row.entity,
       details: detailsString,
-      timestamp: row.timestamp,
-      username: row.username,
+      occurred_at: row.occurred_at,
+      user_name: row.user_name,
     });
 
     return log;

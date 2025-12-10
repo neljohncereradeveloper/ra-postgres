@@ -23,26 +23,26 @@ export class CandidateRepositoryImpl
     try {
       const query = `
         INSERT INTO candidates (
-          electionid,
-          delegateid,
-          positionid,
-          districtid,
-          displayname,
-          createdby,
-          createdat
+          election_id,
+          delegate_id,
+          position_id,
+          district_id,
+          display_name,
+          created_by,
+          created_at
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
       `;
 
       const result = await manager.query(query, [
-        candidate.electionid,
-        candidate.delegateid,
-        candidate.positionid,
-        candidate.districtid,
-        candidate.displayname,
-        candidate.createdby || null,
-        candidate.createdat || new Date(),
+        candidate.election_id,
+        candidate.delegate_id,
+        candidate.position_id,
+        candidate.district_id,
+        candidate.display_name,
+        candidate.created_by || null,
+        candidate.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -71,29 +71,29 @@ export class CandidateRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.displayname !== undefined) {
-        updateParts.push(`displayname = $${paramIndex++}`);
-        values.push(updateFields.displayname);
+      if (updateFields.display_name !== undefined) {
+        updateParts.push(`display_name = $${paramIndex++}`);
+        values.push(updateFields.display_name);
       }
 
-      if (updateFields.positionid !== undefined) {
-        updateParts.push(`positionid = $${paramIndex++}`);
-        values.push(updateFields.positionid);
+      if (updateFields.position_id !== undefined) {
+        updateParts.push(`position_id = $${paramIndex++}`);
+        values.push(updateFields.position_id);
       }
 
-      if (updateFields.districtid !== undefined) {
-        updateParts.push(`districtid = $${paramIndex++}`);
-        values.push(updateFields.districtid);
+      if (updateFields.district_id !== undefined) {
+        updateParts.push(`district_id = $${paramIndex++}`);
+        values.push(updateFields.district_id);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (updateFields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(updateFields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (updateFields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(updateFields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -124,23 +124,23 @@ export class CandidateRepositoryImpl
   ): Promise<Candidate | null> {
     const query = `
       SELECT 
-        c.id as "id",
-        c.electionid,
-        c.positionid,
-        c.districtid,
-        c.delegateid,
-        c.displayname,
-        d.accountid,
-        d.accountname,
+        c.id,
+        c.election_id,
+        c.position_id,
+        c.district_id,
+        c.delegate_id,
+        c.display_name,
+        d.account_id,
+        d.account_name,
         p.desc1,
         dist.desc1,
         e.name,
       FROM candidates c
-      LEFT JOIN delegates d ON c.delegateid = d.id
-      LEFT JOIN positions p ON c.positionid = p.id
-      LEFT JOIN districts dist ON c.districtid = dist.id
-      LEFT JOIN elections e ON c.electionid = e.id
-      WHERE c.id = $1 AND c.deletedat IS NULL
+      LEFT JOIN delegates d ON c.delegate_id = d.id
+      LEFT JOIN positions p ON c.position_id = p.id
+      LEFT JOIN districts dist ON c.district_id = dist.id
+      LEFT JOIN elections e ON c.election_id = e.id
+      WHERE c.id = $1 AND c.deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -156,12 +156,19 @@ export class CandidateRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
-    electionId: number,
+    is_deleted: boolean,
+    election_id: number,
     manager: EntityManager,
   ): Promise<{
-    data: any[];
-    meta: PaginationMeta;
+    data: Candidate[];
+    meta: {
+      page: number;
+      limit: number;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
+    };
   }> {
     const skip = (page - 1) * limit;
 
@@ -170,20 +177,20 @@ export class CandidateRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('c.deletedat IS NOT NULL');
+    if (is_deleted) {
+      whereConditions.push('c.deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('c.deletedat IS NULL');
+      whereConditions.push('c.deleted_at IS NULL');
     }
 
     // Filter by election
     let paramIndex = 1;
-    whereConditions.push(`c.electionid = $${paramIndex++}`);
-    queryParams.push(electionId);
+    whereConditions.push(`c.election_id = $${paramIndex++}`);
+    queryParams.push(election_id);
 
     // Apply search filter on display name
     if (term) {
-      whereConditions.push(`LOWER(c.displayname) LIKE $${paramIndex++}`);
+      whereConditions.push(`LOWER(c.display_name) LIKE $${paramIndex++}`);
       queryParams.push(`%${term.toLowerCase()}%`);
     }
 
@@ -193,18 +200,18 @@ export class CandidateRepositoryImpl
     const dataQuery = `
       SELECT 
         c.id,
-        c.delegateid,
-        c.displayname,
-        d.accountid,
-        d.accountname,
+        c.delegate_id,
+        c.display_name,
+        d.account_id,
+        d.account_name,
         p.desc1,
         dist.desc1,
         e.name,
       FROM candidates c
-      LEFT JOIN delegates d ON c.delegateid = d.id
-      LEFT JOIN positions p ON c.positionid = p.id
-      LEFT JOIN districts dist ON c.districtid = dist.id
-      LEFT JOIN elections e ON c.electionid = e.id
+      LEFT JOIN delegates d ON c.delegate_id = d.id
+      LEFT JOIN positions p ON c.position_id = p.id
+      LEFT JOIN districts dist ON c.district_id = dist.id
+      LEFT JOIN elections e ON c.election_id = e.id
       ${whereClause}
       ORDER BY c.id DESC
       LIMIT $${paramIndex++} OFFSET $${paramIndex}
@@ -218,66 +225,66 @@ export class CandidateRepositoryImpl
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       manager.query(dataQuery, [...queryParams, limit, skip]),
       manager.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
-    const { totalPages, nextPage, previousPage } = calculatePagination(
-      totalRecords,
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
+    const { total_pages, next_page, previous_page } = calculatePagination(
+      total_records,
       page,
       limit,
     );
 
     return {
-      data: dataRows,
+      data: data_rows_array,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
 
   async countByElection(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<number> {
     const query = `
       SELECT COUNT(id) AS "count"
       FROM candidates
-      WHERE deletedat IS NULL AND electionid = $1
+      WHERE deleted_at IS NULL AND election_id = $1
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const row = getFirstRow(result);
     return parseInt(row?.count || '0', 10);
   }
 
   async getElectionCandidates(
-    electionId: number,
+    election_id: number,
     manager: EntityManager,
   ): Promise<any[]> {
     const query = `
       SELECT 
         p.desc1,
-        p.maxcandidates,
-        p.termlimit,
+        p.max_candidates,
+        p.term_limit,
         c.id,
-        c.displayname,
+        c.display_name,
       FROM candidates c
-      LEFT JOIN positions p ON c.positionid = p.id
-      WHERE c.deletedat IS NULL AND c.electionid = $1
+      LEFT JOIN positions p ON c.position_id = p.id
+      WHERE c.deleted_at IS NULL AND c.election_id = $1
     `;
 
-    const result = await manager.query(query, [electionId]);
+    const result = await manager.query(query, [election_id]);
     const rows = extractRows(result);
     return rows;
   }
@@ -286,17 +293,17 @@ export class CandidateRepositoryImpl
   private rowToModel(row: any): Candidate {
     return new Candidate({
       id: row.id,
-      electionid: row.electionid,
-      positionid: row.positionid,
-      districtid: row.districtid,
-      delegateid: row.delegateid,
-      displayname: row.displayname,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      election_id: row.election_id,
+      position_id: row.position_id,
+      district_id: row.district_id,
+      delegate_id: row.delegate_id,
+      display_name: row.display_name,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }

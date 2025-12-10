@@ -17,15 +17,15 @@ export class UserRoleRepositoryImpl
   async create(userRole: UserRole, manager: EntityManager): Promise<UserRole> {
     try {
       const query = `
-        INSERT INTO userroles (desc1, createdby, createdat)
+        INSERT INTO userroles (desc1, created_by, created_at)
         VALUES ($1, $2, $3)
         RETURNING *
       `;
 
       const result = await manager.query(query, [
         userRole.desc1,
-        userRole.createdby || null,
-        userRole.createdat || new Date(),
+        userRole.created_by || null,
+        userRole.created_at || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -43,7 +43,7 @@ export class UserRoleRepositoryImpl
 
   async update(
     id: number,
-    updateFields: Partial<UserRole>,
+    update_fields: Partial<UserRole>,
     manager: EntityManager,
   ): Promise<boolean> {
     try {
@@ -51,19 +51,19 @@ export class UserRoleRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.desc1 !== undefined) {
+      if (update_fields.desc1 !== undefined) {
         updateParts.push(`desc1 = $${paramIndex++}`);
-        values.push(updateFields.desc1);
+        values.push(update_fields.desc1);
       }
 
-      if (updateFields.updatedby !== undefined) {
-        updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedby);
+      if (update_fields.updated_by !== undefined) {
+        updateParts.push(`updated_by = $${paramIndex++}`);
+        values.push(update_fields.updated_by);
       }
 
-      if (updateFields.updatedat !== undefined) {
-        updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedat);
+      if (update_fields.updated_at !== undefined) {
+        updateParts.push(`updated_at = $${paramIndex++}`);
+        values.push(update_fields.updated_at);
       }
 
       if (updateParts.length === 0) {
@@ -75,7 +75,7 @@ export class UserRoleRepositoryImpl
       const query = `
         UPDATE userroles
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deletedat IS NULL
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
       `;
 
       const result = await manager.query(query, values);
@@ -92,16 +92,16 @@ export class UserRoleRepositoryImpl
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: UserRole[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     const skip = (page - 1) * limit;
@@ -111,10 +111,10 @@ export class UserRoleRepositoryImpl
     const queryParams: any[] = [];
 
     // Filter by deletion status
-    if (isDeleted) {
-      whereConditions.push('deletedat IS NOT NULL');
+    if (is_archived) {
+      whereConditions.push('deleted_at IS NOT NULL');
     } else {
-      whereConditions.push('deletedat IS NULL');
+      whereConditions.push('deleted_at IS NULL');
     }
 
     // Apply search filter on description (fixed: was using 'name' but entity has 'desc1')
@@ -131,12 +131,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM userroles
       ${whereClause}
       ORDER BY id DESC
@@ -151,33 +151,33 @@ export class UserRoleRepositoryImpl
     `;
 
     // Execute both queries simultaneously
-    const [dataRows, countResult] = await Promise.all([
+    const [data_rows, count_result] = await Promise.all([
       this.dataSource.query(dataQuery, [...queryParams, limit, skip]),
       this.dataSource.query(countQuery, queryParams),
     ]);
 
     // Extract total records
-    const dataRowsArray = extractRows(dataRows);
-    const countRow = getFirstRow(countResult);
-    const totalRecords = parseInt(countRow?.totalRecords || '0', 10);
+    const data_rows_array = extractRows(data_rows);
+    const count_row = getFirstRow(count_result);
+    const total_records = parseInt(count_row?.total_records || '0', 10);
 
     // Calculate pagination metadata
-    const totalPages = Math.ceil(totalRecords / limit);
-    const nextPage = page < totalPages ? page + 1 : null;
-    const previousPage = page > 1 ? page - 1 : null;
+    const total_pages = Math.ceil(total_records / limit);
+    const next_page = page < total_pages ? page + 1 : null;
+    const previous_page = page > 1 ? page - 1 : null;
 
     // Map raw results to domain models
-    const data = dataRowsArray.map((row: any) => this.rowToModel(row));
+    const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
     return {
       data,
       meta: {
         page,
         limit,
-        totalRecords,
-        totalPages,
-        nextPage,
-        previousPage,
+        total_records,
+        total_pages,
+        next_page,
+        previous_page,
       },
     };
   }
@@ -187,14 +187,14 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM userroles
-      WHERE id = $1 AND deletedat IS NULL
+      WHERE id = $1 AND deleted_at IS NULL
     `;
 
     const result = await manager.query(query, [id]);
@@ -210,15 +210,9 @@ export class UserRoleRepositoryImpl
     const query = `
       SELECT 
         id,
-        desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        desc1
       FROM userroles
-      WHERE deletedat IS NULL
+      WHERE deleted_at IS NULL
       ORDER BY desc1 ASC
     `;
 
@@ -231,14 +225,14 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby,
-        deletedat,
-        createdby,
-        createdat,
-        updatedby,
-        updatedat,
+        deleted_by,
+        deleted_at,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
       FROM userroles
-      WHERE desc1 = $1 AND deletedat IS NULL
+      WHERE desc1 = $1 AND deleted_at IS NULL
       LIMIT 1
     `;
 
@@ -256,12 +250,12 @@ export class UserRoleRepositoryImpl
     return new UserRole({
       id: row.id,
       desc1: row.desc1,
-      deletedby: row.deletedby,
-      deletedat: row.deletedat,
-      createdby: row.createdby,
-      createdat: row.createdat,
-      updatedby: row.updatedby,
-      updatedat: row.updatedat,
+      deleted_by: row.deleted_by,
+      deleted_at: row.deleted_at,
+      created_by: row.created_by,
+      created_at: row.created_at,
+      updated_by: row.updated_by,
+      updated_at: row.updated_at,
     });
   }
 }
