@@ -12,31 +12,31 @@ import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 export class Precinct {
   id: number;
   desc1: string;
-  deletedBy?: string;
-  deletedAt?: Date | null;
-  createdBy?: string;
-  createdAt?: Date;
-  updatedBy?: string;
-  updatedAt?: Date;
+  deletedby?: string;
+  deletedat?: Date | null;
+  createdby?: string;
+  createdat?: Date;
+  updatedby?: string;
+  updatedat?: Date;
 
   constructor(params: {
     id?: number;
     desc1: string;
-    deletedBy?: string;
-    deletedAt?: Date | null;
-    createdBy?: string;
-    createdAt?: Date;
-    updatedBy?: string;
-    updatedAt?: Date;
+    deletedby?: string;
+    deletedat?: Date | null;
+    createdby?: string;
+    createdat?: Date;
+    updatedby?: string;
+    updatedat?: Date;
   }) {
     this.id = params.id;
     this.desc1 = params.desc1;
-    this.deletedBy = params.deletedBy;
-    this.deletedAt = params.deletedAt;
-    this.createdBy = params.createdBy;
-    this.createdAt = params.createdAt;
-    this.updatedBy = params.updatedBy;
-    this.updatedAt = params.updatedAt;
+    this.deletedby = params.deletedby;
+    this.deletedat = params.deletedat;
+    this.createdby = params.createdby;
+    this.createdat = params.createdat;
+    this.updatedby = params.updatedby;
+    this.updatedat = params.updatedat;
   }
 
   /**
@@ -53,11 +53,11 @@ export class Precinct {
    * @returns A new validated Precinct instance
    * @throws PrecinctBusinessValidationException - If validation fails
    */
-  static create(params: { desc1: string; createdBy?: string }): Precinct {
+  static create(params: { desc1: string; createdby?: string }): Precinct {
     const precinct = new Precinct({
       desc1: params.desc1,
-      createdBy: params.createdBy,
-      createdAt: getPHDateTime(),
+      createdby: params.createdby,
+      createdat: getPHDateTime(),
     });
     // Validate the precinct before returning
     precinct.validate();
@@ -75,8 +75,8 @@ export class Precinct {
    * @param updatedBy - Username of the user performing the update (required for audit)
    * @throws PrecinctBusinessValidationException - If validation fails
    */
-  update(dto: { desc1: string; updatedBy?: string }): void {
-    if (this.deletedAt) {
+  update(dto: { desc1: string; updatedby?: string }): void {
+    if (this.deletedat) {
       throw new PrecinctBusinessException(
         'Precinct is archived and cannot be updated',
         HTTP_STATUS.CONFLICT,
@@ -93,8 +93,8 @@ export class Precinct {
 
     // Apply changes only if validation passes (data is already validated)
     this.desc1 = dto.desc1;
-    this.updatedBy = dto.updatedBy;
-    this.updatedAt = getPHDateTime();
+    this.updatedby = dto.updatedby;
+    this.updatedat = getPHDateTime();
   }
 
   /**
@@ -103,9 +103,9 @@ export class Precinct {
    * @param deletedBy - Username of the user performing the archive
    * @throws PrecinctBusinessValidationException - If the precinct cannot be archived
    */
-  archive(deletedBy: string): void {
+  archive(deletedby: string): void {
     // Validate if the precinct is not already archived
-    if (this.deletedAt) {
+    if (this.deletedat) {
       throw new PrecinctBusinessException(
         'Precinct is already archived.',
         HTTP_STATUS.CONFLICT, // Conflict - resource already in the desired state
@@ -113,15 +113,15 @@ export class Precinct {
     }
 
     // Apply archive operation
-    this.deletedAt = getPHDateTime();
-    this.deletedBy = deletedBy;
+    this.deletedat = getPHDateTime();
+    this.deletedby = deletedby;
   }
 
   /**
    * Restores a previously archived precinct
    */
   restore(): void {
-    if (!this.deletedAt) {
+    if (!this.deletedat) {
       throw new PrecinctBusinessException(
         `Precinct with ID ${this.id} is not archived.`,
         HTTP_STATUS.CONFLICT,
@@ -129,8 +129,8 @@ export class Precinct {
     }
 
     // restore the precinct
-    this.deletedAt = null;
-    this.deletedBy = null;
+    this.deletedat = null;
+    this.deletedby = null;
   }
 
   /**
