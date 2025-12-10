@@ -1,4 +1,7 @@
 export interface ReportsRepository<Context = unknown> {
-  electionCastVoteReport(electionId: number, context?: Context): Promise<any>;
-  electionCandidatesReport(electionId: number, context?: Context): Promise<any>;
+  electionCastVoteReport(election_id: number, context?: Context): Promise<any>;
+  electionCandidatesReport(
+    election_id: number,
+    context?: Context,
+  ): Promise<any>;
 }

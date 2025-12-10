@@ -1,12 +1,12 @@
 export interface BallotRepository<Context = unknown> {
   issueBallot(
-    ballotNumber: string,
-    delegateId: number,
-    electionId: number,
+    ballot_number: string,
+    delegate_id: number,
+    election_id: number,
     context: Context,
   ): Promise<any>;
 
-  submitBallot(ballotNumber: string, context?: Context): Promise<any>;
-  retrieveDelegateBallot(delegateId: number, context?: Context): Promise<any>;
-  unlinkBallot(electionId: number, context?: Context): Promise<any>;
+  submitBallot(ballot_number: string, context?: Context): Promise<any>;
+  retrieveDelegateBallot(delegate_id: number, context?: Context): Promise<any>;
+  unlinkBallot(election_id: number, context?: Context): Promise<any>;
 }

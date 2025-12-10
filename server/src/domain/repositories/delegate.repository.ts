@@ -12,18 +12,18 @@ export interface DelegateRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
-    electionId: number,
+    is_archived: boolean,
+    election_id: number,
     context?: Context,
   ): Promise<{
     data: Delegate[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
   // findAllWithElectionId(
@@ -31,8 +31,8 @@ export interface DelegateRepository<Context = unknown> {
   //   context?: Context,
   // ): Promise<Delegate[]>;
   findByControlNumberAndElectionId(
-    controlNumber: string,
-    electionId: number,
+    control_number: string,
+    election_id: number,
     context?: Context,
   ): Promise<Delegate>;
   // findByAccountIdWithElectionId(
@@ -40,7 +40,7 @@ export interface DelegateRepository<Context = unknown> {
   //   electionId: number,
   //   context?: Context,
   // ): Promise<Delegate>;
-  countByElection(electionId: number, context?: Context): Promise<number>;
-  markAsVoted(delegateId: number, context?: Context): Promise<void>;
+  countByElection(election_id: number, context?: Context): Promise<number>;
+  markAsVoted(delegate_id: number, context?: Context): Promise<void>;
 }
 //

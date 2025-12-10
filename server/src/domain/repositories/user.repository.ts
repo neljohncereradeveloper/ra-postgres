@@ -4,7 +4,7 @@ export interface UserRepository<Context = unknown> {
   create(user: User, context?: Context): Promise<User>;
   update(
     id: number,
-    updateData: Partial<User>,
+    update_data: Partial<User>,
     context?: Context,
   ): Promise<boolean>;
   findById(id: number, context?: Context): Promise<User>;
@@ -12,17 +12,17 @@ export interface UserRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: User[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
-  findByUserName(userName: string): Promise<User>;
+  findByUserName(user_name: string): Promise<User>;
 }

@@ -4,7 +4,7 @@ export interface ElectionRepository<Context = unknown> {
   create(election: Election, context?: Context): Promise<Election>;
   update(
     id: number,
-    updateData: Partial<Election>,
+    update_data: Partial<Election>,
     context?: Context,
   ): Promise<boolean>;
   findById(id: number, context?: Context): Promise<Election>;
@@ -12,19 +12,19 @@ export interface ElectionRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: Election[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
-  findByName(name: string, context?: Context): Promise<Election | null>;
+  findByName(name: string, context?: Context): Promise<Election>;
   combobox(): Promise<Election[]>;
   comboboxRetrieveScheduledElections(): Promise<Election[]>;
 }

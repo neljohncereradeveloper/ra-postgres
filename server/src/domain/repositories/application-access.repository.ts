@@ -2,12 +2,12 @@ import { ApplicationAccess } from '@domain/models/application-access.model';
 
 export interface ApplicationAccessRepository<Context = unknown> {
   create(
-    applicationAccess: ApplicationAccess,
+    application_access: ApplicationAccess,
     context?: Context,
   ): Promise<ApplicationAccess>;
   update(
     id: number,
-    updateData: Partial<ApplicationAccess>,
+    update_data: Partial<ApplicationAccess>,
     context?: Context,
   ): Promise<boolean>;
   findById(id: number, context?: Context): Promise<ApplicationAccess>;
@@ -15,16 +15,16 @@ export interface ApplicationAccessRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: ApplicationAccess[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
   findByDesc(desc1: string): Promise<ApplicationAccess>;

@@ -1,10 +1,10 @@
 import { CastVote } from '@domain/models/cast-vote.model';
 
 export interface CastVoteRepository<Context = unknown> {
-  castVote(castVote: CastVote, context?: Context): Promise<CastVote>;
+  castVote(cast_vote: CastVote, context?: Context): Promise<CastVote>;
   reprintCastVote(
-    electionId: number,
-    ballotNumber: string,
+    election_id: number,
+    ballot_number: string,
     context?: Context,
   ): Promise<CastVote>;
 }

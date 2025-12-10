@@ -4,7 +4,7 @@ export interface DistrictRepository<Context = unknown> {
   create(district: District, context?: Context): Promise<District>;
   update(
     id: number,
-    updateData: Partial<District>,
+    update_data: Partial<District>,
     context?: Context,
   ): Promise<boolean>;
   findById(id: number, context?: Context): Promise<District>;
@@ -12,25 +12,25 @@ export interface DistrictRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
-    electionId: number,
+    is_archived: boolean,
+    election_id: number,
     context?: Context,
   ): Promise<{
     data: District[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
   findByDescription(
     desc1: string,
-    electionId: number,
+    election_id: number,
     context?: Context,
   ): Promise<District | null>;
-  combobox(electionId: number, context?: Context): Promise<District[]>;
-  countByElection(electionId: number, context?: Context): Promise<number>;
+  combobox(election_id: number, context?: Context): Promise<District[]>;
+  countByElection(election_id: number, context?: Context): Promise<number>;
 }

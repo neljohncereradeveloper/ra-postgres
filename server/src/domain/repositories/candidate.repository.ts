@@ -12,20 +12,20 @@ export interface CandidateRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    isDeleted: boolean,
-    electionId: number,
+    is_deleted: boolean,
+    election_id: number,
     context?: Context,
   ): Promise<{
     data: Candidate[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
-  countByElection(electionId: number, context?: Context): Promise<number>;
-  getElectionCandidates(electionId: number, context?: Context): Promise<any[]>;
+  countByElection(election_id: number, context?: Context): Promise<number>;
+  getElectionCandidates(election_id: number, context?: Context): Promise<any[]>;
 }

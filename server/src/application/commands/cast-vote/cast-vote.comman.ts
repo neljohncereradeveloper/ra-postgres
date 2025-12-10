@@ -3,6 +3,6 @@ export interface CandidateDto {
 }
 
 export interface CastVoteCommand {
-  controlNumber: string;
+  control_number: string;
   candidates: CandidateDto[];
 }

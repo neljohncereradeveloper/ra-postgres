@@ -1,8 +1,8 @@
 export interface DatabaseManagementRepository {
-  performBackup(req: any, userId: number): Promise<string>;
+  performBackup(req: any, user_id: number): Promise<string>;
   performRestore(
-    filePath: string,
-    username: string,
+    file_path: string,
+    user_name: string,
     req: any,
   ): Promise<{ message: string; statusCode: number }>;
 }

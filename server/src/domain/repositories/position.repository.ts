@@ -12,26 +12,26 @@ export interface PositionRepository<Context = unknown> {
     term: string,
     page: number,
     limit: number,
-    electionId: number,
-    isArchived: boolean,
+    election_id: number,
+    is_archived: boolean,
     context: Context,
   ): Promise<{
     data: Position[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }>;
   findByDescription(
     desc1: string,
-    electionId: number,
+    election_id: number,
     context: Context,
   ): Promise<Position | null>;
-  combobox(electionId: number, context: Context): Promise<Position[]>;
-  findByElection(electionId: number, context: Context): Promise<Position[]>;
-  countByElection(electionId: number, context?: Context): Promise<number>;
+  combobox(election_id: number, context: Context): Promise<Position[]>;
+  findByElection(election_id: number, context: Context): Promise<Position[]>;
+  countByElection(election_id: number, context?: Context): Promise<number>;
 }

@@ -1,6 +1,6 @@
 export interface UpdateUserCommand {
   watcher: string;
   precinct: string;
-  applicationAccess: string[];
-  userRoles: string[];
+  application_access: string[];
+  user_roles: string[];
 }

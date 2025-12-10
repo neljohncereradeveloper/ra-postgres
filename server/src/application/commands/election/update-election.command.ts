@@ -3,7 +3,7 @@ export interface UpdateElectionCommand {
   desc1: string;
   address: string;
   date: Date;
-  maxAttendees: number;
-  startTime: Date | null;
-  endTime: Date | null;
+  max_attendees: number;
+  start_time: Date | null;
+  end_time: Date | null;
 }

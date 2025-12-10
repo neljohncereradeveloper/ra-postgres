@@ -1,8 +1,8 @@
 export interface CreateUserCommand {
   watcher: string;
   precinct: string;
-  applicationAccess: string[];
-  userRoles: string[];
-  userName: string;
+  application_access: string[];
+  user_roles: string[];
+  user_name: string;
   password: string;
 }

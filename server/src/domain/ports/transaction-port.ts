@@ -1,6 +1,6 @@
 export interface TransactionPort {
   executeTransaction<T>(
-    actionlog: string,
+    action_log: string,
     work: (manager: any) => Promise<T>,
   ): Promise<T>;
 }
