@@ -3,7 +3,6 @@ import { DataSource, EntityManager } from 'typeorm';
 import { UserRole } from '@domain/models/user-role.model';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
@@ -25,8 +24,8 @@ export class UserRoleRepositoryImpl
 
       const result = await manager.query(query, [
         userRole.desc1,
-        userRole.createdBy || null,
-        userRole.createdAt || new Date(),
+        userRole.createdby || null,
+        userRole.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -57,14 +56,14 @@ export class UserRoleRepositoryImpl
         values.push(updateFields.desc1);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -132,12 +131,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM userroles
       ${whereClause}
       ORDER BY id DESC
@@ -188,12 +187,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM userroles
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -212,12 +211,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM userroles
       WHERE deletedat IS NULL
       ORDER BY desc1 ASC
@@ -232,12 +231,12 @@ export class UserRoleRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM userroles
       WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1
@@ -257,12 +256,12 @@ export class UserRoleRepositoryImpl
     return new UserRole({
       id: row.id,
       desc1: row.desc1,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

@@ -10,9 +10,9 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   constructor() {}
 
   async issueBallot(
-    ballotNumber: string,
-    delegateId: number,
-    electionId: number,
+    ballotnumber: string,
+    delegateid: number,
+    electionid: number,
     manager: EntityManager,
   ): Promise<Ballot> {
     const query = `
@@ -22,9 +22,9 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     `;
 
     const result = await manager.query(query, [
-      ballotNumber,
-      delegateId,
-      electionId,
+      ballotnumber,
+      delegateid,
+      electionid,
       BALLOT_STATUS_CONSTANTS.ISSUED,
     ]);
 
@@ -37,29 +37,29 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   }
 
   async submitBallot(
-    ballotNumber: string,
+    ballotnumber: string,
     context: EntityManager,
   ): Promise<Ballot> {
     // Update the ballot status
     await context.query(
       `UPDATE ballots SET ballotstatus = $1 WHERE ballotnumber = $2`,
-      [BALLOT_STATUS_CONSTANTS.SUBMITTED, ballotNumber],
+      [BALLOT_STATUS_CONSTANTS.SUBMITTED, ballotnumber],
     );
 
     // Retrieve the updated ballot
     const selectQuery = `
       SELECT 
         id,
-        ballotnumber as "ballotNumber",
-        delegateid as "delegateId",
-        electionid as "electionId",
-        ballotstatus as "ballotStatus"
+        ballotnumber,
+        delegateid,
+        electionid,
+        ballotstatus
       FROM ballots
       WHERE ballotnumber = $1
       LIMIT 1
     `;
 
-    const result = await context.query(selectQuery, [ballotNumber]);
+    const result = await context.query(selectQuery, [ballotnumber]);
     const row = getFirstRow(result);
     if (!row) {
       return null;
@@ -69,29 +69,29 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   }
 
   async unlinkBallot(
-    electionId: number,
+    electionid: number,
     context: EntityManager,
   ): Promise<Ballot> {
     // Update ballots to unlink delegate
     await context.query(
       `UPDATE ballots SET delegateid = NULL WHERE electionid = $1`,
-      [electionId],
+      [electionid],
     );
 
     // Retrieve the first updated ballot (if any)
     const selectQuery = `
       SELECT 
         id,
-        ballotnumber as "ballotNumber",
-        delegateid as "delegateId",
-        electionid as "electionId",
-        ballotstatus as "ballotStatus"
+        ballotnumber,
+        delegateid,
+        electionid,
+        ballotstatus
       FROM ballots
-      WHERE electionid = $1 AND delegateid IS NULL
+      WHERE electionid = $1 AND delegateid IS NULL AND deletedat IS NULL
       LIMIT 1
     `;
 
-    const result = await context.query(selectQuery, [electionId]);
+    const result = await context.query(selectQuery, [electionid]);
     const row = getFirstRow(result);
     if (!row) {
       return null;
@@ -101,22 +101,22 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   }
 
   async retrieveDelegateBallot(
-    delegateId: number,
+    delegateid: number,
     context: EntityManager,
   ): Promise<Ballot> {
     const query = `
       SELECT 
         id,
-        ballotnumber as "ballotNumber",
-        delegateid as "delegateId",
-        electionid as "electionId",
-        ballotstatus as "ballotStatus"
+        ballotnumber,
+        delegateid,
+        electionid,
+        ballotstatus
       FROM ballots
       WHERE delegateid = $1
       LIMIT 1
     `;
 
-    const result = await context.query(query, [delegateId]);
+    const result = await context.query(query, [delegateid]);
     const row = getFirstRow(result);
     if (!row) {
       return null;
@@ -129,10 +129,10 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
   private rowToModel(row: any): Ballot {
     return new Ballot({
       id: row.id,
-      ballotNumber: row.ballotnumber,
-      delegateId: row.delegateid,
-      electionId: row.electionid,
-      ballotStatus: row.ballotstatus,
+      ballotnumber: row.ballotnumber,
+      delegateid: row.delegateid,
+      electionid: row.electionid,
+      ballotstatus: row.ballotstatus,
     });
   }
 }

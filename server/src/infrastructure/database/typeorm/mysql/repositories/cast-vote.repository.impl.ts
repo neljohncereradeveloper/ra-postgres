@@ -30,13 +30,13 @@ export class CastVoteRepositoryImpl
       `;
 
       const result = await context.query(query, [
-        castVote.electionId,
-        castVote.ballotNumber,
+        castVote.electionid,
+        castVote.ballotnumber,
         castVote.precinct,
-        castVote.candidateId,
-        castVote.positionId,
-        castVote.districtId,
-        castVote.dateTimeCast,
+        castVote.candidateid,
+        castVote.positionid,
+        castVote.districtid,
+        castVote.datetimecast,
       ]);
 
       const row = getFirstRow(result);
@@ -53,28 +53,28 @@ export class CastVoteRepositoryImpl
   }
 
   async reprintCastVote(
-    electionId: number,
-    ballotNumber: string,
+    electionid: number,
+    ballotnumber: string,
     context: EntityManager,
   ): Promise<CastVote> {
     try {
       const query = `
         SELECT
           cv.id,
-          cv.electionid as "electionId",
-          cv.ballotnumber as "ballotNumber",
+          cv.electionid,
+          cv.ballotnumber,
           cv.precinct,
-          cv.candidateid as "candidateId",
-          cv.positionid as "positionId",
-          cv.districtid as "districtId",
-          cv.datetimecast as "dateTimeCast",
-          cv.deletedat as "deletedAt"
+          cv.candidateid,
+          cv.positionid,
+          cv.districtid,
+          cv.datetimecast,
+          cv.deletedat,
         FROM cast_votes cv
         WHERE cv.ballotnumber = $1 AND cv.electionid = $2
         LIMIT 1
       `;
 
-      const result = await context.query(query, [ballotNumber, electionId]);
+      const result = await context.query(query, [ballotnumber, electionid]);
       const row = getFirstRow(result);
       if (!row) {
         return null;
@@ -90,14 +90,14 @@ export class CastVoteRepositoryImpl
   private rowToModel(row: any): CastVote {
     return new CastVote({
       id: row.id,
-      electionId: row.electionid,
-      ballotNumber: row.ballotnumber,
+      electionid: row.electionid,
+      ballotnumber: row.ballotnumber,
       precinct: row.precinct,
-      candidateId: row.candidateid,
-      positionId: row.positionid,
-      districtId: row.districtid,
-      dateTimeCast: row.datetimecast,
-      deletedAt: row.deletedat,
+      candidateid: row.candidateid,
+      positionid: row.positionid,
+      districtid: row.districtid,
+      datetimecast: row.datetimecast,
+      deletedat: row.deletedat,
     });
   }
 }

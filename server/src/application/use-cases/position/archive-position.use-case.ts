@@ -40,12 +40,12 @@ export class ArchivePositionUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // Can only archive position if election is scheduled
@@ -79,7 +79,7 @@ export class ArchivePositionUseCase {
             desc1: position.desc1,
             explanation: `Position with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: getPHDateTime(position.deletedAt),
+            archivedAt: getPHDateTime(position.deletedat),
           }),
           username: userName,
         });

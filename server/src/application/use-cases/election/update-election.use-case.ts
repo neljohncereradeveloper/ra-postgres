@@ -45,10 +45,10 @@ export class UpdateElectionUseCase {
           desc1: dto.desc1,
           address: dto.address,
           date: getPHDateTime(dto.date),
-          maxAttendees: dto.maxAttendees,
-          startTime: dto.startTime,
-          endTime: dto.endTime,
-          updatedBy: userName,
+          maxattendees: dto.maxAttendees,
+          starttime: dto.startTime,
+          endtime: dto.endTime,
+          updatedby: userName,
         });
 
         // update the election in the database
@@ -79,11 +79,11 @@ export class UpdateElectionUseCase {
             desc1: election.desc1,
             address: election.address,
             date: getPHDateTime(election.date),
-            maxAttendees: election.maxAttendees,
-            startTime: election.startTime,
-            endTime: election.endTime,
+            maxAttendees: election.maxattendees,
+            startTime: election.starttime,
+            endTime: election.endtime,
             updatedBy: userName,
-            updatedAt: getPHDateTime(election.updatedAt),
+            updatedAt: getPHDateTime(election.updatedat),
           }),
           username: userName,
         });

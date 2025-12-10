@@ -31,10 +31,10 @@ export class DistrictRepositoryImpl
       `;
 
       const result = await manager.query(query, [
-        district.electionId,
+        district.electionid,
         district.desc1,
-        district.createdBy || null,
-        district.createdAt || new Date(),
+        district.createdby || null,
+        district.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -65,14 +65,14 @@ export class DistrictRepositoryImpl
         values.push(updateFields.desc1);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -138,14 +138,14 @@ export class DistrictRepositoryImpl
     const dataQuery = `
       SELECT 
         id,
-        electionid as "electionId",
+        electionid,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM districts
       ${whereClause}
       ORDER BY id DESC
@@ -195,14 +195,14 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as "electionId",
+        electionid,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM districts
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -224,14 +224,14 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as "electionId",
+        electionid,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM districts
       WHERE desc1 = $1 AND electionid = $2 AND deletedat IS NULL
       LIMIT 1
@@ -253,14 +253,14 @@ export class DistrictRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as "electionId",
+        electionid,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM districts
       WHERE electionid = $1 AND deletedat IS NULL
       ORDER BY desc1 ASC
@@ -290,14 +290,14 @@ export class DistrictRepositoryImpl
   private rowToModel(row: any): District {
     return new District({
       id: row.id,
-      electionId: row.electionid,
+      electionid: row.electionid,
       desc1: row.desc1,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

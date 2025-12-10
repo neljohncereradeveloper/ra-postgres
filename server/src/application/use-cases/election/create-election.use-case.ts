@@ -35,7 +35,7 @@ export class CreateElectionUseCase {
           desc1: dto.desc1,
           address: dto.address,
           date: getPHDateTime(dto.date),
-          createdBy: userName,
+          createdby: userName,
         });
 
         // create the election in the database
@@ -59,7 +59,7 @@ export class CreateElectionUseCase {
             address: createdElection.address,
             date: getPHDateTime(createdElection.date),
             createdBy: userName,
-            createdAt: getPHDateTime(createdElection.createdAt),
+            createdAt: getPHDateTime(createdElection.createdat),
           }),
           username: userName,
         });

@@ -51,12 +51,12 @@ export class StartElectionUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found`,
+            `Election with ID ${activeElection.electionid} not found`,
           );
         }
 
@@ -107,7 +107,7 @@ export class StartElectionUseCase {
             date: getPHDateTime(election.date),
             explanation: `Election with ID : ${election.id} started by USER : ${userName}`,
             startedBy: userName,
-            startedAt: getPHDateTime(election.startTime),
+            startedAt: getPHDateTime(election.starttime),
           }),
           username: userName,
         });

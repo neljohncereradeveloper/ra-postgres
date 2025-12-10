@@ -40,7 +40,7 @@ export class UpdateUserRoleUseCase {
         }
 
         // Update the userRole
-        userRole.update({ desc1: dto.desc1, updatedBy: username });
+        userRole.update({ desc1: dto.desc1, updatedby: username });
 
         // save the updated user role
         const success = await this.userRoleRepository.update(
@@ -66,7 +66,7 @@ export class UpdateUserRoleUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: username,
         });

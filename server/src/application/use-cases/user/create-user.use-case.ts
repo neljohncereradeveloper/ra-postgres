@@ -55,7 +55,7 @@ export class CreateUserUseCase {
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         // Can only add user if election is scheduled
@@ -105,11 +105,11 @@ export class CreateUserUseCase {
         const user = User.create({
           precinct: dto.precinct,
           watcher: dto.watcher,
-          applicationAccess: dto.applicationAccess,
-          userRoles: dto.userRoles,
-          userName: dto.userName,
+          applicationaccess: dto.applicationAccess,
+          userroles: dto.userRoles,
+          username: dto.userName,
           password: hassPassword,
-          createdBy: username,
+          createdby: username,
         });
         const createdUser = await this.userRepository.create(user, manager);
 
@@ -123,13 +123,13 @@ export class CreateUserUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
             id: createdUser.id,
-            userName: createdUser.userName,
+            userName: createdUser.username,
             precinct: createdUser.precinct,
             watcher: createdUser.watcher,
-            applicationAccess: createdUser.applicationAccess,
-            userRoles: createdUser.userRoles,
+            applicationAccess: createdUser.applicationaccess,
+            userRoles: createdUser.userroles,
             createdBy: username,
-            createdAt: getPHDateTime(createdUser.createdAt),
+            createdAt: getPHDateTime(createdUser.createdat),
           }),
           username: username,
         });

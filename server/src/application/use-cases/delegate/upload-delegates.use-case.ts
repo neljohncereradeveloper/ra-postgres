@@ -19,7 +19,10 @@ import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { UUIDGeneratorPort } from '@domain/ports/uuid-generator.port';
 import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
-import { SomethinWentWrongException } from '@domains/exceptions/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 
 const schema = {
   branch: { prop: 'branch', type: String },
@@ -81,9 +84,14 @@ export class UploadDelegatesUseCase {
           throw new BadRequestException('No Active election');
         }
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${activeElection.electionid} not found.`,
+          );
+        }
 
         // Can only upload delegates if election is scheduled
         election.validateForUpdate();
@@ -115,20 +123,20 @@ export class UploadDelegatesUseCase {
           // Create the delegate
           const delegate = new Delegate({
             branch: row.branch,
-            electionId: election?.id,
-            accountId: row.accountid,
-            accountName: row.name,
+            electionid: election?.id,
+            accountid: row.accountid,
+            accountname: row.name,
             age: row.age,
             balance: row.balance,
-            loanStatus: row.loanstatus,
-            mevStatus: row.mevstatus,
-            clientType: row.clienttype,
+            loanstatus: row.loanstatus,
+            mevstatus: row.mevstatus,
+            clienttype: row.clienttype,
             address: row.address,
             tell: row.tell,
             cell: row.cell,
-            dateOpened: row.dateopened,
-            birthDate: row.birthdate,
-            controlNumber: row.controlnumber,
+            dateopened: row.dateopened,
+            birthdate: row.birthdate,
+            controlnumber: row.controlnumber,
           });
 
           const delegateResult = await this.delegateRepository.create(

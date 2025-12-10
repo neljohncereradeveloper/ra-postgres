@@ -47,12 +47,12 @@ export class CreatePositionUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
@@ -60,11 +60,11 @@ export class CreatePositionUseCase {
 
         // use domain model method to create (encapsulates business logic and validation)
         const newPosition = Position.create({
-          electionId: election.id,
+          electionid: election.id,
           desc1: dto.desc1,
-          maxCandidates: dto.maxCandidates || 1,
-          termLimit: dto.termLimit || '1',
-          createdBy: username,
+          maxcandidates: dto.maxCandidates || 1,
+          termlimit: dto.termLimit || '1',
+          createdby: username,
         });
         // create the position in the database
         const createdPosition = await this.positionRepository.create(
@@ -84,7 +84,7 @@ export class CreatePositionUseCase {
             id: createdPosition.id,
             desc1: createdPosition.desc1,
             createdBy: username,
-            createdAt: getPHDateTime(createdPosition.createdAt),
+            createdAt: getPHDateTime(createdPosition.createdat),
           }),
           username: username,
         });

@@ -44,12 +44,12 @@ export class ArchivePrecinctUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -82,7 +82,7 @@ export class ArchivePrecinctUseCase {
             desc1: precinct.desc1,
             explanation: `Precinct with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: getPHDateTime(precinct.deletedAt),
+            archivedAt: getPHDateTime(precinct.deletedat),
           }),
           username: userName,
         });

@@ -60,7 +60,7 @@ export class ArchiveElectionUseCase {
             date: getPHDateTime(election.date),
             explanation: `Election with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: getPHDateTime(election.deletedAt),
+            archivedAt: getPHDateTime(election.deletedat),
           }),
           username: userName,
         });

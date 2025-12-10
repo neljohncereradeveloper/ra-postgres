@@ -3,7 +3,6 @@ import { DataSource, EntityManager } from 'typeorm';
 import { User } from '@domain/models/user.model';
 import { UserRepository } from '@domains/repositories/user.repository';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
@@ -33,12 +32,12 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       const result = await manager.query(query, [
         user.precinct,
         user.watcher,
-        JSON.stringify(user.applicationAccess || []),
-        JSON.stringify(user.userRoles || []),
-        user.userName,
+        JSON.stringify(user.applicationaccess || []),
+        JSON.stringify(user.userroles || []),
+        user.username,
         user.password,
-        user.createdBy || null,
-        user.createdAt || new Date(),
+        user.createdby || null,
+        user.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -74,19 +73,19 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         values.push(updateFields.watcher);
       }
 
-      if (updateFields.applicationAccess !== undefined) {
+      if (updateFields.applicationaccess !== undefined) {
         updateParts.push(`applicationaccess = $${paramIndex++}`);
-        values.push(JSON.stringify(updateFields.applicationAccess || []));
+        values.push(JSON.stringify(updateFields.applicationaccess || []));
       }
 
-      if (updateFields.userRoles !== undefined) {
+      if (updateFields.userroles !== undefined) {
         updateParts.push(`userroles = $${paramIndex++}`);
-        values.push(JSON.stringify(updateFields.userRoles || []));
+        values.push(JSON.stringify(updateFields.userroles || []));
       }
 
-      if (updateFields.userName !== undefined) {
+      if (updateFields.username !== undefined) {
         updateParts.push(`username = $${paramIndex++}`);
-        values.push(updateFields.userName);
+        values.push(updateFields.username);
       }
 
       if (updateFields.password !== undefined) {
@@ -94,14 +93,14 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         values.push(updateFields.password);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -170,10 +169,10 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        applicationaccess as "applicationAccess",
-        userroles as "userRoles",
-        username as "userName",
-        deletedat as "deletedAt"
+        applicationaccess,
+        userroles,
+        username,
+        deletedat,
       FROM users
       ${whereClause}
       ORDER BY id DESC
@@ -225,16 +224,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         id,
         precinct,
         watcher,
-        applicationaccess as "applicationAccess",
-        userroles as "userRoles",
-        username as "userName",
+        applicationaccess,
+        userroles,
+        username,
         password,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM users
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -256,9 +255,9 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
           id,
           precinct,
           watcher,
-          applicationaccess as "applicationAccess",
-          userroles as "userRoles",
-          username as "userName",
+          applicationaccess,
+          userroles,
+          username,
           password
         FROM users
         WHERE username = $1
@@ -322,16 +321,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       id: row.id,
       precinct: row.precinct,
       watcher: row.watcher,
-      applicationAccess,
-      userRoles,
-      userName: row.username,
+      applicationaccess: applicationAccess,
+      userroles: userRoles,
+      username: row.username,
       password: includePassword ? row.password : undefined,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

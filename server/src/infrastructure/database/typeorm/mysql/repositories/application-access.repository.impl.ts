@@ -27,8 +27,8 @@ export class ApplicationAccessRepositoryImpl
 
       const result = await manager.query(query, [
         applicationAccess.desc1,
-        applicationAccess.createdBy || null,
-        applicationAccess.createdAt || new Date(),
+        applicationAccess.createdby || null,
+        applicationAccess.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -59,14 +59,14 @@ export class ApplicationAccessRepositoryImpl
         values.push(updateFields.desc1);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -137,12 +137,12 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM applicationaccess
       ${whereClause}
       ORDER BY id DESC
@@ -196,12 +196,12 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM applicationaccess
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -220,12 +220,12 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM applicationaccess
       WHERE deletedat IS NULL
       ORDER BY desc1 ASC
@@ -240,12 +240,12 @@ export class ApplicationAccessRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM applicationaccess
       WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1
@@ -265,12 +265,12 @@ export class ApplicationAccessRepositoryImpl
     return new ApplicationAccess({
       id: row.id,
       desc1: row.desc1,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

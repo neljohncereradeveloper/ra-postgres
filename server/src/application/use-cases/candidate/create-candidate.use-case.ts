@@ -57,7 +57,7 @@ export class CreateCandidateUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
@@ -75,7 +75,7 @@ export class CreateCandidateUseCase {
           throw new NotFoundException('Delegate not found');
         }
 
-        if (election.id !== delegate.electionId) {
+        if (election.id !== delegate.electionid) {
           throw new BadRequestException(
             'Delegate is not part of this election',
           );
@@ -101,12 +101,12 @@ export class CreateCandidateUseCase {
 
         // use domain model method to create (encapsulates business logic and validation)
         const newCandidate = Candidate.create({
-          electionId: election.id,
-          districtId: district.id,
-          positionId: position.id,
-          delegateId: delegate.id,
-          displayName: dto.displayName,
-          createdBy: username,
+          electionid: election.id,
+          districtid: district.id,
+          positionid: position.id,
+          delegateid: delegate.id,
+          displayname: dto.displayName,
+          createdby: username,
         });
         // create the candidate in the database
         const candidate = await this.candidateRepository.create(
@@ -124,12 +124,12 @@ export class CreateCandidateUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
           details: JSON.stringify({
             id: candidate.id,
-            displayName: candidate.displayName,
+            displayName: candidate.displayname,
             position: position.desc1,
             district: district.desc1,
-            delegate: delegate.accountName,
+            delegate: delegate.accountname,
             createdBy: username,
-            createdAt: getPHDateTime(candidate.createdAt),
+            createdAt: getPHDateTime(candidate.createdat),
           }),
           username: username,
         });

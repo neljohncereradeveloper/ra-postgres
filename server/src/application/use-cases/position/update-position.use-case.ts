@@ -46,12 +46,12 @@ export class UpdatePositionUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
@@ -66,9 +66,9 @@ export class UpdatePositionUseCase {
         // use domain model method to update (encapsulates business logic and validation)
         position.update({
           desc1: dto.desc1,
-          maxCandidates: dto.maxCandidates,
-          termLimit: dto.termLimit,
-          updatedBy: username,
+          maxcandidates: dto.maxCandidates,
+          termlimit: dto.termLimit,
+          updatedby: username,
         });
 
         // update the position in the database
@@ -95,7 +95,7 @@ export class UpdatePositionUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: username,
         });

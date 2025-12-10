@@ -57,7 +57,7 @@ export class ArchiveApplicationAccessUseCase {
             desc1: applicationAccess.desc1,
             explanation: `ApplicationAccess with ID : ${id} archived by USER : ${username}`,
             archivedBy: username,
-            archivedAt: getPHDateTime(applicationAccess.deletedAt),
+            archivedAt: getPHDateTime(applicationAccess.deletedat),
           }),
           username: username,
         });

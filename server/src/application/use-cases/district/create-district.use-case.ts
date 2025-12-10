@@ -47,12 +47,12 @@ export class CreateDistrictUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
@@ -60,9 +60,9 @@ export class CreateDistrictUseCase {
 
         // use domain model method to create (encapsulates business logic and validation)
         const newDistrict = District.create({
-          electionId: election.id,
+          electionid: election.id,
           desc1: dto.desc1,
-          createdBy: username,
+          createdby: username,
         });
         // create the district in the database
         const createdDistrict = await this.districtRepository.create(
@@ -82,7 +82,7 @@ export class CreateDistrictUseCase {
             id: createdDistrict.id,
             desc1: createdDistrict.desc1,
             createdBy: username,
-            createdAt: getPHDateTime(createdDistrict.createdAt),
+            createdAt: getPHDateTime(createdDistrict.createdat),
           }),
           username: username,
         });

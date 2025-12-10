@@ -53,7 +53,7 @@ export class ArchiveUserRoleUseCase {
             desc1: userRole.desc1,
             explanation: `UserRole with ID : ${id} archived by USER : ${username}`,
             archivedBy: username,
-            archivedAt: getPHDateTime(userRole.deletedAt),
+            archivedAt: getPHDateTime(userRole.deletedat),
           }),
           username: username,
         });

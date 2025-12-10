@@ -32,7 +32,7 @@ export class CreateApplicationAccessUseCase {
         // Create the applicationAccess
         const applicationAccess = ApplicationAccess.create({
           desc1: dto.desc1,
-          createdBy: username,
+          createdby: username,
         });
         const createdApplicationAccess =
           await this.applicationAccessRepository.create(
@@ -54,7 +54,7 @@ export class CreateApplicationAccessUseCase {
             id: createdApplicationAccess.id,
             desc1: createdApplicationAccess.desc1,
             createdBy: username,
-            createdAt: getPHDateTime(createdApplicationAccess.createdAt),
+            createdAt: getPHDateTime(createdApplicationAccess.createdat),
           }),
           username: username,
         });

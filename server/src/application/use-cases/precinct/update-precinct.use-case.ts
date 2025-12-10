@@ -38,7 +38,7 @@ export class UpdatePrecinctUseCase {
         }
 
         // use domain model method to update (encapsulates business logic and validation)
-        precinct.update({ desc1: dto.desc1, updatedBy: userName });
+        precinct.update({ desc1: dto.desc1, updatedby: userName });
 
         // Update the precinct in the database
         const updateSuccessfull = await this.precinctRepository.update(
@@ -64,7 +64,7 @@ export class UpdatePrecinctUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: userName,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: userName,
         });

@@ -33,7 +33,7 @@ export class CreatePrecinctUseCase {
         // use domain model factory method to create (encapsulates business logic and validation)
         const precinct = Precinct.create({
           desc1: dto.desc1,
-          createdBy: userName,
+          createdby: userName,
         });
 
         // Create the precinct in the database
@@ -54,7 +54,7 @@ export class CreatePrecinctUseCase {
             id: createdPrecinct.id,
             desc1: createdPrecinct.desc1,
             createdBy: userName,
-            createdAt: getPHDateTime(createdPrecinct.createdAt),
+            createdAt: getPHDateTime(createdPrecinct.createdat),
           }),
           username: userName,
         });

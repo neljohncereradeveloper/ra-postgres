@@ -45,10 +45,10 @@ export class RestoreDeleteUserUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
             id,
-            userName: user.userName,
+            userName: user.username,
             explanation: `User with ID : ${id} restored by USER : ${userName}`,
-            restoredBy: user.userName,
-            restoredAt: getPHDateTime(user.deletedAt),
+            restoredBy: user.username,
+            restoredAt: getPHDateTime(user.deletedat),
           }),
           username: userName,
         });

@@ -63,26 +63,26 @@ export class ReprintCastVoteUseCase {
 
         // Retrieve election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${election.id} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
 
         const delegate =
           await this.delegateRepository.findByControlNumberAndElectionId(
             controlNumber,
-            activeElection.electionId,
+            activeElection.electionid,
             manager,
           );
 
         if (!delegate) {
           throw new NotFoundException('Delegate not found');
         }
-        if (!delegate.hasVoted) {
+        if (!delegate.hasvoted) {
           throw new BadRequestException('Delegate has not yet voted');
         }
 
@@ -95,7 +95,7 @@ export class ReprintCastVoteUseCase {
 
         const castVotes = await this.castVoteRepository.reprintCastVote(
           election.id,
-          ballot.ballotNumber,
+          ballot.ballotnumber,
           manager,
         );
 
@@ -119,7 +119,7 @@ export class ReprintCastVoteUseCase {
           }
           candidatesMap.get(key).candidates.push({
             id: vote.id,
-            name: vote.candidateName,
+            name: vote.candidatename,
           });
         }
         const groupCandidates = Array.from(candidatesMap.values());
@@ -131,8 +131,8 @@ export class ReprintCastVoteUseCase {
           details: JSON.stringify({
             id: castVotes.id,
             election: election.name,
-            ballotNumber: ballot.ballotNumber,
-            delegate: delegate.accountName,
+            ballotNumber: ballot.ballotnumber,
+            delegate: delegate.accountname,
             dateTimeReprint: getPHDateTime(),
           }),
           username: username,
@@ -140,7 +140,7 @@ export class ReprintCastVoteUseCase {
         await this.activityLogRepository.create(log, manager);
 
         return {
-          ballotId: ballot?.ballotNumber,
+          ballotId: ballot?.ballotnumber,
           precinct:
             castVotesArray.length > 0 ? castVotesArray[0].precinct : null,
           election: election,

@@ -40,12 +40,12 @@ export class ArchiveDelegateUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -76,10 +76,10 @@ export class ArchiveDelegateUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_DELEGATE,
           details: JSON.stringify({
             id,
-            controlNumber: delegate.controlNumber,
+            controlNumber: delegate.controlnumber,
             explanation: `Delegate with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: getPHDateTime(delegate.deletedAt),
+            archivedAt: getPHDateTime(delegate.deletedat),
           }),
           username: userName,
         });

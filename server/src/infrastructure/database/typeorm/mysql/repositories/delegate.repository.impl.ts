@@ -43,24 +43,24 @@ export class DelegateRepositoryImpl
       `;
 
       const result = await manager.query(query, [
-        delegate.electionId,
+        delegate.electionid,
         delegate.branch,
-        delegate.accountId,
-        delegate.accountName,
+        delegate.accountid,
+        delegate.accountname,
         delegate.age || null,
-        delegate.birthDate || null,
+        delegate.birthdate || null,
         delegate.address || null,
         delegate.tell || null,
         delegate.cell || null,
-        delegate.dateOpened || null,
-        delegate.clientType || null,
-        delegate.loanStatus,
+        delegate.dateopened || null,
+        delegate.clienttype || null,
+        delegate.loanstatus,
         delegate.balance,
-        delegate.mevStatus,
-        delegate.hasVoted || false,
-        delegate.controlNumber,
-        delegate.createdBy || null,
-        delegate.createdAt || new Date(),
+        delegate.mevstatus,
+        delegate.hasvoted || false,
+        delegate.controlnumber,
+        delegate.createdby || null,
+        delegate.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -69,7 +69,6 @@ export class DelegateRepositoryImpl
       }
       return this.rowToModel(row);
     } catch (error) {
-      console.log('error', error);
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException(error.sqlMessage);
       }
@@ -92,14 +91,14 @@ export class DelegateRepositoryImpl
         values.push(updateFields.branch);
       }
 
-      if (updateFields.accountId !== undefined) {
+      if (updateFields.accountid !== undefined) {
         updateParts.push(`accountid = $${paramIndex++}`);
-        values.push(updateFields.accountId);
+        values.push(updateFields.accountid);
       }
 
-      if (updateFields.accountName !== undefined) {
+      if (updateFields.accountname !== undefined) {
         updateParts.push(`accountname = $${paramIndex++}`);
-        values.push(updateFields.accountName);
+        values.push(updateFields.accountname);
       }
 
       if (updateFields.age !== undefined) {
@@ -107,9 +106,9 @@ export class DelegateRepositoryImpl
         values.push(updateFields.age);
       }
 
-      if (updateFields.birthDate !== undefined) {
+      if (updateFields.birthdate !== undefined) {
         updateParts.push(`birthdate = $${paramIndex++}`);
-        values.push(updateFields.birthDate);
+        values.push(updateFields.birthdate);
       }
 
       if (updateFields.address !== undefined) {
@@ -127,14 +126,14 @@ export class DelegateRepositoryImpl
         values.push(updateFields.cell);
       }
 
-      if (updateFields.dateOpened !== undefined) {
+      if (updateFields.dateopened !== undefined) {
         updateParts.push(`dateopened = $${paramIndex++}`);
-        values.push(updateFields.dateOpened);
+        values.push(updateFields.dateopened);
       }
 
-      if (updateFields.clientType !== undefined) {
+      if (updateFields.clienttype !== undefined) {
         updateParts.push(`clienttype = $${paramIndex++}`);
-        values.push(updateFields.clientType);
+        values.push(updateFields.clienttype);
       }
 
       if (updateFields.balance !== undefined) {
@@ -142,34 +141,34 @@ export class DelegateRepositoryImpl
         values.push(updateFields.balance);
       }
 
-      if (updateFields.loanStatus !== undefined) {
+      if (updateFields.loanstatus !== undefined) {
         updateParts.push(`loanstatus = $${paramIndex++}`);
-        values.push(updateFields.loanStatus);
+        values.push(updateFields.loanstatus);
       }
 
-      if (updateFields.mevStatus !== undefined) {
+      if (updateFields.mevstatus !== undefined) {
         updateParts.push(`mevstatus = $${paramIndex++}`);
-        values.push(updateFields.mevStatus);
+        values.push(updateFields.mevstatus);
       }
 
-      if (updateFields.hasVoted !== undefined) {
+      if (updateFields.hasvoted !== undefined) {
         updateParts.push(`hasvoted = $${paramIndex++}`);
-        values.push(updateFields.hasVoted);
+        values.push(updateFields.hasvoted);
       }
 
-      if (updateFields.controlNumber !== undefined) {
+      if (updateFields.controlnumber !== undefined) {
         updateParts.push(`controlnumber = $${paramIndex++}`);
-        values.push(updateFields.controlNumber);
+        values.push(updateFields.controlnumber);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -241,25 +240,25 @@ export class DelegateRepositoryImpl
     // Build data query
     const dataQuery = `
       SELECT 
-        d.id AS "id",
-        d.branch AS "branch",
-        d.accountid AS "accountId",
-        d.accountname AS "accountName",
-        d.age AS "age",
-        d.birthdate AS "birthDate",
-        d.address AS "address",
-        d.tell AS "tell",
-        d.cell AS "cell",
-        d.dateopened AS "dateOpened",
-        d.clienttype AS "clientType",
-        d.balance AS "balance",
-        d.loanstatus AS "loanStatus",
-        d.mevstatus AS "mevStatus",
-        d.deletedat AS "deletedAt",
-        d.electionid AS "electionId",
-        e.name AS "election",
-        d.hasvoted AS "hasVoted",
-        d.controlnumber AS "controlNumber"
+        d.id,
+        d.branch,
+        d.accountid,
+        d.accountname,
+        d.age,
+        d.birthdate,
+        d.address,
+        d.tell,
+        d.cell,
+        d.dateopened,
+        d.clienttype,
+        d.balance,
+        d.loanstatus,
+        d.mevstatus,
+        d.deletedat,
+        d.electionid,
+        e.name,
+        d.hasvoted,
+        d.controlnumber,
       FROM delegates d
       INNER JOIN elections e ON d.electionid = e.id
       WHERE ${whereClause}
@@ -311,28 +310,28 @@ export class DelegateRepositoryImpl
     const query = `
       SELECT 
         id,
-        electionid as "electionId",
+        electionid,
         branch,
-        accountid as "accountId",
-        accountname as "accountName",
+        accountid,
+        accountname,
         age,
-        birthdate as "birthDate",
+        birthdate,
         address,
         tell,
         cell,
-        dateopened as "dateOpened",
-        clienttype as "clientType",
-        loanstatus as "loanStatus",
+        dateopened,
+        clienttype,
+        loanstatus,
         balance,
-        mevstatus as "mevStatus",
-        hasvoted as "hasVoted",
-        controlnumber as "controlNumber",
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        mevstatus,
+        hasvoted,
+        controlnumber,
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM delegates
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -354,28 +353,28 @@ export class DelegateRepositoryImpl
     const query = `
       SELECT 
         id,
-          electionid as "electionId",
+        electionid,
         branch,
-        accountid as "accountId",
-        accountname as "accountName",
+        accountid,
+        accountname,
         age,
-        birthdate as "birthDate",
+        birthdate,
         address,
         tell,
         cell,
-        dateopened as "dateOpened",
-        clienttype as "clientType",
-        loanstatus as "loanStatus",
+        dateopened,
+        clienttype,
+        loanstatus,
         balance,
-        mevstatus as "mevStatus",
-        hasvoted as "hasVoted",
-        controlnumber as "controlNumber",
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        mevstatus,
+        hasvoted,
+        controlnumber,
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM delegates
       WHERE controlnumber = $1 AND electionid = $2 AND deletedat IS NULL
       LIMIT 1
@@ -421,27 +420,27 @@ export class DelegateRepositoryImpl
     return new Delegate({
       id: row.id,
       branch: row.branch,
-      electionId: row.electionid,
-      accountId: row.accountid,
-      accountName: row.accountname,
+      electionid: row.electionid,
+      accountid: row.accountid,
+      accountname: row.accountname,
       age: row.age,
       balance: row.balance,
-      loanStatus: row.loanstatus,
-      mevStatus: row.mevstatus,
-      clientType: row.clienttype,
+      loanstatus: row.loanstatus,
+      mevstatus: row.mevstatus,
+      clienttype: row.clienttype,
       address: row.address,
       tell: row.tell,
       cell: row.cell,
-      dateOpened: row.dateopened,
-      birthDate: row.birthdate,
-      hasVoted: row.hasvoted,
-      controlNumber: row.controlnumber,
-      deletedAt: row.deletedat,
-      deletedBy: row.deletedby,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      dateopened: row.dateopened,
+      birthdate: row.birthdate,
+      hasvoted: row.hasvoted,
+      controlnumber: row.controlnumber,
+      deletedat: row.deletedat,
+      deletedby: row.deletedby,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

@@ -41,7 +41,7 @@ export class UpdateApplicationAccessUseCase {
         }
 
         // Update the applicationAccess
-        applicationAccess.update({ desc1: dto.desc1, updatedBy: username });
+        applicationAccess.update({ desc1: dto.desc1, updatedby: username });
 
         // save the updated application access
         const success = await this.applicationAccessRepository.update(
@@ -68,7 +68,7 @@ export class UpdateApplicationAccessUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: username,
         });

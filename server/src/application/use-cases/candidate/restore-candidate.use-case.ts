@@ -39,12 +39,12 @@ export class RestoreCandidateUseCase {
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // Can only restore deleted candidate if election is scheduled
@@ -75,7 +75,7 @@ export class RestoreCandidateUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_CANDIDATE,
           details: JSON.stringify({
             id,
-            displayName: candidate.displayName,
+            displayName: candidate.displayname,
             explanation: `Candidate with ID : ${id} restored by USER : ${userName}`,
             restoredBy: userName,
             restoredAt: getPHDateTime(),

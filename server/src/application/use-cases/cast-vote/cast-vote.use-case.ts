@@ -67,15 +67,13 @@ export class CastVoteUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
 
-        console.log('election', election);
-
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
 
@@ -154,13 +152,13 @@ export class CastVoteUseCase {
           for (const candidate of candidateEntities) {
             // Cast the vote
             const newCastVote = new CastVote({
-              electionId: activeElection.electionId,
-              ballotNumber: ballot.ballotNumber,
+              electionid: activeElection.electionid,
+              ballotnumber: ballot.ballotnumber,
               precinct: precinct,
-              candidateId: candidate.id,
-              positionId: candidate.positionId,
-              districtId: candidate.districtId,
-              dateTimeCast: getPHDateTime(),
+              candidateid: candidate.id,
+              positionid: candidate.positionid,
+              districtid: candidate.districtid,
+              datetimecast: getPHDateTime(),
             });
             const castVote = await this.castVoteRepository.castVote(
               newCastVote,
@@ -178,9 +176,10 @@ export class CastVoteUseCase {
               details: JSON.stringify({
                 id: castVote.id,
                 election: election.name,
-                ballotNumber: castVote.ballotNumber,
-                candidate: candidate.displayName,
-                dateTimeCast: getPHDateTime(castVote.dateTimeCast),
+                ballotNumber: castVote.ballotnumber,
+                candidate: candidate.displayname,
+                datetimecast: getPHDateTime(castVote.datetimecast),
+                precinct: precinct,
               }),
               username: username,
             });

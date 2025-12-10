@@ -5,7 +5,6 @@ import { CandidateRepository } from '@domains/repositories/candidate.repository'
 import { Candidate } from '@domain/models/candidate.model';
 import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
@@ -37,13 +36,13 @@ export class CandidateRepositoryImpl
       `;
 
       const result = await manager.query(query, [
-        candidate.electionId,
-        candidate.delegateId,
-        candidate.positionId,
-        candidate.districtId,
-        candidate.displayName,
-        candidate.createdBy || null,
-        candidate.createdAt || new Date(),
+        candidate.electionid,
+        candidate.delegateid,
+        candidate.positionid,
+        candidate.districtid,
+        candidate.displayname,
+        candidate.createdby || null,
+        candidate.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -72,29 +71,29 @@ export class CandidateRepositoryImpl
       const values: any[] = [];
       let paramIndex = 1;
 
-      if (updateFields.displayName !== undefined) {
+      if (updateFields.displayname !== undefined) {
         updateParts.push(`displayname = $${paramIndex++}`);
-        values.push(updateFields.displayName);
+        values.push(updateFields.displayname);
       }
 
-      if (updateFields.positionId !== undefined) {
+      if (updateFields.positionid !== undefined) {
         updateParts.push(`positionid = $${paramIndex++}`);
-        values.push(updateFields.positionId);
+        values.push(updateFields.positionid);
       }
 
-      if (updateFields.districtId !== undefined) {
+      if (updateFields.districtid !== undefined) {
         updateParts.push(`districtid = $${paramIndex++}`);
-        values.push(updateFields.districtId);
+        values.push(updateFields.districtid);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -126,16 +125,16 @@ export class CandidateRepositoryImpl
     const query = `
       SELECT 
         c.id as "id",
-        c.electionid as "electionId",
-        c.positionid as "positionId",
-        c.districtid as "districtId",
-        c.delegateid as "delegateId",
-        c.displayname as "displayName",
-        d.accountid as "accountId",
-        d.accountname as "accountName",
-        p.desc1 AS "position",
-        dist.desc1 AS "district",
-        e.name AS "election"
+        c.electionid,
+        c.positionid,
+        c.districtid,
+        c.delegateid,
+        c.displayname,
+        d.accountid,
+        d.accountname,
+        p.desc1,
+        dist.desc1,
+        e.name,
       FROM candidates c
       LEFT JOIN delegates d ON c.delegateid = d.id
       LEFT JOIN positions p ON c.positionid = p.id
@@ -149,8 +148,6 @@ export class CandidateRepositoryImpl
     if (!row) {
       return null;
     }
-
-    console.log('row', row);
 
     return row;
   }
@@ -195,14 +192,14 @@ export class CandidateRepositoryImpl
     // Build data query
     const dataQuery = `
       SELECT 
-        c.id as "id",
-        c.delegateid as "delegateId",
-        c.displayname as "displayName",
-        d.accountid as "accountId",
-        d.accountname as "accountName",
-        p.desc1 AS "position",
-        dist.desc1 AS "district",
-        e.name AS "election"
+        c.id,
+        c.delegateid,
+        c.displayname,
+        d.accountid,
+        d.accountname,
+        p.desc1,
+        dist.desc1,
+        e.name,
       FROM candidates c
       LEFT JOIN delegates d ON c.delegateid = d.id
       LEFT JOIN positions p ON c.positionid = p.id
@@ -270,11 +267,11 @@ export class CandidateRepositoryImpl
   ): Promise<any[]> {
     const query = `
       SELECT 
-        p.desc1 AS "position",
-        p.maxcandidates AS "positionMaxCandidates",
-        p.termlimit AS "positionTermLimit",
-        c.id as "candidateId",
-        c.displayname as "displayName"
+        p.desc1,
+        p.maxcandidates,
+        p.termlimit,
+        c.id,
+        c.displayname,
       FROM candidates c
       LEFT JOIN positions p ON c.positionid = p.id
       WHERE c.deletedat IS NULL AND c.electionid = $1
@@ -289,17 +286,17 @@ export class CandidateRepositoryImpl
   private rowToModel(row: any): Candidate {
     return new Candidate({
       id: row.id,
-      electionId: row.electionid,
-      positionId: row.positionid,
-      districtId: row.districtid,
-      delegateId: row.delegateid,
-      displayName: row.displayname,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      electionid: row.electionid,
+      positionid: row.positionid,
+      districtid: row.districtid,
+      delegateid: row.delegateid,
+      displayname: row.displayname,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

@@ -39,12 +39,12 @@ export class ArchiveDistrictUseCase {
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -78,7 +78,7 @@ export class ArchiveDistrictUseCase {
             desc1: district.desc1,
             explanation: `District with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: getPHDateTime(district.deletedAt),
+            archivedAt: getPHDateTime(district.deletedat),
           }),
           username: userName,
         });

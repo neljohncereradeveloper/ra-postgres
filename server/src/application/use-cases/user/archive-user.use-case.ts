@@ -43,10 +43,10 @@ export class ArchiveUserUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
             id,
-            userName: user.userName,
+            userName: user.username,
             explanation: `User with ID : ${id} archived by USER : ${userName}`,
             archivedBy: userName,
-            archivedAt: getPHDateTime(user.deletedAt),
+            archivedAt: getPHDateTime(user.deletedat),
           }),
           username: userName,
         });

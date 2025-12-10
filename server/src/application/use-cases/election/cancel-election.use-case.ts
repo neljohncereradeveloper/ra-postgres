@@ -40,12 +40,12 @@ export class CancelElectionUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found`,
+            `Election with ID ${activeElection.electionid} not found`,
           );
         }
 
@@ -54,7 +54,7 @@ export class CancelElectionUseCase {
 
         // update the election in the database
         const success = await this.electionRepository.update(
-          activeElection.electionId,
+          activeElection.electionid,
           election,
           manager,
         );

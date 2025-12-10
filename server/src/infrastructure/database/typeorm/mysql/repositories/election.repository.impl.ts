@@ -41,12 +41,12 @@ export class ElectionRepositoryImpl
         election.desc1 || null,
         election.address,
         election.date || null,
-        election.startTime || null,
-        election.endTime || null,
-        election.maxAttendees || null,
-        election.electionStatus || ElectionStatus.SCHEDULED,
-        election.createdBy || null,
-        election.createdAt || new Date(),
+        election.starttime || null,
+        election.endtime || null,
+        election.maxattendees || null,
+        election.electionstatus || ElectionStatus.SCHEDULED,
+        election.createdby || null,
+        election.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -92,34 +92,34 @@ export class ElectionRepositoryImpl
         values.push(updateFields.date);
       }
 
-      if (updateFields.startTime !== undefined) {
+      if (updateFields.starttime !== undefined) {
         updateParts.push(`starttime = $${paramIndex++}`);
-        values.push(updateFields.startTime);
+        values.push(updateFields.starttime);
       }
 
-      if (updateFields.endTime !== undefined) {
+      if (updateFields.endtime !== undefined) {
         updateParts.push(`endtime = $${paramIndex++}`);
-        values.push(updateFields.endTime);
+        values.push(updateFields.endtime);
       }
 
-      if (updateFields.maxAttendees !== undefined) {
+      if (updateFields.maxattendees !== undefined) {
         updateParts.push(`maxattendees = $${paramIndex++}`);
-        values.push(updateFields.maxAttendees);
+        values.push(updateFields.maxattendees);
       }
 
-      if (updateFields.electionStatus !== undefined) {
+      if (updateFields.electionstatus !== undefined) {
         updateParts.push(`electionstatus = $${paramIndex++}`);
-        values.push(updateFields.electionStatus);
+        values.push(updateFields.electionstatus);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -183,11 +183,11 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as "startTime",
-        endtime as "endTime",
-        maxattendees as "maxAttendees",
-        electionstatus as "electionStatus",
-        deletedat as "deletedAt"
+        starttime,
+        endtime,
+        maxattendees,
+        electionstatus,
+        deletedat
       FROM elections
       ${whereClause}
       ORDER BY id DESC
@@ -248,16 +248,16 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as "startTime",
-        endtime as "endTime",
-        maxattendees as "maxAttendees",
-        electionstatus as "electionStatus",
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        starttime,
+        endtime,
+        maxattendees,
+        electionstatus,
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM elections
       WHERE id = $1 AND deletedat IS NULL
     `;
@@ -279,16 +279,16 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as "startTime",
-        endtime as "endTime",
-        maxattendees as "maxAttendees",
-        electionstatus as "electionStatus",
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        starttime,
+        endtime,
+        maxattendees,
+        electionstatus,
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM elections
       WHERE deletedat IS NULL
       ORDER BY name ASC
@@ -329,16 +329,16 @@ export class ElectionRepositoryImpl
         desc1,
         address,
         date,
-        starttime as "startTime",
-        endtime as "endTime",
-        maxattendees as "maxAttendees",
-        electionstatus as "electionStatus",
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        starttime,
+        endtime,
+        maxattendees,
+        electionstatus,
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat
       FROM elections
       WHERE name = $1 AND deletedat IS NULL
       LIMIT 1
@@ -361,16 +361,16 @@ export class ElectionRepositoryImpl
       desc1: row.desc1,
       address: row.address,
       date: row.date,
-      startTime: row.starttime,
-      endTime: row.endtime,
-      maxAttendees: row.maxattendees,
-      electionStatus: row.electionstatus,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      starttime: row.starttime,
+      endtime: row.endtime,
+      maxattendees: row.maxattendees,
+      electionstatus: row.electionstatus,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

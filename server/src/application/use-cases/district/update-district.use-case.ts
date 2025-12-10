@@ -46,12 +46,12 @@ export class UpdateDistrictUseCase {
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
@@ -66,7 +66,7 @@ export class UpdateDistrictUseCase {
         // use domain model method to update (encapsulates business logic and validation)
         district.update({
           desc1: dto.desc1,
-          updatedBy: userName,
+          updatedby: userName,
         });
 
         // update the district in the database
@@ -93,7 +93,7 @@ export class UpdateDistrictUseCase {
             id: updateResult.id,
             desc1: updateResult.desc1,
             updatedBy: userName,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: userName,
         });

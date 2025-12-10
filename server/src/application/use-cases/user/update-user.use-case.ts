@@ -56,7 +56,7 @@ export class UpdateUserUseCase {
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         // Can only UPDATE user if election is schedule
@@ -73,7 +73,9 @@ export class UpdateUserUseCase {
         /** validate roles if exist */
         const userRolesPromises = dto.userRoles.map(async (role) => {
           // validate role
-          const userRole = await this.userRoleRepository.findByDesc(role.trim());
+          const userRole = await this.userRoleRepository.findByDesc(
+            role.trim(),
+          );
           if (!userRole) {
             throw new NotFoundException(`Role ${role} not found`);
           }
@@ -106,9 +108,9 @@ export class UpdateUserUseCase {
         userResult.update({
           precinct: dto.precinct,
           watcher: dto.watcher,
-          applicationAccess: dto.applicationAccess,
-          userRoles: dto.userRoles,
-          updatedBy: username,
+          applicationaccess: dto.applicationAccess,
+          userroles: dto.userRoles,
+          updatedby: username,
         });
         const updateSuccessfull = await this.userRepository.update(
           id,
@@ -128,13 +130,13 @@ export class UpdateUserUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
             id: updateResult.id,
-            userName: updateResult.userName,
+            userName: updateResult.username,
             precinct: updateResult.precinct,
             watcher: updateResult.watcher,
-            applicationAccess: updateResult.applicationAccess,
-            userRoles: updateResult.userRoles,
+            applicationAccess: updateResult.applicationaccess,
+            userRoles: updateResult.userroles,
             updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: username,
         });

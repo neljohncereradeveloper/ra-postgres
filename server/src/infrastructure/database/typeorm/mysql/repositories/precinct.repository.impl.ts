@@ -5,7 +5,6 @@ import { calculatePagination } from '@shared/utils/pagination.util';
 import { PrecinctRepository } from '@domains/repositories/precinct.repository';
 import { Precinct } from '@domain/models/precinct.model';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
@@ -26,8 +25,8 @@ export class PrecinctRepositoryImpl
 
       const result = await manager.query(query, [
         precinct.desc1,
-        precinct.createdBy || null,
-        precinct.createdAt || new Date(),
+        precinct.createdby || null,
+        precinct.createdat || new Date(),
       ]);
 
       const row = getFirstRow(result);
@@ -58,24 +57,24 @@ export class PrecinctRepositoryImpl
         values.push(updateFields.desc1);
       }
 
-      if (updateFields.deletedAt !== undefined) {
+      if (updateFields.deletedat !== undefined) {
         updateParts.push(`deletedat = $${paramIndex++}`);
-        values.push(updateFields.deletedAt);
+        values.push(updateFields.deletedat);
       }
 
-      if (updateFields.deletedBy !== undefined) {
+      if (updateFields.deletedby !== undefined) {
         updateParts.push(`deletedby = $${paramIndex++}`);
-        values.push(updateFields.deletedBy);
+        values.push(updateFields.deletedby);
       }
 
-      if (updateFields.updatedBy !== undefined) {
+      if (updateFields.updatedby !== undefined) {
         updateParts.push(`updatedby = $${paramIndex++}`);
-        values.push(updateFields.updatedBy);
+        values.push(updateFields.updatedby);
       }
 
-      if (updateFields.updatedAt !== undefined) {
+      if (updateFields.updatedat !== undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
-        values.push(updateFields.updatedAt);
+        values.push(updateFields.updatedat);
       }
 
       if (updateParts.length === 0) {
@@ -83,7 +82,7 @@ export class PrecinctRepositoryImpl
       }
 
       // Always update updatedat if not explicitly set
-      if (updateFields.updatedAt === undefined) {
+      if (updateFields.updatedat === undefined) {
         updateParts.push(`updatedat = $${paramIndex++}`);
         values.push(new Date());
       }
@@ -141,12 +140,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM precincts
       ${whereClause}
       ORDER BY id DESC
@@ -194,12 +193,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM precincts
       WHERE id = $1
     `;
@@ -221,12 +220,12 @@ export class PrecinctRepositoryImpl
       SELECT 
         id,
         desc1,
-        deletedby as "deletedBy",
-        deletedat as "deletedAt",
-        createdby as "createdBy",
-        createdat as "createdAt",
-        updatedby as "updatedBy",
-        updatedat as "updatedAt"
+        deletedby,
+        deletedat,
+        createdby,
+        createdat,
+        updatedby,
+        updatedat,
       FROM precincts
       WHERE desc1 = $1 AND deletedat IS NULL
       LIMIT 1
@@ -260,12 +259,12 @@ export class PrecinctRepositoryImpl
     return new Precinct({
       id: row.id,
       desc1: row.desc1,
-      deletedBy: row.deletedby,
-      deletedAt: row.deletedat,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      deletedby: row.deletedby,
+      deletedat: row.deletedat,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

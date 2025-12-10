@@ -54,12 +54,12 @@ export class UpdateCandidateUseCase {
         }
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionId} not found.`,
+            `Election with ID ${activeElection.electionid} not found.`,
           );
         }
         // Can only update candidate if election is scheduled
@@ -98,10 +98,10 @@ export class UpdateCandidateUseCase {
         }
 
         candidate.update({
-          displayName: dto.displayName,
-          updatedBy: userName,
-          positionId: position.id,
-          districtId: district.id,
+          displayname: dto.displayName,
+          updatedby: userName,
+          positionid: position.id,
+          districtid: district.id,
         });
 
         // update the candidate in the database
@@ -127,12 +127,12 @@ export class UpdateCandidateUseCase {
           details: JSON.stringify({
             id: updateResult.id,
             election: election.name,
-            displayName: updateResult.displayName,
+            displayName: updateResult.displayname,
             position: position.desc1,
             district: district.desc1,
-            delegate: delegate.accountName,
+            delegate: delegate.accountname,
             updatedBy: userName,
-            updatedAt: getPHDateTime(updateResult.updatedAt),
+            updatedAt: getPHDateTime(updateResult.updatedat),
           }),
           username: userName,
         });

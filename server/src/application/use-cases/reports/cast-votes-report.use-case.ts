@@ -41,14 +41,14 @@ export class CastVoteReportUseCase {
           throw new BadRequestException('No Active election');
         }
         const election = await this.electionRepository.findById(
-          activeElection.electionId,
+          activeElection.electionid,
           manager,
         );
 
         // Call the repository method to get filtered data
         const result: any[] =
           await this.reportsRepository.electionCastVoteReport(
-            activeElection.electionId,
+            activeElection.electionid,
             manager,
           );
 

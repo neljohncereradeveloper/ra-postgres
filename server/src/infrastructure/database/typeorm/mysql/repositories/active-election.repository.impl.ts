@@ -136,11 +136,11 @@ export class ActiveElectionRepositoryImpl
   private toModel(row: any): ActiveElection {
     return new ActiveElection({
       id: row.id,
-      electionId: row.electionid,
-      createdBy: row.createdby,
-      createdAt: row.createdat,
-      updatedBy: row.updatedby,
-      updatedAt: row.updatedat,
+      electionid: row.electionid,
+      createdby: row.createdby,
+      createdat: row.createdat,
+      updatedby: row.updatedby,
+      updatedat: row.updatedat,
     });
   }
 }

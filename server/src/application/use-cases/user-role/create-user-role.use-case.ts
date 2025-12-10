@@ -32,7 +32,7 @@ export class CreateUserRoleUseCase {
         // Create the userRole
         const userRole = UserRole.create({
           desc1: dto.desc1,
-          createdBy: username,
+          createdby: username,
         });
         const createdUserRole = await this.userRoleRepository.create(
           userRole,
@@ -51,7 +51,7 @@ export class CreateUserRoleUseCase {
             id: createdUserRole.id,
             desc1: createdUserRole.desc1,
             createdBy: username,
-            createdAt: getPHDateTime(createdUserRole.createdAt),
+            createdAt: getPHDateTime(createdUserRole.createdat),
           }),
           username: username,
         });
