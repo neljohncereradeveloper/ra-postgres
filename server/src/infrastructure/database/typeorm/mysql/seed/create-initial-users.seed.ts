@@ -62,28 +62,30 @@ export class SeedUsers {
     const adminUserData = {
       watcher: 'default',
       precinct: 'default',
-      applicationaccess: [
+      application_access: [
         adminModuleApplicationAccess.desc1,
         electionModuleApplicationAccess.desc1,
       ],
-      userroles: [adminRole.desc1],
-      username: 'admin',
+      user_roles: [adminRole.desc1],
+      user_name: 'admin',
       password: hashPassword,
-      createdby: 'system',
-      createdat: getPHDateTime(),
+      created_by: 'system',
+      created_at: getPHDateTime(),
     };
     // Check if the super admin user already exists
     const existingAdmin = await userRepository.findOneBy({
-      username: adminUserData.username,
+      user_name: adminUserData.user_name,
     });
     if (!existingAdmin) {
       const newAdmin = userRepository.create(adminUserData);
       await userRepository.save(newAdmin);
       this.logger.log(
-        `Admin user '${adminUserData.username}' created successfully.`,
+        `Admin user '${adminUserData.user_name}' created successfully.`,
       );
     } else {
-      this.logger.log(`Admin user '${adminUserData.username}' already exists.`);
+      this.logger.log(
+        `Admin user '${adminUserData.user_name}' already exists.`,
+      );
     }
   }
 }
