@@ -173,7 +173,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         application_access,
         user_roles,
         user_name,
-        deleted_at,
+        deleted_at
       FROM users
       ${whereClause}
       ORDER BY id DESC
@@ -234,7 +234,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM users
       WHERE id = $1
     `;

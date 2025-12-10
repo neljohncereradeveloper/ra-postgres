@@ -167,7 +167,7 @@ export class PositionRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at  
       FROM positions
       ${whereClause}
       ORDER BY id DESC
@@ -226,7 +226,7 @@ export class PositionRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at  
       FROM positions
       WHERE id = $1
     `;

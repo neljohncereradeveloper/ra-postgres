@@ -107,7 +107,7 @@ export class DelegateRepositoryImpl
       }
 
       if (update_fields.birth_date !== undefined) {
-        updateParts.push(`birthdate = $${paramIndex++}`);
+        updateParts.push(`birth_date = $${paramIndex++}`);
         values.push(update_fields.birth_date);
       }
 
@@ -258,7 +258,7 @@ export class DelegateRepositoryImpl
         d.election_id,
         e.name,
         d.has_voted,
-        d.control_number,
+        d.control_number
       FROM delegates d
       INNER JOIN elections e ON d.election_id = e.id
       WHERE ${whereClause}
@@ -331,7 +331,7 @@ export class DelegateRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM delegates
       WHERE id = $1
     `;
@@ -374,7 +374,7 @@ export class DelegateRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM delegates
       WHERE control_number = $1 AND election_id = $2 AND deleted_at IS NULL
       LIMIT 1
