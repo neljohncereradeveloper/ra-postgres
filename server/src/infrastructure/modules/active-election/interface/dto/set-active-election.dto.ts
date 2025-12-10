@@ -5,6 +5,5 @@ export class SetActiveElectionDto {
   @toLowerCase
   @IsNotEmpty()
   @IsString()
-  electionName: string;
+  election_name: string;
 }
-

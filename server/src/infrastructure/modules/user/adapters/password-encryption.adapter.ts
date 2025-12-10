@@ -14,9 +14,9 @@ export class BcryptPasswordEncryptionAdapter implements PasswordEncryptionPort {
     }
   }
 
-  async compare(password: string, hashedPassword: string): Promise<boolean> {
+  async compare(password: string, hashed_password: string): Promise<boolean> {
     try {
-      return await bcrypt.compare(password, hashedPassword);
+      return await bcrypt.compare(password, hashed_password);
     } catch (error) {
       console.error('Error during password comparison:', error);
       throw new InternalServerErrorException('Password verification failed');

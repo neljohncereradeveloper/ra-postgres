@@ -50,10 +50,10 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
+    const user_name = req.user.user_name as string;
     return this.createApplicationAccessUseCase.execute(
       createApplicationAccessDto,
-      userName,
+      user_name,
     );
   }
 
@@ -63,7 +63,7 @@ export class ApplicationAccessController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isArchived') isArchived: boolean,
+    @Query('is_archived') is_archived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -82,7 +82,7 @@ export class ApplicationAccessController {
       term || '',
       parsedPage,
       parsedLimit,
-      isArchived,
+      is_archived,
     );
   }
 
@@ -99,8 +99,8 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.softDeleteApplicationAccessUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.softDeleteApplicationAccessUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -110,8 +110,8 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.restoreDeleteApplicationAccessUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.restoreDeleteApplicationAccessUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -122,11 +122,11 @@ export class ApplicationAccessController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
+    const user_name = req.user.user_name as string;
     return this.updateApplicationAccessUseCase.execute(
       id,
       updateApplicationAccessDto,
-      userName,
+      user_name,
     );
   }
 }

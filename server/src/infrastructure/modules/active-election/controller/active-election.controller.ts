@@ -37,10 +37,10 @@ export class ActiveElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
+    const user_name = req.user.user_name as string;
     return this.setActiveElectionUseCase.execute(
-      setActiveElectionDto.electionName,
-      userName,
+      setActiveElectionDto.election_name,
+      user_name,
     );
   }
 
@@ -49,8 +49,8 @@ export class ActiveElectionController {
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Patch('reset')
   async reset(@Request() req) {
-    const userName = req.user.userName as string;
-    return this.resetActiveElectionUseCase.execute(userName);
+    const user_name = req.user.user_name as string;
+    return this.resetActiveElectionUseCase.execute(user_name);
   }
 
   @Version('1')

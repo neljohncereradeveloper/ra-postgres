@@ -35,7 +35,7 @@ export class CreateUserDto {
       'Username should be at least 3 characters and maximum of 30 characters',
   })
   @IsNotEmpty({ message: 'Username should not be empty' })
-  userName: string;
+  user_name: string;
 
   @IsString()
   @Length(3, 50, {
@@ -50,7 +50,7 @@ export class CreateUserDto {
   @ArrayMinSize(1, { message: 'User roles must contain at least one role' })
   @IsString({ each: true, message: 'Each user role must be a string' })
   @IsNotEmpty({ each: true, message: 'User roles should not be empty' })
-  userRoles: string[];
+  user_roles: string[];
 
   @toLowerCaseArray
   @IsArray({ message: 'Application Access must be an array' })
@@ -59,5 +59,5 @@ export class CreateUserDto {
   })
   @IsString({ each: true, message: 'Each application access must be a string' })
   @IsNotEmpty({ each: true, message: 'Application Access should not be empty' })
-  applicationAccess: string[];
+  application_access: string[];
 }

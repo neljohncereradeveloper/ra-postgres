@@ -26,8 +26,8 @@ export class ReportsController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.castVoteReportUseCase.execute(userName);
+    const user_name = req.user.user_name as string;
+    return this.castVoteReportUseCase.execute(user_name);
   }
 
   @Version('1') // API versioning
@@ -38,7 +38,7 @@ export class ReportsController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.candidatesReportUseCase.execute(userName);
+    const user_name = req.user.user_name as string;
+    return this.candidatesReportUseCase.execute(user_name);
   }
 }

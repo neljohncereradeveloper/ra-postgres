@@ -20,19 +20,19 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   /**
    * Validates a user's credentials.
    *
-   * @param username - The username provided by the user.
+   * @param user_name - The username provided by the user.
    * @param password - The password provided by the user.
    * @returns The validated user object.
    * @throws NotFoundException if the user cannot be authenticated.
    */
-  async validate(username: string, password: string): Promise<any> {
+  async validate(user_name: string, password: string): Promise<any> {
     // console.log('Calls `LocalStrategy.validate`');
     // calls authService.validateUser
-    const user = await this.authPort.validateUser(username, password);
+    const user = await this.authPort.validateUser(user_name, password);
     // validate user
     if (!user) {
       // log
-      this.logger.log(`Invalid Credentials [ user:${username} ].`);
+      this.logger.log(`Invalid Credentials [ user:${user_name} ].`);
       throw new NotFoundException({
         success: false,
         message: 'Invalid Credentials.',

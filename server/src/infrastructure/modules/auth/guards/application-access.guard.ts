@@ -29,12 +29,12 @@ export class ApplicationAccessGuard implements CanActivate {
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // extract applicationAccess from route metadata.
-    const requiredApplicationAccess = this.reflector.getAllAndOverride<
+    const required_application_access = this.reflector.getAllAndOverride<
       AuthApplicationAccessEnum[]
     >('applicationAccess', [context.getHandler(), context.getClass()]);
 
     // allowing access routes without applicationAccess
-    if (!requiredApplicationAccess) {
+    if (!required_application_access) {
       return true;
     }
 
@@ -49,13 +49,11 @@ export class ApplicationAccessGuard implements CanActivate {
 
     // validate token
     const user: User = await this.authPort.jwtVerify(token);
-    const _applicationAccess = user.applicationAccess;
-
-    console.log('user', user);
+    const _application_access = user.application_access;
 
     // validate applicationAccess if match for the route required applicationAccess
-    const isAuthorized = requiredApplicationAccess.some((applicationAccess) =>
-      _applicationAccess.includes(applicationAccess),
+    const isAuthorized = required_application_access.some(
+      (application_access) => _application_access.includes(application_access),
     );
 
     // throw error if not authorized

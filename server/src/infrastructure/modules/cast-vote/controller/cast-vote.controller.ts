@@ -17,7 +17,6 @@ import {
 import { AuthorizeApplicationAccess } from '@infrastructure/modules/auth/decorators/applicationaccess.decorator';
 import { CastVoteDto } from '../interface/dto/cast-vote.dto';
 import { CastVoteUseCase } from '@application/use-cases/cast-vote/cast-vote.use-case';
-import { User } from '@domain/models/user.model';
 import { ReprintCastVoteUseCase } from '@application/use-cases/cast-vote/reprint-case-vote.use-case';
 
 @Controller('cast-vote')
@@ -37,12 +36,11 @@ export class CastVoteController {
     @Request()
     req,
   ) {
-    console.log('req.user', req.user);
-    const userName = req.user.userName as string;
+    const user_name = req.user.user_name as string;
     const precinct = req.user.precinct as string;
     return this.castVoteUseCase.execute(
       castVoteDto,
-      userName,
+      user_name,
       precinct as string,
     );
   }
@@ -52,11 +50,11 @@ export class CastVoteController {
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Get('reprint')
   async reprintCastVote(
-    @Query('controlNumber') controlNumber: string,
+    @Query('control_number') control_number: string,
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.reprintCastVoteUseCase.execute(controlNumber, userName);
+    const user_name = req.user.user_name as string;
+    return this.reprintCastVoteUseCase.execute(control_number, user_name);
   }
 }

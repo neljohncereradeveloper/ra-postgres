@@ -32,15 +32,15 @@ export class UpdateElectionDto {
 
   @IsNumber({}, { message: 'Maximum attendees must be a number' })
   @Min(1, { message: 'Maximum attendees must be greater than zero' })
-  maxAttendees: number;
+  max_attendees: number;
 
   @ValidateIf((o) => o.startTime !== null)
   @Transform(({ value }) => (value ? new Date(value) : null))
   @IsDate({ message: 'Start time must be a valid date' })
-  startTime: Date | null;
+  start_time: Date | null;
 
   @ValidateIf((o) => o.endTime !== null)
   @Transform(({ value }) => (value ? new Date(value) : null))
   @IsDate({ message: 'End time must be a valid date' })
-  endTime: Date | null;
+  end_time: Date | null;
 }

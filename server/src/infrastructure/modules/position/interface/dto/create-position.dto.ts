@@ -9,10 +9,10 @@ export class CreatePositionDto {
 
   @IsNotEmpty()
   @IsNumber()
-  maxCandidates: number;
+  max_candidates: number;
 
   @toLowerCase
   @IsNotEmpty()
   @IsString()
-  termLimit: string;
+  term_limit: string;
 }

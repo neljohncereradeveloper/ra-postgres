@@ -17,7 +17,7 @@ export class CastVoteDto {
   @toLowerCase
   @IsNotEmpty()
   @IsString()
-  controlNumber: string;
+  control_number: string;
 
   @IsNotEmpty()
   @IsArray()

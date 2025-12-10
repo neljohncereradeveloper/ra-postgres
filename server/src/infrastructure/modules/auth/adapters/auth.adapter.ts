@@ -30,20 +30,20 @@ export class AuthAdapter implements AuthPort {
    * proccess 1
    * validates a user's credentials
    *
-   * @param username - user username
+   * @param user_name - user username
    * @param password - user password
    * @returns user
    */
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(user_name: string, password: string): Promise<any> {
     // find user by username
-    const user = await this.userRepository.findByUserName(username);
+    const user = await this.userRepository.findByUserName(user_name);
 
     if (!user) {
       throw new BadRequestException('Invalid credentials.');
     }
 
     // if account isdisable throw error
-    if (user?.deletedAt) {
+    if (user?.deleted_at) {
       throw new BadRequestException('Account deleted.');
     }
 
@@ -58,9 +58,9 @@ export class AuthAdapter implements AuthPort {
         // return user
         return {
           id: user.id,
-          userName: user.userName,
-          userRoles: user.userRoles,
-          applicationAccess: user.applicationAccess,
+          user_name: user.user_name,
+          user_roles: user.user_roles,
+          application_access: user.application_access,
           precinct: user.precinct,
         };
       }
@@ -78,10 +78,10 @@ export class AuthAdapter implements AuthPort {
    */
   login(user: User) {
     const payload = {
-      name: user.userName,
+      name: user.user_name,
       sub: user.id,
-      userRoles: user.userRoles,
-      applicationAccess: user.applicationAccess,
+      user_roles: user.user_roles,
+      application_access: user.application_access,
       precinct: user.precinct,
     };
     const token = this.jwtService.sign(payload);

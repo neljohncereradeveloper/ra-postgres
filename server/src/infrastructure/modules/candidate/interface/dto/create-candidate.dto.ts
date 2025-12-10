@@ -4,7 +4,7 @@ import { toLowerCase } from '../../../../../shared/utils/dto-transformers.util';
 export class CreateCandidateDto {
   @IsNotEmpty()
   @IsNumber()
-  delegateId: number;
+  delegate_id: number;
 
   @toLowerCase
   @IsNotEmpty()
@@ -19,5 +19,5 @@ export class CreateCandidateDto {
   @toLowerCase
   @IsNotEmpty()
   @IsString()
-  displayName: string;
+  display_name: string;
 }

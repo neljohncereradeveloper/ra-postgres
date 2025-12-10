@@ -29,13 +29,12 @@ export class UserRolesGuard implements CanActivate {
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // extract roles from route metadata.
-    const requiredRoles = this.reflector.getAllAndOverride<AuthUserRolesEnum[]>(
-      'roles',
-      [context.getHandler(), context.getClass()],
-    );
+    const required_roles = this.reflector.getAllAndOverride<
+      AuthUserRolesEnum[]
+    >('roles', [context.getHandler(), context.getClass()]);
 
     // allowing access routes without roles
-    if (!requiredRoles) {
+    if (!required_roles) {
       return true;
     }
 
@@ -50,12 +49,12 @@ export class UserRolesGuard implements CanActivate {
 
     // validate token
     const user: User = await this.authPort.jwtVerify(token);
-    const _roles = user.userRoles;
-
-    console.log('user', user);
+    const _user_roles = user.user_roles;
 
     // validate roles if match for the route required role
-    const isAuthorized = requiredRoles.some((role) => _roles.includes(role));
+    const isAuthorized = required_roles.some((user_role) =>
+      _user_roles.includes(user_role),
+    );
 
     // console.log('isAuthorized user : ', isAuthorized);
     // throw error if not authorized

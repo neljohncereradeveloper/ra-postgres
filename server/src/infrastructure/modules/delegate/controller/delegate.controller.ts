@@ -42,8 +42,8 @@ export class DelegateController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
-    const userName = req.user.userName as string;
-    return await this.uploadDelegatesFileUseCase.execute(file, userName);
+    const user_name = req.user.user_name as string;
+    return await this.uploadDelegatesFileUseCase.execute(file, user_name);
   }
 
   @Version('1') // API versioning
@@ -54,7 +54,7 @@ export class DelegateController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isArchived') isArchived: boolean,
+    @Query('is_archived') is_archived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -73,17 +73,17 @@ export class DelegateController {
       term || '',
       parsedPage,
       parsedLimit,
-      isArchived,
+      is_archived,
     );
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin, AuthUserRolesEnum.Precinct)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
-  @Get('control-number/:controlNumber')
-  async findByControlNumber(@Param('controlNumber') controlNumber: string) {
+  @Get('control-number/:control_number')
+  async findByControlNumber(@Param('control_number') control_number: string) {
     return await this.findDelegatesWithElectionIdAndControlNumberUseCase.execute(
-      controlNumber,
+      control_number,
     );
   }
 }

@@ -49,8 +49,8 @@ export class CandidateController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.createCandidateUseCase.execute(createCandidateDto, userName);
+    const user_name = req.user.user_name as string;
+    return this.createCandidateUseCase.execute(createCandidateDto, user_name);
   }
 
   @Version('1') // API versioning
@@ -61,7 +61,7 @@ export class CandidateController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isArchived') isArchived: boolean,
+    @Query('is_archived') is_archived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -80,7 +80,7 @@ export class CandidateController {
       term || '',
       parsedPage,
       parsedLimit,
-      isArchived,
+      is_archived,
     );
   }
 
@@ -102,8 +102,8 @@ export class CandidateController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.softDeleteCandidateUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.softDeleteCandidateUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -115,8 +115,8 @@ export class CandidateController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.restoreDeleteCandidateUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.restoreDeleteCandidateUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -129,11 +129,11 @@ export class CandidateController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
+    const user_name = req.user.user_name as string;
     return this.updateCandidateUseCase.execute(
       id,
       updateCandidateDto,
-      userName,
+      user_name,
     );
   }
 }

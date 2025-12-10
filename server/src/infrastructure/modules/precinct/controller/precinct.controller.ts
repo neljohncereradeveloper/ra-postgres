@@ -50,8 +50,8 @@ export class PrecinctController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.createPrecinctUseCase.execute(createPrecinctDto, userName);
+    const user_name = req.user.user_name as string;
+    return this.createPrecinctUseCase.execute(createPrecinctDto, user_name);
   }
 
   @Version('1') // API versioning
@@ -62,7 +62,7 @@ export class PrecinctController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isArchived') isArchived: boolean,
+    @Query('is_archived') is_archived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -81,7 +81,7 @@ export class PrecinctController {
       term || '',
       parsedPage,
       parsedLimit,
-      isArchived,
+      is_archived,
     );
   }
 
@@ -102,8 +102,8 @@ export class PrecinctController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.softDeletePrecinctUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.softDeletePrecinctUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -115,8 +115,8 @@ export class PrecinctController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.restoreDeletePrecinctUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.restoreDeletePrecinctUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -129,7 +129,7 @@ export class PrecinctController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.updatePrecinctUseCase.execute(id, updatePrecinctDto, userName);
+    const user_name = req.user.user_name as string;
+    return this.updatePrecinctUseCase.execute(id, updatePrecinctDto, user_name);
   }
 }

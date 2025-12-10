@@ -58,8 +58,8 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.createElectionUseCase.execute(createElectionDto, userName);
+    const user_name = req.user.user_name as string;
+    return this.createElectionUseCase.execute(createElectionDto, user_name);
   }
 
   @Version('1') // API versioning
@@ -69,7 +69,7 @@ export class ElectionController {
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Query('isArchived') isArchived: boolean,
+    @Query('is_archived') is_archived: boolean,
   ) {
     // Validate and parse query parameters
     const parsedPage = parseInt(page, 10) || 1;
@@ -88,7 +88,7 @@ export class ElectionController {
       term || '',
       parsedPage,
       parsedLimit,
-      isArchived,
+      is_archived,
     );
   }
 
@@ -114,8 +114,8 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.softDeleteElectionUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.softDeleteElectionUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -126,8 +126,8 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.restoreDeleteElectionUseCase.execute(id, userName);
+    const user_name = req.user.user_name as string;
+    return this.restoreDeleteElectionUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -137,8 +137,8 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.startElectionUseCase.execute(userName);
+    const user_name = req.user.user_name as string;
+    return this.startElectionUseCase.execute(user_name);
   }
 
   @Version('1') // API versioning
@@ -148,8 +148,8 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.closeElectionUseCase.execute(userName);
+    const user_name = req.user.user_name as string;
+    return this.closeElectionUseCase.execute(user_name);
   }
 
   @Version('1') // API versioning
@@ -159,8 +159,8 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.cancelElectionUseCase.execute(userName);
+    const user_name = req.user.user_name as string;
+    return this.cancelElectionUseCase.execute(user_name);
   }
 
   @Version('1') // API versioning
@@ -172,7 +172,7 @@ export class ElectionController {
     @Request()
     req,
   ) {
-    const userName = req.user.userName as string;
-    return this.updateElectionUseCase.execute(id, updateElectionDto, userName);
+    const user_name = req.user.user_name as string;
+    return this.updateElectionUseCase.execute(id, updateElectionDto, user_name);
   }
 }
