@@ -96,6 +96,16 @@ export class CandidateRepositoryImpl
         values.push(updateFields.updated_at);
       }
 
+      if (updateFields.deleted_at !== undefined) {
+        updateParts.push(`deleted_at = $${paramIndex++}`);
+        values.push(updateFields.deleted_at);
+      }
+
+      if (updateFields.deleted_by !== undefined) {
+        updateParts.push(`deleted_by = $${paramIndex++}`);
+        values.push(updateFields.deleted_by);
+      }
+
       if (updateParts.length === 0) {
         return false;
       }
@@ -140,7 +150,7 @@ export class CandidateRepositoryImpl
       LEFT JOIN positions p ON c.position_id = p.id
       LEFT JOIN districts dist ON c.district_id = dist.id
       LEFT JOIN elections e ON c.election_id = e.id
-      WHERE c.id = $1 AND c.deleted_at IS NULL
+      WHERE c.id = $1
     `;
 
     const result = await manager.query(query, [id]);

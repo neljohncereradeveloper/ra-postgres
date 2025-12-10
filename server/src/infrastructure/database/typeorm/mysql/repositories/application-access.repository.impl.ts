@@ -70,6 +70,16 @@ export class ApplicationAccessRepositoryImpl
         values.push(updateFields.updated_at);
       }
 
+      if (updateFields.deleted_at !== undefined) {
+        updateParts.push(`deleted_at = $${paramIndex++}`);
+        values.push(updateFields.deleted_at);
+      }
+
+      if (updateFields.deleted_by !== undefined) {
+        updateParts.push(`deleted_by = $${paramIndex++}`);
+        values.push(updateFields.deleted_by);
+      }
+
       if (updateParts.length === 0) {
         return false;
       }
@@ -194,7 +204,7 @@ export class ApplicationAccessRepositoryImpl
         updated_by,
         updated_at
       FROM applicationaccess
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1
     `;
 
     const result = await manager.query(query, [id]);

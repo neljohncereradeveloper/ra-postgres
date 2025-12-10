@@ -104,6 +104,16 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         values.push(update_fields.updated_at);
       }
 
+      if (update_fields.deleted_at !== undefined) {
+        updateParts.push(`deleted_at = $${paramIndex++}`);
+        values.push(update_fields.deleted_at);
+      }
+
+      if (update_fields.deleted_by !== undefined) {
+        updateParts.push(`deleted_by = $${paramIndex++}`);
+        values.push(update_fields.deleted_by);
+      }
+
       if (updateParts.length === 0) {
         return false;
       }
@@ -113,7 +123,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
       const query = `
         UPDATE users
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deleted_at IS NULL
+        WHERE id = $${paramIndex}
       `;
 
       const result = await manager.query(query, values);
@@ -226,7 +236,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
         updated_by,
         updated_at,
       FROM users
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1
     `;
 
     const result = await manager.query(query, [id]);

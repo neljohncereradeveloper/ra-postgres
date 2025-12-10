@@ -67,6 +67,16 @@ export class UserRoleRepositoryImpl
         values.push(update_fields.updated_at);
       }
 
+      if (update_fields.deleted_at !== undefined) {
+        updateParts.push(`deleted_at = $${paramIndex++}`);
+        values.push(update_fields.deleted_at);
+      }
+
+      if (update_fields.deleted_by !== undefined) {
+        updateParts.push(`deleted_by = $${paramIndex++}`);
+        values.push(update_fields.deleted_by);
+      }
+
       if (updateParts.length === 0) {
         return false;
       }
@@ -76,7 +86,7 @@ export class UserRoleRepositoryImpl
       const query = `
         UPDATE userroles
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deleted_at IS NULL
+        WHERE id = $${paramIndex}
       `;
 
       const result = await manager.query(query, values);
@@ -185,7 +195,7 @@ export class UserRoleRepositoryImpl
         updated_by,
         updated_at,
       FROM userroles
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1
     `;
 
     const result = await manager.query(query, [id]);

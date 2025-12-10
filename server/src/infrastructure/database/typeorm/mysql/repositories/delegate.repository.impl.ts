@@ -171,6 +171,16 @@ export class DelegateRepositoryImpl
         values.push(update_fields.updated_at);
       }
 
+      if (update_fields.deleted_at !== undefined) {
+        updateParts.push(`deleted_at = $${paramIndex++}`);
+        values.push(update_fields.deleted_at);
+      }
+
+      if (update_fields.deleted_by !== undefined) {
+        updateParts.push(`deleted_by = $${paramIndex++}`);
+        values.push(update_fields.deleted_by);
+      }
+
       if (updateParts.length === 0) {
         return false;
       }
@@ -180,7 +190,7 @@ export class DelegateRepositoryImpl
       const query = `
         UPDATE delegates
         SET ${updateParts.join(', ')}
-        WHERE id = $${paramIndex} AND deleted_at IS NULL
+        WHERE id = $${paramIndex}
       `;
 
       const result = await manager.query(query, values);
@@ -323,7 +333,7 @@ export class DelegateRepositoryImpl
         updated_by,
         updated_at,
       FROM delegates
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1
     `;
 
     const result = await manager.query(query, [id]);
