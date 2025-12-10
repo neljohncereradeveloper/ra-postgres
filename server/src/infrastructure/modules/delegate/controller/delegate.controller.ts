@@ -43,7 +43,16 @@ export class DelegateController {
     @Request() req,
   ) {
     const user_name = req.user.user_name as string;
-    return await this.uploadDelegatesFileUseCase.execute(file, user_name);
+    const uploadedFileInput = {
+      original_name: file.originalname,
+      mime_type: file.mimetype,
+      size: file.size,
+      buffer: file.buffer,
+    };
+    return await this.uploadDelegatesFileUseCase.execute(
+      uploadedFileInput,
+      user_name,
+    );
   }
 
   @Version('1') // API versioning
