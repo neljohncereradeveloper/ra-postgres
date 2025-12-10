@@ -35,7 +35,9 @@ export class SetActiveElectionUseCase {
           manager,
         );
         if (!election) {
-          throw new NotFoundException('Election does not exist');
+          throw new NotFoundException(
+            'Election does not exist || already archived',
+          );
         }
 
         const active_election = await this.activeElectionRepository.findById(
