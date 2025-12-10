@@ -1,4 +1,5 @@
 import { Candidate } from '@domain/models/candidate.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface CandidateRepository<Context = unknown> {
   create(candidate: Candidate, context?: Context): Promise<Candidate>;
@@ -15,17 +16,7 @@ export interface CandidateRepository<Context = unknown> {
     is_deleted: boolean,
     election_id: number,
     context?: Context,
-  ): Promise<{
-    data: Candidate[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<Candidate>>;
   countByElection(election_id: number, context?: Context): Promise<number>;
   getElectionCandidates(election_id: number, context?: Context): Promise<any[]>;
 }

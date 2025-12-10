@@ -19,6 +19,7 @@
       "@domain/policies/*": ["src/domain/policies/*"],
       "@domain/ports/*": ["src/domain/ports/*"],
       "@domain/utils/*": ["src/domain/utils/*"],
+      "@domain/interfaces/*": ["src/domain/interfaces/*"],
       "@domains/repositories/*": ["src/domain/repositories/*"],
       "@domains/services/*": ["src/domain/services/*"],
       "@domains/exceptions/*": ["src/domain/exceptions/*"],

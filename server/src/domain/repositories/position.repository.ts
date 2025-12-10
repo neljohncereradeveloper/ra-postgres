@@ -1,4 +1,5 @@
 import { Position } from '@domain/models/position.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface PositionRepository<Context = unknown> {
   create(position: Position, context?: Context): Promise<Position>;
@@ -15,17 +16,7 @@ export interface PositionRepository<Context = unknown> {
     election_id: number,
     is_archived: boolean,
     context: Context,
-  ): Promise<{
-    data: Position[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<Position>>;
   findByDescription(
     desc1: string,
     election_id: number,

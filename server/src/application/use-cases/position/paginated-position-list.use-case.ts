@@ -11,6 +11,7 @@ import {
   NotFoundException,
 } from '@domains/exceptions/index';
 import { POSITION_ACTIONS } from '@domain/constants/position/position-actions.constants';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class PaginatedPositionsListUseCase {
@@ -38,17 +39,7 @@ export class PaginatedPositionsListUseCase {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Position[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Position>> {
     return this.transactionHelper.executeTransaction(
       POSITION_ACTIONS.FIND_WITH_FILTERS,
       async (manager) => {

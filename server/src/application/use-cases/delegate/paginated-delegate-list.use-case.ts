@@ -8,6 +8,7 @@ import { ActiveElectionRepository } from '@domains/repositories/active-election.
 import { ElectionRepository } from '@domains/repositories/election.repository';
 import { NotFoundException } from '@domains/exceptions/index';
 import { DELEGATE_ACTIONS } from '@domain/constants/delegate/delegate-actions.constants';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class PaginatedDelegateListUseCase {
@@ -35,17 +36,7 @@ export class PaginatedDelegateListUseCase {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Delegate[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Delegate>> {
     return this.transactionHelper.executeTransaction(
       DELEGATE_ACTIONS.FIND_WITH_PAGINATION,
       async (manager) => {

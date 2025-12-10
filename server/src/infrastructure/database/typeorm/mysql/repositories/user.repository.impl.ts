@@ -7,6 +7,7 @@ import {
   hasAffectedRows,
   extractRows,
 } from '@shared/utils/query-result.util';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class UserRepositoryImpl implements UserRepository<EntityManager> {
@@ -130,17 +131,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: User[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<User>> {
     const skip = (page - 1) * limit;
 
     // Build WHERE clause

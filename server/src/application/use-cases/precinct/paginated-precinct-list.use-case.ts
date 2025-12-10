@@ -4,6 +4,7 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { PrecinctRepository } from '@domains/repositories/index';
 import { Precinct } from '@domain/models/index';
 import { BadRequestException } from '@domains/exceptions/index';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class PaginatedPrecinctListUseCase {
@@ -25,17 +26,7 @@ export class PaginatedPrecinctListUseCase {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Precinct[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Precinct>> {
     // Validate pagination parameters (Application Layer validation)
     if (page < 1) {
       throw new BadRequestException('Page number must be greater than 0');

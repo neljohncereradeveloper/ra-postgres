@@ -4,6 +4,7 @@ import { Inject } from '@nestjs/common';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { UserRoleRepository } from '@domains/repositories/user-role.repository';
 import { BadRequestException } from '@domains/exceptions/index';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class PaginatedUserRoleListUseCase {
@@ -25,17 +26,7 @@ export class PaginatedUserRoleListUseCase {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: UserRole[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<UserRole>> {
     // Validate input parameters (optional but recommended)
     if (page < 1) {
       throw new BadRequestException('Page number must be greater than 0');

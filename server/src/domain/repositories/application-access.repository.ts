@@ -1,4 +1,5 @@
 import { ApplicationAccess } from '@domain/models/application-access.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface ApplicationAccessRepository<Context = unknown> {
   create(
@@ -16,17 +17,7 @@ export interface ApplicationAccessRepository<Context = unknown> {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: ApplicationAccess[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<ApplicationAccess>>;
   findByDesc(desc1: string): Promise<ApplicationAccess>;
   combobox(): Promise<ApplicationAccess[]>;
 }

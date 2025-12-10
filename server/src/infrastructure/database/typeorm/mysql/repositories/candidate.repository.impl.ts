@@ -3,12 +3,12 @@ import { EntityManager } from 'typeorm';
 import { calculatePagination } from '@shared/utils/pagination.util';
 import { CandidateRepository } from '@domains/repositories/candidate.repository';
 import { Candidate } from '@domain/models/candidate.model';
-import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import {
   getFirstRow,
   hasAffectedRows,
   extractRows,
 } from '@shared/utils/query-result.util';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class CandidateRepositoryImpl
@@ -159,17 +159,7 @@ export class CandidateRepositoryImpl
     is_deleted: boolean,
     election_id: number,
     manager: EntityManager,
-  ): Promise<{
-    data: Candidate[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Candidate>> {
     const skip = (page - 1) * limit;
 
     // Build WHERE clause

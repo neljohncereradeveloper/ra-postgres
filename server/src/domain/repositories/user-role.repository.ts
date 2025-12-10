@@ -1,4 +1,5 @@
 import { UserRole } from '@domain/models/user-role.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface UserRoleRepository<Context = unknown> {
   create(userRole: UserRole, context?: Context): Promise<UserRole>;
@@ -13,17 +14,7 @@ export interface UserRoleRepository<Context = unknown> {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: UserRole[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<UserRole>>;
   findByDesc(desc1: string): Promise<UserRole>;
   combobox(): Promise<UserRole[]>;
 }

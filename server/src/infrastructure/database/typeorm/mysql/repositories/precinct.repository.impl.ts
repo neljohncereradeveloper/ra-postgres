@@ -1,6 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
-import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import { calculatePagination } from '@shared/utils/pagination.util';
 import { PrecinctRepository } from '@domains/repositories/precinct.repository';
 import { Precinct } from '@domain/models/precinct.model';
@@ -9,6 +8,7 @@ import {
   hasAffectedRows,
   extractRows,
 } from '@shared/utils/query-result.util';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class PrecinctRepositoryImpl
@@ -110,17 +110,7 @@ export class PrecinctRepositoryImpl
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Precinct[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Precinct>> {
     const skip = (page - 1) * limit;
 
     // Build WHERE clause

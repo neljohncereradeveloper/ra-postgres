@@ -3,11 +3,11 @@ import { EntityManager } from 'typeorm';
 import { Delegate } from '@domain/models/delegate.model';
 import { DelegateRepository } from '@domains/repositories/delegate.repository';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
 } from '@shared/utils/query-result.util';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class DelegateRepositoryImpl
@@ -200,17 +200,7 @@ export class DelegateRepositoryImpl
     is_archived: boolean,
     election_id: number,
     manager: EntityManager,
-  ): Promise<{
-    data: Delegate[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Delegate>> {
     const skip = (page - 1) * limit;
 
     // Build WHERE conditions

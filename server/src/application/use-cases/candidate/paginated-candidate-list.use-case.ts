@@ -11,6 +11,7 @@ import {
   NotFoundException,
 } from '@domains/exceptions/index';
 import { ElectionRepository } from '@domains/repositories/election.repository';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class PaginatedCandidateListUseCase {
@@ -38,17 +39,7 @@ export class PaginatedCandidateListUseCase {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Candidate[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<Candidate>> {
     return this.transactionHelper.executeTransaction(
       CANDIDATE_ACTIONS.FIND_WITH_PAGINATION,
       async (manager) => {

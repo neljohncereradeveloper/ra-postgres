@@ -1,4 +1,5 @@
 import { Election } from '@domain/models/election.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface ElectionRepository<Context = unknown> {
   create(election: Election, context?: Context): Promise<Election>;
@@ -13,17 +14,7 @@ export interface ElectionRepository<Context = unknown> {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Election[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<Election>>;
   findByName(name: string, context?: Context): Promise<Election>;
   combobox(): Promise<Election[]>;
   comboboxRetrieveScheduledElections(): Promise<Election[]>;

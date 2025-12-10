@@ -1,4 +1,5 @@
 import { User } from '@domain/models/user.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface UserRepository<Context = unknown> {
   create(user: User, context?: Context): Promise<User>;
@@ -13,16 +14,6 @@ export interface UserRepository<Context = unknown> {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: User[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<User>>;
   findByUserName(user_name: string): Promise<User>;
 }

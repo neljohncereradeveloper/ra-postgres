@@ -1,4 +1,5 @@
 import { Precinct } from '@domain/models/precinct.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface PrecinctRepository<Context = unknown> {
   create(precinct: Precinct, context?: Context): Promise<Precinct>;
@@ -13,17 +14,7 @@ export interface PrecinctRepository<Context = unknown> {
     page: number,
     limit: number,
     is_archived: boolean,
-  ): Promise<{
-    data: Precinct[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<Precinct>>;
   findByDescription(desc1: string, context?: Context): Promise<Precinct | null>;
   combobox(): Promise<Precinct[]>;
 }

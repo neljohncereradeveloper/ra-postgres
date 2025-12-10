@@ -2,14 +2,13 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { District } from '@domain/models/district.model';
 import { DistrictRepository } from '@domains/repositories/district.repository';
-import { PaginationMeta } from '@shared/interfaces/pagination.interface';
 import { calculatePagination } from '@shared/utils/pagination.util';
 import {
-  getInsertId,
   getFirstRow,
   hasAffectedRows,
   extractRows,
 } from '@shared/utils/query-result.util';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 @Injectable()
 export class DistrictRepositoryImpl
@@ -104,17 +103,7 @@ export class DistrictRepositoryImpl
     is_archived: boolean,
     election_id: number,
     manager: EntityManager,
-  ): Promise<{
-    data: District[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }> {
+  ): Promise<PaginatedResult<District>> {
     const skip = (page - 1) * limit;
 
     // Build WHERE clause

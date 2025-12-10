@@ -1,4 +1,5 @@
 import { Delegate } from '@domain/models/delegate.model';
+import { PaginatedResult } from '@domain/interfaces/pagination.interface';
 
 export interface DelegateRepository<Context = unknown> {
   create(delegate: Delegate, context?: Context): Promise<Delegate>;
@@ -15,17 +16,7 @@ export interface DelegateRepository<Context = unknown> {
     is_archived: boolean,
     election_id: number,
     context?: Context,
-  ): Promise<{
-    data: Delegate[];
-    meta: {
-      page: number;
-      limit: number;
-      total_records: number;
-      total_pages: number;
-      next_page: number | null;
-      previous_page: number | null;
-    };
-  }>;
+  ): Promise<PaginatedResult<Delegate>>;
   // findAllWithElectionId(
   //   electionId: number,
   //   context?: Context,
