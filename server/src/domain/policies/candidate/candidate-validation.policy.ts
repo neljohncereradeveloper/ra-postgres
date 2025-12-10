@@ -34,7 +34,7 @@ export class CandidateValidationPolicy {
     }
 
     // Validate if electionId is provided (foreign key reference to Election primary key)
-    if (!candidate.electionId || candidate.electionId <= 0) {
+    if (!candidate.electionid || candidate.electionid <= 0) {
       throw new CandidateBusinessException(
         'Election ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -42,7 +42,7 @@ export class CandidateValidationPolicy {
     }
 
     // Validate if positionId is provided (foreign key reference to Position primary key)
-    if (!candidate.positionId || candidate.positionId <= 0) {
+    if (!candidate.positionid || candidate.positionid <= 0) {
       throw new CandidateBusinessException(
         'Position ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -50,7 +50,7 @@ export class CandidateValidationPolicy {
     }
 
     // Validate if districtId is provided (foreign key reference to District primary key)
-    if (!candidate.districtId || candidate.districtId <= 0) {
+    if (!candidate.districtid || candidate.districtid <= 0) {
       throw new CandidateBusinessException(
         'District ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -58,7 +58,7 @@ export class CandidateValidationPolicy {
     }
 
     // Validate if delegateId is provided (foreign key reference to Delegate primary key)
-    if (!candidate.delegateId || candidate.delegateId <= 0) {
+    if (!candidate.delegateid || candidate.delegateid <= 0) {
       throw new CandidateBusinessException(
         'Delegate ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -66,7 +66,7 @@ export class CandidateValidationPolicy {
     }
 
     // Validate if displayName is provided
-    if (!candidate.displayName || candidate.displayName.trim().length === 0) {
+    if (!candidate.displayname || candidate.displayname.trim().length === 0) {
       throw new CandidateBusinessException(
         'Display name is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
@@ -74,7 +74,7 @@ export class CandidateValidationPolicy {
     }
 
     // Validate if displayName length is within limits (255 characters max based on entity)
-    if (candidate.displayName.length > 255) {
+    if (candidate.displayname.length > 255) {
       throw new CandidateBusinessException(
         'Display name must not exceed 255 characters.',
         HTTP_STATUS.BAD_REQUEST,

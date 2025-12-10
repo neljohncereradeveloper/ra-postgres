@@ -60,7 +60,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is not started
-    if (election.electionStatus === ElectionStatus.STARTED) {
+    if (election.electionstatus === ElectionStatus.STARTED) {
       throw new ElectionBusinessException(
         'Election has already started.',
         HTTP_STATUS.BAD_REQUEST,
@@ -68,7 +68,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is not cancelled
-    if (election.electionStatus === ElectionStatus.CANCELLED) {
+    if (election.electionstatus === ElectionStatus.CANCELLED) {
       throw new ElectionBusinessException(
         `Election cancelled.`,
         HTTP_STATUS.BAD_REQUEST,
@@ -76,7 +76,7 @@ export class ElectionStartPolicy {
     }
 
     // Validate if the election is not closed
-    if (election.electionStatus === ElectionStatus.CLOSED) {
+    if (election.electionstatus === ElectionStatus.CLOSED) {
       throw new ElectionBusinessException(
         `Election already closed.`,
         HTTP_STATUS.BAD_REQUEST,

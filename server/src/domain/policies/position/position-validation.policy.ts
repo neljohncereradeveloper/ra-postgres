@@ -33,7 +33,7 @@ export class PositionValidationPolicy {
     }
 
     // Validate if electionId is provided (foreign key reference to Election primary key)
-    if (!position.electionId || position.electionId <= 0) {
+    if (!position.electionid || position.electionid <= 0) {
       throw new PositionBusinessException(
         'Election ID is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -65,7 +65,7 @@ export class PositionValidationPolicy {
     }
 
     // Validate if maxCandidates is provided and greater than zero
-    if (!position.maxCandidates || position.maxCandidates <= 0) {
+    if (!position.maxcandidates || position.maxcandidates <= 0) {
       throw new PositionBusinessException(
         'Max candidates is required and must be a valid positive integer.',
         HTTP_STATUS.BAD_REQUEST,
@@ -73,7 +73,7 @@ export class PositionValidationPolicy {
     }
 
     // Validate if termLimit is provided
-    if (!position.termLimit || position.termLimit.trim().length === 0) {
+    if (!position.termlimit || position.termlimit.trim().length === 0) {
       throw new PositionBusinessException(
         'Term limit is required and cannot be empty.',
         HTTP_STATUS.BAD_REQUEST,
