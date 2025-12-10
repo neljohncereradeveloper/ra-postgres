@@ -35,10 +35,10 @@ export class DistrictController {
   constructor(
     private readonly createDistrictUseCase: CreateDistrictUseCase,
     private readonly updateDistrictUseCase: UpdateDistrictUseCase,
-    private readonly findDistrictsWithFiltersUseCase: PaginatedDistrictsListUseCase,
-    private readonly softDeleteDistrictUseCase: ArchiveDistrictUseCase,
-    private readonly restoreDeleteDistrictUseCase: RestoreDistrictUseCase,
-    private readonly retrieveComboboxDistrictUseCase: ComboboxDistrictUseCase,
+    private readonly paginatedDistrictsListUseCase: PaginatedDistrictsListUseCase,
+    private readonly archiveDistrictUseCase: ArchiveDistrictUseCase,
+    private readonly restoreDistrictUseCase: RestoreDistrictUseCase,
+    private readonly comboboxDistrictUseCase: ComboboxDistrictUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -58,7 +58,7 @@ export class DistrictController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -77,7 +77,7 @@ export class DistrictController {
     }
 
     // Execute the use case
-    return await this.findDistrictsWithFiltersUseCase.execute(
+    return await this.paginatedDistrictsListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -89,21 +89,21 @@ export class DistrictController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin, AuthUserRolesEnum.Precinct)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('combobox')
-  async retrieveCombobox() {
-    return this.retrieveComboboxDistrictUseCase.execute();
+  async combobox() {
+    return this.comboboxDistrictUseCase.execute();
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeleteDistrictUseCase.execute(id, user_name);
+    return this.archiveDistrictUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -116,7 +116,7 @@ export class DistrictController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeleteDistrictUseCase.execute(id, user_name);
+    return this.restoreDistrictUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

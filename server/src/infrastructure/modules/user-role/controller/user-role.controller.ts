@@ -18,7 +18,7 @@ import { UpdateUserRoleDto } from '../interface/dto/update-user-role.dto';
 import { UpdateUserRoleUseCase } from '@application/use-cases/user-role/update-user-role.use-case';
 import { PaginatedUserRoleListUseCase } from '@application/use-cases/user-role/paginated-user-role-list.use-case';
 import { ArchiveUserRoleUseCase } from '@application/use-cases/user-role/archive-user-role.use-case';
-import { RestoreDeleteUserRoleUseCase } from '@application/use-cases/user-role/restore-user-role.use-case';
+import { RestoreUserRoleUseCase } from '@application/use-cases/user-role/restore-user-role.use-case';
 import { ComboboxUserRoleUseCase } from '@application/use-cases/user-role/combobox-user-role.use-case';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
@@ -37,10 +37,10 @@ export class UserRoleController {
   constructor(
     private readonly createUserRoleUseCase: CreateUserRoleUseCase,
     private readonly updateUserRoleUseCase: UpdateUserRoleUseCase,
-    private readonly findUserRolesWithFiltersUseCase: PaginatedUserRoleListUseCase,
-    private readonly softDeleteUserRoleUseCase: ArchiveUserRoleUseCase,
-    private readonly restoreDeleteUserRoleUseCase: RestoreDeleteUserRoleUseCase,
-    private readonly retrieveComboboxUserRoleUseCase: ComboboxUserRoleUseCase,
+    private readonly paginatedUserRoleListUseCase: PaginatedUserRoleListUseCase,
+    private readonly archiveUserRoleUseCase: ArchiveUserRoleUseCase,
+    private readonly restoreUserRoleUseCase: RestoreUserRoleUseCase,
+    private readonly comboboxUserRoleUseCase: ComboboxUserRoleUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -56,7 +56,7 @@ export class UserRoleController {
 
   @Version('1') // API versioning
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -75,7 +75,7 @@ export class UserRoleController {
     }
 
     // Execute the use case
-    return await this.findUserRolesWithFiltersUseCase.execute(
+    return await this.paginatedUserRoleListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -85,19 +85,19 @@ export class UserRoleController {
 
   @Version('1') // API versioning
   @Get('combobox')
-  async retrieveCombobox() {
-    return this.retrieveComboboxUserRoleUseCase.execute();
+  async combobox() {
+    return this.comboboxUserRoleUseCase.execute();
   }
 
   @Version('1') // API versioning
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeleteUserRoleUseCase.execute(id, user_name);
+    return this.archiveUserRoleUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -108,7 +108,7 @@ export class UserRoleController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeleteUserRoleUseCase.execute(id, user_name);
+    return this.restoreUserRoleUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

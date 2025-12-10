@@ -4,7 +4,7 @@ import { CreateUserUseCase } from '@application/use-cases/user/create-user.use-c
 import { UpdateUserUseCase } from '@application/use-cases/user/update-user.use-case';
 import { PaginatedUserListUseCase } from '@application/use-cases/user/paginated-user-list.use-case';
 import { ArchiveUserUseCase } from '@application/use-cases/user/archive-user.use-case';
-import { RestoreDeleteUserUseCase } from '@application/use-cases/user/restore-user.use-case';
+import { RestoreUserUseCase } from '@application/use-cases/user/restore-user.use-case';
 import { BcryptPasswordEncryptionAdapter } from '@infrastructure/modules/user/adapters/password-encryption.adapter';
 import { MysqlDatabaseModule } from '@infrastructure/database/typeorm-mysql/mysql-database.module';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
@@ -56,14 +56,14 @@ import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-m
     UpdateUserUseCase,
     PaginatedUserListUseCase,
     ArchiveUserUseCase,
-    RestoreDeleteUserUseCase,
+    RestoreUserUseCase,
   ],
   exports: [
     CreateUserUseCase,
     UpdateUserUseCase,
     PaginatedUserListUseCase,
     ArchiveUserUseCase,
-    RestoreDeleteUserUseCase,
+    RestoreUserUseCase,
   ],
 })
 export class UserModule {}

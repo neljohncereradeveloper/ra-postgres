@@ -4,7 +4,7 @@ import { CreateUserRoleUseCase } from '@application/use-cases/user-role/create-u
 import { UpdateUserRoleUseCase } from '@application/use-cases/user-role/update-user-role.use-case';
 import { PaginatedUserRoleListUseCase } from '@application/use-cases/user-role/paginated-user-role-list.use-case';
 import { ArchiveUserRoleUseCase } from '@application/use-cases/user-role/archive-user-role.use-case';
-import { RestoreDeleteUserRoleUseCase } from '@application/use-cases/user-role/restore-user-role.use-case';
+import { RestoreUserRoleUseCase } from '@application/use-cases/user-role/restore-user-role.use-case';
 import { ComboboxUserRoleUseCase } from '@application/use-cases/user-role/combobox-user-role.use-case';
 import { MysqlDatabaseModule } from '@infrastructure/database/typeorm-mysql/mysql-database.module';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
@@ -30,7 +30,7 @@ import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysq
     UpdateUserRoleUseCase,
     PaginatedUserRoleListUseCase,
     ArchiveUserRoleUseCase,
-    RestoreDeleteUserRoleUseCase,
+    RestoreUserRoleUseCase,
     ComboboxUserRoleUseCase,
   ],
   exports: [
@@ -38,7 +38,7 @@ import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysq
     UpdateUserRoleUseCase,
     PaginatedUserRoleListUseCase,
     ArchiveUserRoleUseCase,
-    RestoreDeleteUserRoleUseCase,
+    RestoreUserRoleUseCase,
     ComboboxUserRoleUseCase,
   ],
 })

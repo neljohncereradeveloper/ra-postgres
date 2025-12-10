@@ -18,7 +18,7 @@ import { UpdateUserDto } from '../interface/dto/update-user.dto';
 import { UpdateUserUseCase } from '@application/use-cases/user/update-user.use-case';
 import { PaginatedUserListUseCase } from '@application/use-cases/user/paginated-user-list.use-case';
 import { ArchiveUserUseCase } from '@application/use-cases/user/archive-user.use-case';
-import { RestoreDeleteUserUseCase } from '@application/use-cases/user/restore-user.use-case';
+import { RestoreUserUseCase } from '@application/use-cases/user/restore-user.use-case';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
 import {
@@ -36,9 +36,9 @@ export class UserController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
-    private readonly findUsersWithFiltersUseCase: PaginatedUserListUseCase,
-    private readonly softDeleteUserUseCase: ArchiveUserUseCase,
-    private readonly restoreDeleteUserUseCase: RestoreDeleteUserUseCase,
+    private readonly paginatedUserListUseCase: PaginatedUserListUseCase,
+    private readonly archiveUserUseCase: ArchiveUserUseCase,
+    private readonly restoreUserUseCase: RestoreUserUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -54,7 +54,7 @@ export class UserController {
 
   @Version('1') // API versioning
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -73,7 +73,7 @@ export class UserController {
     }
 
     // Execute the use case
-    return await this.findUsersWithFiltersUseCase.execute(
+    return await this.paginatedUserListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -82,14 +82,14 @@ export class UserController {
   }
 
   @Version('1') // API versioning
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeleteUserUseCase.execute(id, user_name);
+    return this.archiveUserUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -100,7 +100,7 @@ export class UserController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeleteUserUseCase.execute(id, user_name);
+    return this.restoreUserUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

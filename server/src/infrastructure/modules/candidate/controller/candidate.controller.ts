@@ -34,10 +34,10 @@ export class CandidateController {
   constructor(
     private readonly createCandidateUseCase: CreateCandidateUseCase,
     private readonly updateCandidateUseCase: UpdateCandidateUseCase,
-    private readonly findCandidatesWithFiltersUseCase: PaginatedCandidateListUseCase,
-    private readonly softDeleteCandidateUseCase: ArchiveCandidateUseCase,
-    private readonly restoreDeleteCandidateUseCase: RestoreCandidateUseCase,
-    private readonly getCastVoteCandidatesUseCase: GetElectionCandidatesUseCase,
+    private readonly paginatedCandidateListUseCase: PaginatedCandidateListUseCase,
+    private readonly archiveCandidateUseCase: ArchiveCandidateUseCase,
+    private readonly restoreCandidateUseCase: RestoreCandidateUseCase,
+    private readonly getElectionCandidatesUseCase: GetElectionCandidatesUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -57,7 +57,7 @@ export class CandidateController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -76,7 +76,7 @@ export class CandidateController {
     }
 
     // Execute the use case
-    return await this.findCandidatesWithFiltersUseCase.execute(
+    return await this.paginatedCandidateListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -88,22 +88,22 @@ export class CandidateController {
   @AuthorizeRoles(AuthUserRolesEnum.Precinct)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Get('cast-vote')
-  async getCastVoteCandidates() {
+  async getElectionCandidates() {
     // Execute the use case
-    return await this.getCastVoteCandidatesUseCase.execute();
+    return await this.getElectionCandidatesUseCase.execute();
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeleteCandidateUseCase.execute(id, user_name);
+    return this.archiveCandidateUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -116,7 +116,7 @@ export class CandidateController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeleteCandidateUseCase.execute(id, user_name);
+    return this.restoreCandidateUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

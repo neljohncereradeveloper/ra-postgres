@@ -14,6 +14,8 @@ import { PaginatedDelegateListUseCase } from '@application/use-cases/delegate/pa
 import { FindByControllNumberUseCase } from '@application/use-cases/delegate/find-by-controll-number.use-case';
 import { UUIDGeneratorAdapter } from 'src/infrastructure/adapters/uuid-generator';
 import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/ballot.repository.impl';
+import { ArchiveDelegateUseCase } from '@application/use-cases/delegate/archive-delegate.use-case';
+import { RestoreDelegateUseCase } from '@application/use-cases/delegate/restore-delegate.use-case';
 
 @Module({
   imports: [MysqlDatabaseModule],
@@ -47,12 +49,16 @@ import { BallotRepositoryImpl } from '@infrastructure/database/typeorm-mysql/rep
     ElectionLockPolicy,
     PaginatedDelegateListUseCase,
     FindByControllNumberUseCase,
+    ArchiveDelegateUseCase,
+    RestoreDelegateUseCase,
   ],
   exports: [
     UploadDelegatesUseCase,
     PaginatedDelegateListUseCase,
     FindByControllNumberUseCase,
     ElectionLockPolicy,
+    ArchiveDelegateUseCase,
+    RestoreDelegateUseCase,
   ],
 })
 export class DelegateModule {}

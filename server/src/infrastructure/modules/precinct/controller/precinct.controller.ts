@@ -35,10 +35,10 @@ export class PrecinctController {
   constructor(
     private readonly createPrecinctUseCase: CreatePrecinctUseCase,
     private readonly updatePrecinctUseCase: UpdatePrecinctUseCase,
-    private readonly findPrecinctsWithFiltersUseCase: PaginatedPrecinctListUseCase,
-    private readonly softDeletePrecinctUseCase: ArchivePrecinctUseCase,
-    private readonly restoreDeletePrecinctUseCase: RestorePrecinctUseCase,
-    private readonly retrieveComboboxPrecinctUseCase: ComboboxPrecinctUseCase,
+    private readonly paginatedPrecinctListUseCase: PaginatedPrecinctListUseCase,
+    private readonly archivePrecinctUseCase: ArchivePrecinctUseCase,
+    private readonly restorePrecinctUseCase: RestorePrecinctUseCase,
+    private readonly comboboxPrecinctUseCase: ComboboxPrecinctUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -58,7 +58,7 @@ export class PrecinctController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -77,7 +77,7 @@ export class PrecinctController {
     }
 
     // Execute the use case
-    return await this.findPrecinctsWithFiltersUseCase.execute(
+    return await this.paginatedPrecinctListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -89,21 +89,21 @@ export class PrecinctController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin, AuthUserRolesEnum.Precinct)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('combobox')
-  async retrieveCombobox() {
-    return this.retrieveComboboxPrecinctUseCase.execute();
+  async combobox() {
+    return this.comboboxPrecinctUseCase.execute();
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeletePrecinctUseCase.execute(id, user_name);
+    return this.archivePrecinctUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -116,7 +116,7 @@ export class PrecinctController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeletePrecinctUseCase.execute(id, user_name);
+    return this.restorePrecinctUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

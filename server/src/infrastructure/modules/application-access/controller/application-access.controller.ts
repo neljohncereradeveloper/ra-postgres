@@ -37,10 +37,10 @@ export class ApplicationAccessController {
   constructor(
     private readonly createApplicationAccessUseCase: CreateApplicationAccessUseCase,
     private readonly updateApplicationAccessUseCase: UpdateApplicationAccessUseCase,
-    private readonly findApplicationAccesssWithFiltersUseCase: PaginatedApplicationAccessListUseCase,
-    private readonly softDeleteApplicationAccessUseCase: ArchiveApplicationAccessUseCase,
-    private readonly restoreDeleteApplicationAccessUseCase: RestoreApplicationAccessUseCase,
-    private readonly retrieveComboboxApplicationAccessUseCase: ComboboxApplicationAccessUseCase,
+    private readonly paginatedApplicationAccessListUseCase: PaginatedApplicationAccessListUseCase,
+    private readonly archiveApplicationAccessUseCase: ArchiveApplicationAccessUseCase,
+    private readonly restoreApplicationAccessUseCase: RestoreApplicationAccessUseCase,
+    private readonly comboboxApplicationAccessUseCase: ComboboxApplicationAccessUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -59,7 +59,7 @@ export class ApplicationAccessController {
 
   @Version('1') // API versioning
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -78,7 +78,7 @@ export class ApplicationAccessController {
     }
 
     // Execute the use case
-    return await this.findApplicationAccesssWithFiltersUseCase.execute(
+    return await this.paginatedApplicationAccessListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -88,19 +88,19 @@ export class ApplicationAccessController {
 
   @Version('1') // API versioning
   @Get('combobox')
-  async retrieveCombobox() {
-    return this.retrieveComboboxApplicationAccessUseCase.execute();
+  async combobox() {
+    return this.comboboxApplicationAccessUseCase.execute();
   }
 
   @Version('1') // API versioning
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeleteApplicationAccessUseCase.execute(id, user_name);
+    return this.archiveApplicationAccessUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -111,7 +111,7 @@ export class ApplicationAccessController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeleteApplicationAccessUseCase.execute(id, user_name);
+    return this.restoreApplicationAccessUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

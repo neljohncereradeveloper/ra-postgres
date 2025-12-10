@@ -142,7 +142,7 @@ export class PrecinctRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM precincts
       ${whereClause}
       ORDER BY id DESC
@@ -195,7 +195,7 @@ export class PrecinctRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM precincts
       WHERE id = $1
     `;
@@ -222,7 +222,7 @@ export class PrecinctRepositoryImpl
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM precincts
       WHERE desc1 = $1 AND deleted_at IS NULL
       LIMIT 1

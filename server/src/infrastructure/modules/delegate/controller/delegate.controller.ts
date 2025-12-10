@@ -10,6 +10,8 @@ import {
   Request,
   UploadedFile,
   UseInterceptors,
+  Delete,
+  Patch,
 } from '@nestjs/common';
 import { JwtBearerAuthGuard } from '@infrastructure/modules/auth/guards/jwt-auth.guard';
 import { AuthorizeRoles } from '@infrastructure/modules/auth/decorators/roles.decorator';
@@ -22,6 +24,8 @@ import { UploadDelegatesUseCase } from '@application/use-cases/delegate/upload-d
 import { AuthorizeApplicationAccess } from '@infrastructure/modules/auth/decorators/applicationaccess.decorator';
 import { PaginatedDelegateListUseCase } from '@application/use-cases/delegate/paginated-delegate-list.use-case';
 import { FindByControllNumberUseCase } from '@application/use-cases/delegate/find-by-controll-number.use-case';
+import { ArchiveDelegateUseCase } from '@application/use-cases/delegate/archive-delegate.use-case';
+import { RestoreDelegateUseCase } from '@application/use-cases/delegate/restore-delegate.use-case';
 
 // Controller for handling client-related requests
 @Controller('delegates')
@@ -29,8 +33,10 @@ import { FindByControllNumberUseCase } from '@application/use-cases/delegate/fin
 export class DelegateController {
   constructor(
     private readonly uploadDelegatesFileUseCase: UploadDelegatesUseCase,
-    private readonly findDelegatesWithElectionIdFiltersUseCase: PaginatedDelegateListUseCase,
-    private readonly findDelegatesWithElectionIdAndControlNumberUseCase: FindByControllNumberUseCase,
+    private readonly paginatedDelegateListUseCase: PaginatedDelegateListUseCase,
+    private readonly findByControlNumberUseCase: FindByControllNumberUseCase,
+    private readonly archiveDelegateUseCase: ArchiveDelegateUseCase,
+    private readonly restoreDelegateUseCase: RestoreDelegateUseCase,
   ) {}
 
   @Version('1')
@@ -59,7 +65,7 @@ export class DelegateController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('active-election')
-  async findWithElectionIdFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -78,7 +84,7 @@ export class DelegateController {
     }
 
     // Execute the use case
-    return await this.findDelegatesWithElectionIdFiltersUseCase.execute(
+    return await this.paginatedDelegateListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -91,8 +97,24 @@ export class DelegateController {
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.CastVoteModule)
   @Get('control-number/:control_number')
   async findByControlNumber(@Param('control_number') control_number: string) {
-    return await this.findDelegatesWithElectionIdAndControlNumberUseCase.execute(
-      control_number,
-    );
+    return await this.findByControlNumberUseCase.execute(control_number);
+  }
+
+  @Version('1') // API versioning
+  @AuthorizeRoles(AuthUserRolesEnum.Admin)
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
+  @Delete('archive/:id')
+  async archive(@Param('id') id: number, @Request() req) {
+    const user_name = req.user.user_name as string;
+    return this.archiveDelegateUseCase.execute(id, user_name);
+  }
+
+  @Version('1') // API versioning
+  @AuthorizeRoles(AuthUserRolesEnum.Admin)
+  @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
+  @Patch('restore/:id')
+  async restore(@Param('id') id: number, @Request() req) {
+    const user_name = req.user.user_name as string;
+    return this.restoreDelegateUseCase.execute(id, user_name);
   }
 }

@@ -10,7 +10,7 @@ import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 
 @Injectable()
-export class RestoreDeleteUserUseCase {
+export class RestoreUserUseCase {
   constructor(
     @Inject(REPOSITORY_TOKENS.TRANSACTIONPORT)
     private readonly transactionHelper: TransactionPort,

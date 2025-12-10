@@ -34,10 +34,10 @@ export class PositionController {
   constructor(
     private readonly createPositionUseCase: CreatePositionUseCase,
     private readonly updatePositionUseCase: UpdatePositionUseCase,
-    private readonly findPositionsWithFiltersUseCase: PaginatedPositionsListUseCase,
-    private readonly softDeletePositionUseCase: ArchivePositionUseCase,
-    private readonly restoreDeletePositionUseCase: RestorePositionUseCase,
-    private readonly retrieveComboboxPositionUseCase: ComboboxPositionUseCase,
+    private readonly paginatedPositionsListUseCase: PaginatedPositionsListUseCase,
+    private readonly archivePositionUseCase: ArchivePositionUseCase,
+    private readonly restorePositionUseCase: RestorePositionUseCase,
+    private readonly comboboxPositionUseCase: ComboboxPositionUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -57,7 +57,7 @@ export class PositionController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -76,7 +76,7 @@ export class PositionController {
     }
 
     // Execute the use case
-    return await this.findPositionsWithFiltersUseCase.execute(
+    return await this.paginatedPositionsListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -88,21 +88,21 @@ export class PositionController {
   @AuthorizeRoles(AuthUserRolesEnum.Admin, AuthUserRolesEnum.Precinct)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
   @Get('combobox')
-  async retrieveCombobox() {
-    return this.retrieveComboboxPositionUseCase.execute();
+  async combobox() {
+    return this.comboboxPositionUseCase.execute();
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @AuthorizeApplicationAccess(AuthApplicationAccessEnum.ElectionModule)
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeletePositionUseCase.execute(id, user_name);
+    return this.archivePositionUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -115,7 +115,7 @@ export class PositionController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeletePositionUseCase.execute(id, user_name);
+    return this.restorePositionUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning

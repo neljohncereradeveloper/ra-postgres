@@ -40,14 +40,14 @@ export class ElectionController {
   constructor(
     private readonly createElectionUseCase: CreateElectionUseCase,
     private readonly updateElectionUseCase: UpdateElectionUseCase,
-    private readonly findElectionsWithFiltersUseCase: PaginatedElectionListUseCase,
-    private readonly softDeleteElectionUseCase: ArchiveElectionUseCase,
-    private readonly restoreDeleteElectionUseCase: RestoreElectionUseCase,
+    private readonly paginatedElectionListUseCase: PaginatedElectionListUseCase,
+    private readonly archiveElectionUseCase: ArchiveElectionUseCase,
+    private readonly restoreElectionUseCase: RestoreElectionUseCase,
     private readonly startElectionUseCase: StartElectionUseCase,
     private readonly closeElectionUseCase: CloseElectionUseCase,
     private readonly cancelElectionUseCase: CancelElectionUseCase,
-    private readonly retrieveComboboxElectionUseCase: ComboboxElectionUseCase,
-    private readonly retrieveComboboxScheduledElectionUseCase: ComboboxScheduledElectionUseCase,
+    private readonly comboboxElectionUseCase: ComboboxElectionUseCase,
+    private readonly comboboxScheduledElectionUseCase: ComboboxScheduledElectionUseCase,
   ) {}
 
   @Version('1') // API versioning
@@ -65,7 +65,7 @@ export class ElectionController {
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @Get()
-  async findWithFilters(
+  async paginatedList(
     @Query('term') term: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -84,7 +84,7 @@ export class ElectionController {
     }
 
     // Execute the use case
-    return await this.findElectionsWithFiltersUseCase.execute(
+    return await this.paginatedElectionListUseCase.execute(
       term || '',
       parsedPage,
       parsedLimit,
@@ -95,27 +95,27 @@ export class ElectionController {
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @Get('combobox')
-  async retrieveCombobox() {
-    return this.retrieveComboboxElectionUseCase.execute();
+  async combobox() {
+    return this.comboboxElectionUseCase.execute();
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
   @Get('combobox/scheduled')
-  async retrieveComboboxScheduled() {
-    return this.retrieveComboboxScheduledElectionUseCase.execute();
+  async comboboxScheduled() {
+    return this.comboboxScheduledElectionUseCase.execute();
   }
 
   @Version('1') // API versioning
   @AuthorizeRoles(AuthUserRolesEnum.Admin)
-  @Delete('delete/:id')
-  async delete(
+  @Delete('archive/:id')
+  async archive(
     @Param('id') id: number,
     @Request()
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.softDeleteElectionUseCase.execute(id, user_name);
+    return this.archiveElectionUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
@@ -127,7 +127,7 @@ export class ElectionController {
     req,
   ) {
     const user_name = req.user.user_name as string;
-    return this.restoreDeleteElectionUseCase.execute(id, user_name);
+    return this.restoreElectionUseCase.execute(id, user_name);
   }
 
   @Version('1') // API versioning
