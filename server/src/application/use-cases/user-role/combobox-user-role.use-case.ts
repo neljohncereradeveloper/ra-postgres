@@ -10,9 +10,9 @@ export class ComboboxUserRoleUseCase {
   ) {}
 
   async execute(): Promise<{ value: string; label: string }[]> {
-    const userRoles = await this.userRoleRepository.combobox();
+    const user_roles = await this.userRoleRepository.combobox();
 
-    return userRoles.map((val: { desc1: string }) => ({
+    return user_roles.map((val: { desc1: string }) => ({
       value: val.desc1,
       label:
         val.desc1.charAt(0).toUpperCase() + val.desc1.slice(1).toLowerCase(),

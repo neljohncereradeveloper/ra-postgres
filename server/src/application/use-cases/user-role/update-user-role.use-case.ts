@@ -28,24 +28,24 @@ export class UpdateUserRoleUseCase {
   async execute(
     id: number,
     dto: UpdateUserRoleCommand,
-    username: string,
+    user_name: string,
   ): Promise<UserRole> {
     return this.transactionHelper.executeTransaction(
       USER_ROLE_ACTIONS.UPDATE,
       async (manager) => {
         // validate applicationAccess existence
-        const userRole = await this.userRoleRepository.findById(id, manager);
-        if (!userRole) {
+        const user_role = await this.userRoleRepository.findById(id, manager);
+        if (!user_role) {
           throw new NotFoundException(`UserRole with ID ${id} not found.`);
         }
 
         // Update the userRole
-        userRole.update({ desc1: dto.desc1, updatedby: username });
+        user_role.update({ desc1: dto.desc1, updated_by: user_name });
 
         // save the updated user role
         const success = await this.userRoleRepository.update(
           id,
-          userRole,
+          user_role,
           manager,
         );
 
@@ -53,7 +53,7 @@ export class UpdateUserRoleUseCase {
           throw new SomethinWentWrongException(`UserRole update failed`);
         }
 
-        const updateResult = await this.userRoleRepository.findById(
+        const update_result = await this.userRoleRepository.findById(
           id,
           manager,
         );
@@ -63,16 +63,16 @@ export class UpdateUserRoleUseCase {
           action: USER_ROLE_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_USERROLE,
           details: JSON.stringify({
-            id: updateResult.id,
-            desc1: updateResult.desc1,
-            updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedat),
+            id: update_result.id,
+            desc1: update_result.desc1,
+            updated_by: user_name,
+            updated_at: getPHDateTime(update_result.updated_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

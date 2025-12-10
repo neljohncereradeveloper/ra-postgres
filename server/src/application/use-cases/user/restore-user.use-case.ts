@@ -20,7 +20,7 @@ export class RestoreDeleteUserUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       USER_ACTIONS.RESTORE,
       async (manager) => {
@@ -45,12 +45,12 @@ export class RestoreDeleteUserUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
             id,
-            userName: user.username,
-            explanation: `User with ID : ${id} restored by USER : ${userName}`,
-            restoredBy: user.username,
-            restoredAt: getPHDateTime(user.deletedat),
+            user_name: user.user_name,
+            explanation: `User with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(user.deleted_at || new Date()),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

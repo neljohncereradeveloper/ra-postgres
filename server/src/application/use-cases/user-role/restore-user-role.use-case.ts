@@ -20,22 +20,22 @@ export class RestoreDeleteUserRoleUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, username: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       USER_ROLE_ACTIONS.RESTORE,
       async (manager) => {
         // retrieve the application access
-        const userRole = await this.userRoleRepository.findById(id, manager);
-        if (!userRole) {
+        const user_role = await this.userRoleRepository.findById(id, manager);
+        if (!user_role) {
           throw new NotFoundException(`UserRole with ID ${id} not found.`);
         }
 
         // use domain model method to restore (ensures deletedBy is cleared)
-        userRole.restore();
+        user_role.restore();
 
         const success = await this.userRoleRepository.update(
           id,
-          userRole,
+          user_role,
           manager,
         );
         if (!success) {
@@ -48,12 +48,12 @@ export class RestoreDeleteUserRoleUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USERROLE,
           details: JSON.stringify({
             id,
-            desc1: userRole.desc1,
-            explanation: `UserRole with ID : ${id} restored by USER : ${username}`,
-            restoredBy: username,
-            restoredAt: getPHDateTime(),
+            desc1: user_role.desc1,
+            explanation: `UserRole with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(user_role.deleted_at || new Date()),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

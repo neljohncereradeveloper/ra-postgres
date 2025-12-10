@@ -27,25 +27,25 @@ export class CancelElectionUseCase {
     private readonly activeElectionRepository: ActiveElectionRepository,
   ) {}
 
-  async execute(userName: string): Promise<boolean> {
+  async execute(user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.CANCEL,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found`,
+            `Election with ID ${active_election.election_id} not found`,
           );
         }
 
@@ -54,7 +54,7 @@ export class CancelElectionUseCase {
 
         // update the election in the database
         const success = await this.electionRepository.update(
-          activeElection.electionid,
+          active_election.election_id,
           election,
           manager,
         );
@@ -75,11 +75,11 @@ export class CancelElectionUseCase {
             address: election.address,
             date: getPHDateTime(election.date),
             desc1: election.desc1,
-            explanation: `Election ${election.name} cancelled by USER : ${userName}`,
-            cancelledBy: userName,
-            cancelledAt: getPHDateTime(),
+            explanation: `Election ${election.name} cancelled by USER : ${user_name}`,
+            cancelled_by: user_name,
+            cancelled_at: getPHDateTime(),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

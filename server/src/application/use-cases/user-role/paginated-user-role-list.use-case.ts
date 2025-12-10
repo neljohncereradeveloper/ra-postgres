@@ -24,16 +24,16 @@ export class PaginatedUserRoleListUseCase {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: UserRole[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     // Validate input parameters (optional but recommended)
@@ -45,13 +45,13 @@ export class PaginatedUserRoleListUseCase {
     }
 
     // retrieve the paginated list of user roles
-    const userRoles = await this.userRoleRepository.findPaginatedList(
+    const user_roles = await this.userRoleRepository.findPaginatedList(
       term,
       page,
       limit,
-      isArchived,
+      is_archived,
     );
 
-    return userRoles;
+    return user_roles;
   }
 }

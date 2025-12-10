@@ -28,7 +28,7 @@ export class UpdateElectionUseCase {
   async execute(
     id: number,
     dto: UpdateElectionCommand,
-    userName: string,
+    user_name: string,
   ): Promise<Election> {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.UPDATE,
@@ -45,10 +45,10 @@ export class UpdateElectionUseCase {
           desc1: dto.desc1,
           address: dto.address,
           date: getPHDateTime(dto.date),
-          maxattendees: dto.maxAttendees,
-          starttime: dto.startTime,
-          endtime: dto.endTime,
-          updatedby: userName,
+          max_attendees: dto.max_attendees,
+          start_time: dto.start_time,
+          end_time: dto.end_time,
+          updated_by: user_name,
         });
 
         // update the election in the database
@@ -64,7 +64,7 @@ export class UpdateElectionUseCase {
         }
 
         // retrieve the updated election
-        const updateResult = await this.electionRepository.findById(
+        const update_result = await this.electionRepository.findById(
           id,
           manager,
         );
@@ -79,17 +79,17 @@ export class UpdateElectionUseCase {
             desc1: election.desc1,
             address: election.address,
             date: getPHDateTime(election.date),
-            maxAttendees: election.maxattendees,
-            startTime: election.starttime,
-            endTime: election.endtime,
-            updatedBy: userName,
-            updatedAt: getPHDateTime(election.updatedat),
+            max_attendees: election.max_attendees,
+            start_time: election.start_time,
+            end_time: election.end_time,
+            updated_by: user_name,
+            updated_at: getPHDateTime(election.updated_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

@@ -23,22 +23,22 @@ export class ArchiveUserRoleUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, username: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       USER_ROLE_ACTIONS.ARCHIVE,
       async (manager) => {
         // retrieve the application access
-        const userRole = await this.userRoleRepository.findById(id, manager);
-        if (!userRole) {
+        const user_role = await this.userRoleRepository.findById(id, manager);
+        if (!user_role) {
           throw new NotFoundException(`UserRole with ID ${id} not found.`);
         }
 
         // use domain model method to archive (ensures deletedBy is cleared)
-        userRole.archive(username);
+        user_role.archive(user_name);
 
         const success = await this.userRoleRepository.update(
           id,
-          userRole,
+          user_role,
           manager,
         );
         if (!success) {
@@ -50,12 +50,12 @@ export class ArchiveUserRoleUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USERROLE,
           details: JSON.stringify({
             id,
-            desc1: userRole.desc1,
-            explanation: `UserRole with ID : ${id} archived by USER : ${username}`,
-            archivedBy: username,
-            archivedAt: getPHDateTime(userRole.deletedat),
+            desc1: user_role.desc1,
+            explanation: `UserRole with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(user_role.deleted_at || new Date()),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

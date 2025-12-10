@@ -33,46 +33,46 @@ export class CreatePositionUseCase {
 
   async execute(
     dto: CreatePositionCommand,
-    username: string,
+    user_name: string,
   ): Promise<Position> {
     return this.transactionHelper.executeTransaction(
       POSITION_ACTIONS.CREATE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
         election.validateForUpdate();
 
         // use domain model method to create (encapsulates business logic and validation)
-        const newPosition = Position.create({
-          electionid: election.id,
+        const new_position = Position.create({
+          election_id: election.id,
           desc1: dto.desc1,
-          maxcandidates: dto.maxCandidates || 1,
-          termlimit: dto.termLimit || '1',
-          createdby: username,
+          max_candidates: dto.max_candidates || 1,
+          term_limit: dto.term_limit || '1',
+          created_by: user_name,
         });
         // create the position in the database
-        const createdPosition = await this.positionRepository.create(
-          newPosition,
+        const created_position = await this.positionRepository.create(
+          new_position,
           manager,
         );
 
-        if (!createdPosition) {
+        if (!created_position) {
           throw new SomethinWentWrongException('Position creation failed');
         }
 
@@ -81,16 +81,16 @@ export class CreatePositionUseCase {
           action: POSITION_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_POSITION,
           details: JSON.stringify({
-            id: createdPosition.id,
-            desc1: createdPosition.desc1,
-            createdBy: username,
-            createdAt: getPHDateTime(createdPosition.createdat),
+            id: created_position.id,
+            desc1: created_position.desc1,
+            created_by: user_name,
+            created_at: getPHDateTime(created_position.created_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return createdPosition;
+        return created_position;
       },
     );
   }

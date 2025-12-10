@@ -24,22 +24,22 @@ export class CreateUserRoleUseCase {
 
   async execute(
     dto: CreateUserRoleCommand,
-    username: string,
+    user_name: string,
   ): Promise<UserRole> {
     return this.transactionHelper.executeTransaction(
       USER_ROLE_ACTIONS.CREATE,
       async (manager) => {
         // Create the userRole
-        const userRole = UserRole.create({
+        const user_role = UserRole.create({
           desc1: dto.desc1,
-          createdby: username,
+          created_by: user_name,
         });
-        const createdUserRole = await this.userRoleRepository.create(
-          userRole,
+        const created_user_role = await this.userRoleRepository.create(
+          user_role,
           manager,
         );
 
-        if (!createdUserRole) {
+        if (!created_user_role) {
           throw new SomethinWentWrongException('User role creation failed');
         }
 
@@ -48,16 +48,16 @@ export class CreateUserRoleUseCase {
           action: USER_ROLE_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_USERROLE,
           details: JSON.stringify({
-            id: createdUserRole.id,
-            desc1: createdUserRole.desc1,
-            createdBy: username,
-            createdAt: getPHDateTime(createdUserRole.createdat),
+            id: created_user_role.id,
+            desc1: created_user_role.desc1,
+            created_by: user_name,
+            created_at: getPHDateTime(created_user_role.created_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return createdUserRole;
+        return created_user_role;
       },
     );
   }

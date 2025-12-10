@@ -38,25 +38,25 @@ export class StartElectionUseCase {
     private readonly candidateRepository: CandidateRepository,
   ) {}
 
-  async execute(userName: string): Promise<boolean> {
+  async execute(user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.START,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found`,
+            `Election with ID ${active_election.election_id} not found`,
           );
         }
 
@@ -105,11 +105,11 @@ export class StartElectionUseCase {
             desc1: election.desc1,
             address: election.address,
             date: getPHDateTime(election.date),
-            explanation: `Election with ID : ${election.id} started by USER : ${userName}`,
-            startedBy: userName,
-            startedAt: getPHDateTime(election.starttime),
+            explanation: `Election with ID : ${election.id} started by USER : ${user_name}`,
+            started_by: user_name,
+            started_at: getPHDateTime(election.start_time),
           }),
-          username: userName,
+          user_name: user_name,
         });
 
         await this.activityLogRepository.create(log, manager);

@@ -21,7 +21,7 @@ export class RestoreElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userName: string) {
+  async execute(id: number, user_name: string) {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.RESTORE,
       async (manager) => {
@@ -56,11 +56,11 @@ export class RestoreElectionUseCase {
             desc1: election.desc1,
             address: election.address,
             date: getPHDateTime(election.date),
-            explanation: `Election with ID : ${id} restored by USER : ${userName}`,
-            restoredBy: userName,
-            restoredAt: getPHDateTime(),
+            explanation: `Election with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(),
           }),
-          username: userName,
+          user_name: user_name,
         });
 
         await this.activityLogRepository.create(log, manager);

@@ -25,7 +25,7 @@ export class CreatePrecinctUseCase {
 
   async execute(
     dto: CreatePrecinctCommand,
-    userName: string,
+    user_name: string,
   ): Promise<Precinct> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.CREATE,
@@ -33,16 +33,16 @@ export class CreatePrecinctUseCase {
         // use domain model factory method to create (encapsulates business logic and validation)
         const precinct = Precinct.create({
           desc1: dto.desc1,
-          createdby: userName,
+          created_by: user_name,
         });
 
         // Create the precinct in the database
-        const createdPrecinct = await this.precinctRepository.create(
+        const created_precinct = await this.precinctRepository.create(
           precinct,
           manager,
         );
 
-        if (!createdPrecinct) {
+        if (!created_precinct) {
           throw new SomethinWentWrongException('Precinct creation failed');
         }
 
@@ -51,17 +51,17 @@ export class CreatePrecinctUseCase {
           action: PRECINCT_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,
           details: JSON.stringify({
-            id: createdPrecinct.id,
-            desc1: createdPrecinct.desc1,
-            createdBy: userName,
-            createdAt: getPHDateTime(createdPrecinct.createdat),
+            id: created_precinct.id,
+            desc1: created_precinct.desc1,
+            created_by: user_name,
+            created_at: getPHDateTime(created_precinct.created_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
         // Return the created precinct
-        return createdPrecinct;
+        return created_precinct;
       },
     );
   }

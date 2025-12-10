@@ -27,25 +27,25 @@ export class ArchivePositionUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       POSITION_ACTIONS.ARCHIVE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // Can only archive position if election is scheduled
@@ -58,7 +58,7 @@ export class ArchivePositionUseCase {
         }
 
         // use domain model method to archive (encapsulates business logic and validation)
-        position.archive(userName);
+        position.archive(user_name);
 
         // update the position in the database
         const success = await this.positionRepository.update(
@@ -77,11 +77,11 @@ export class ArchivePositionUseCase {
           details: JSON.stringify({
             id,
             desc1: position.desc1,
-            explanation: `Position with ID : ${id} archived by USER : ${userName}`,
-            archivedBy: userName,
-            archivedAt: getPHDateTime(position.deletedat),
+            explanation: `Position with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(position.deleted_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
 
         await this.activityLogRepository.create(log, manager);

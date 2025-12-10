@@ -26,7 +26,7 @@ export class UpdatePrecinctUseCase {
   async execute(
     id: number,
     dto: UpdatePrecinctCommand,
-    userName: string,
+    user_name: string,
   ): Promise<Precinct> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.UPDATE,
@@ -38,7 +38,7 @@ export class UpdatePrecinctUseCase {
         }
 
         // use domain model method to update (encapsulates business logic and validation)
-        precinct.update({ desc1: dto.desc1, updatedby: userName });
+        precinct.update({ desc1: dto.desc1, updated_by: user_name });
 
         // Update the precinct in the database
         const updateSuccessfull = await this.precinctRepository.update(
@@ -51,7 +51,7 @@ export class UpdatePrecinctUseCase {
         }
 
         // retrieve the updated precinct
-        const updateResult = await this.precinctRepository.findById(
+        const update_result = await this.precinctRepository.findById(
           id,
           manager,
         );
@@ -61,16 +61,16 @@ export class UpdatePrecinctUseCase {
           action: PRECINCT_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_PRECINCT,
           details: JSON.stringify({
-            id: updateResult.id,
-            desc1: updateResult.desc1,
-            updatedBy: userName,
-            updatedAt: getPHDateTime(updateResult.updatedat),
+            id: update_result.id,
+            desc1: update_result.desc1,
+            updated_by: user_name,
+            updated_at: getPHDateTime(update_result.updated_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

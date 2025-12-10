@@ -32,26 +32,26 @@ export class UpdatePositionUseCase {
   async execute(
     id: number,
     dto: UpdatePositionCommand,
-    username: string,
+    user_name: string,
   ): Promise<Position> {
     return this.transactionHelper.executeTransaction(
       POSITION_ACTIONS.UPDATE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // use domain model method to validate if election is scheduled
@@ -66,9 +66,9 @@ export class UpdatePositionUseCase {
         // use domain model method to update (encapsulates business logic and validation)
         position.update({
           desc1: dto.desc1,
-          maxcandidates: dto.maxCandidates,
-          termlimit: dto.termLimit,
-          updatedby: username,
+          max_candidates: dto.max_candidates,
+          term_limit: dto.term_limit,
+          updated_by: user_name,
         });
 
         // update the position in the database
@@ -82,7 +82,7 @@ export class UpdatePositionUseCase {
         }
 
         // retrieve the updated position
-        const updateResult = await this.positionRepository.findById(
+        const update_result = await this.positionRepository.findById(
           id,
           manager,
         );
@@ -92,16 +92,16 @@ export class UpdatePositionUseCase {
           action: POSITION_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_POSITION,
           details: JSON.stringify({
-            id: updateResult.id,
-            desc1: updateResult.desc1,
-            updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedat),
+            id: update_result.id,
+            desc1: update_result.desc1,
+            updated_by: user_name,
+            updated_at: getPHDateTime(update_result.updated_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

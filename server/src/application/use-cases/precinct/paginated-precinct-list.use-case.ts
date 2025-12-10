@@ -24,16 +24,16 @@ export class PaginatedPrecinctListUseCase {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ): Promise<{
     data: Precinct[];
     meta: {
       page: number;
       limit: number;
-      totalRecords: number;
-      totalPages: number;
-      nextPage: number | null;
-      previousPage: number | null;
+      total_records: number;
+      total_pages: number;
+      next_page: number | null;
+      previous_page: number | null;
     };
   }> {
     // Validate pagination parameters (Application Layer validation)
@@ -49,7 +49,7 @@ export class PaginatedPrecinctListUseCase {
       term,
       page,
       limit,
-      isArchived,
+      is_archived,
     );
 
     return result;

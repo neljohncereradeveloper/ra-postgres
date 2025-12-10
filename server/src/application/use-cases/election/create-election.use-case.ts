@@ -24,7 +24,7 @@ export class CreateElectionUseCase {
 
   async execute(
     dto: CreateElectionCommand,
-    userName: string,
+    user_name: string,
   ): Promise<Election> {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.CREATE,
@@ -35,16 +35,16 @@ export class CreateElectionUseCase {
           desc1: dto.desc1,
           address: dto.address,
           date: getPHDateTime(dto.date),
-          createdby: userName,
+          created_by: user_name,
         });
 
         // create the election in the database
-        const createdElection = await this.electionRepository.create(
+        const created_election = await this.electionRepository.create(
           election,
           manager,
         );
 
-        if (!createdElection) {
+        if (!created_election) {
           throw new SomethinWentWrongException('Election creation failed');
         }
 
@@ -53,20 +53,20 @@ export class CreateElectionUseCase {
           action: ELECTION_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_ELECTION,
           details: JSON.stringify({
-            id: createdElection.id,
-            name: createdElection.name,
-            desc1: createdElection.desc1,
-            address: createdElection.address,
-            date: getPHDateTime(createdElection.date),
-            createdBy: userName,
-            createdAt: getPHDateTime(createdElection.createdat),
+            id: created_election.id,
+            name: created_election.name,
+            desc1: created_election.desc1,
+            address: created_election.address,
+            date: getPHDateTime(created_election.date),
+            created_by: user_name,
+            created_at: getPHDateTime(created_election.created_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
         // Return the created election
-        return createdElection;
+        return created_election;
       },
     );
   }

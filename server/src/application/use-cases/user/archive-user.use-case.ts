@@ -20,7 +20,7 @@ export class ArchiveUserUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       USER_ACTIONS.ARCHIVE,
       async (manager) => {
@@ -30,7 +30,7 @@ export class ArchiveUserUseCase {
           throw new NotFoundException(`User with ID ${id} not found.`);
         }
         // Use domain model method to archive (encapsulates business logic and validation)
-        user.archive(userName);
+        user.archive(user_name);
 
         const success = await this.userRepository.update(id, user, manager);
         if (!success) {
@@ -43,12 +43,12 @@ export class ArchiveUserUseCase {
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
             id,
-            userName: user.username,
-            explanation: `User with ID : ${id} archived by USER : ${userName}`,
-            archivedBy: userName,
-            archivedAt: getPHDateTime(user.deletedat),
+            user_name: user.user_name,
+            explanation: `User with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(user.deleted_at || new Date()),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

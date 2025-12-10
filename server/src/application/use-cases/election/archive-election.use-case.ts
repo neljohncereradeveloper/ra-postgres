@@ -21,7 +21,7 @@ export class ArchiveElectionUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userName: string) {
+  async execute(id: number, user_name: string) {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.ARCHIVE,
       async (manager) => {
@@ -34,7 +34,7 @@ export class ArchiveElectionUseCase {
         }
 
         // Use domain method to archive (soft delete)
-        election.archive(userName);
+        election.archive(user_name);
 
         // update the election in the database
         const success = await this.electionRepository.update(
@@ -58,11 +58,11 @@ export class ArchiveElectionUseCase {
             desc1: election.desc1,
             address: election.address,
             date: getPHDateTime(election.date),
-            explanation: `Election with ID : ${id} archived by USER : ${userName}`,
-            archivedBy: userName,
-            archivedAt: getPHDateTime(election.deletedat),
+            explanation: `Election with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(election.deleted_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
 
         await this.activityLogRepository.create(log, manager);

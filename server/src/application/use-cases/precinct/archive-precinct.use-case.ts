@@ -31,25 +31,25 @@ export class ArchivePrecinctUseCase {
     private readonly electionRepository: ElectionRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.ARCHIVE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found.`,
+            `Election with ID ${active_election.election_id} not found.`,
           );
         }
         // Use domain model method to validate if election is scheduled
@@ -61,7 +61,7 @@ export class ArchivePrecinctUseCase {
           throw new NotFoundException(`Precinct with ID ${id} not found.`);
         }
         // Use domain model method to archive (encapsulates business logic and validation)
-        precinct.archive(userName);
+        precinct.archive(user_name);
 
         // Update the precinct in the database
         const success = await this.precinctRepository.update(
@@ -80,11 +80,11 @@ export class ArchivePrecinctUseCase {
           details: JSON.stringify({
             id,
             desc1: precinct.desc1,
-            explanation: `Precinct with ID : ${id} archived by USER : ${userName}`,
-            archivedBy: userName,
-            archivedAt: getPHDateTime(precinct.deletedat),
+            explanation: `Precinct with ID : ${id} archived by USER : ${user_name}`,
+            archived_by: user_name,
+            archived_at: getPHDateTime(precinct.deleted_at),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

@@ -28,25 +28,25 @@ export class CloseElectionUseCase {
     // private readonly ballotRepository: BallotRepository,
   ) {}
 
-  async execute(userName: string): Promise<boolean> {
+  async execute(user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       ELECTION_ACTIONS.CLOSE,
       async (manager) => {
         // retrieve the active election
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new NotFoundException('No Active election');
         }
 
         // retrieve the election
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         if (!election) {
           throw new NotFoundException(
-            `Election with ID ${activeElection.electionid} not found`,
+            `Election with ID ${active_election.election_id} not found`,
           );
         }
 
@@ -55,7 +55,7 @@ export class CloseElectionUseCase {
 
         // update the election in the database
         const success = await this.electionRepository.update(
-          activeElection.electionid,
+          active_election.election_id,
           election,
           manager,
         );
@@ -68,7 +68,7 @@ export class CloseElectionUseCase {
 
         // Remove all delegate links in the ballot
         // await this.ballotRepository.unlinkBallot(
-        //   activeElection.electionId,
+        //   active_election.election_id,
         //   manager,
         // );
 
@@ -82,11 +82,11 @@ export class CloseElectionUseCase {
             address: election.address,
             date: getPHDateTime(election.date),
             desc1: election.desc1,
-            explanation: `Election ${election.name} closed by USER : ${userName}`,
-            closedBy: userName,
-            closedAt: getPHDateTime(),
+            explanation: `Election ${election.name} closed by USER : ${user_name}`,
+            closed_by: user_name,
+            closed_at: getPHDateTime(),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

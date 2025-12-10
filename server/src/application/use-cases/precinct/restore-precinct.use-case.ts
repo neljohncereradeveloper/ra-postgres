@@ -25,7 +25,7 @@ export class RestorePrecinctUseCase {
     private readonly activityLogRepository: ActivityLogRepository,
   ) {}
 
-  async execute(id: number, userName: string): Promise<boolean> {
+  async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.RESTORE,
       async (manager) => {
@@ -55,11 +55,11 @@ export class RestorePrecinctUseCase {
           details: JSON.stringify({
             id,
             desc1: precinct.desc1,
-            explanation: `Precinct with ID : ${id} restored by USER : ${userName}`,
-            restoredBy: userName,
-            restoredAt: getPHDateTime(),
+            explanation: `Precinct with ID : ${id} restored by USER : ${user_name}`,
+            restored_by: user_name,
+            restored_at: getPHDateTime(precinct.deleted_at || new Date()),
           }),
-          username: userName,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 

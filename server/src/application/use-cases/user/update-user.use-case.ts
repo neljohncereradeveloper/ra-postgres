@@ -44,19 +44,19 @@ export class UpdateUserUseCase {
   async execute(
     id: number,
     dto: UpdateUserCommand,
-    username: string,
+    user_name: string,
   ): Promise<User> {
     return this.transactionHelper.executeTransaction(
       USER_ACTIONS.UPDATE,
       async (manager) => {
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new BadRequestException('No Active election');
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         // Can only UPDATE user if election is schedule
@@ -71,19 +71,19 @@ export class UpdateUserUseCase {
         }
 
         /** validate roles if exist */
-        const userRolesPromises = dto.userRoles.map(async (role) => {
+        const user_roles_promises = dto.user_roles.map(async (role) => {
           // validate role
-          const userRole = await this.userRoleRepository.findByDesc(
+          const user_role = await this.userRoleRepository.findByDesc(
             role.trim(),
           );
-          if (!userRole) {
+          if (!user_role) {
             throw new NotFoundException(`Role ${role} not found`);
           }
         });
         // Execute all promises concurrently using Promise.all.
-        await Promise.all(userRolesPromises);
+        await Promise.all(user_roles_promises);
 
-        const applicationAccessPromises = dto.applicationAccess.map(
+        const application_access_promises = dto.application_access.map(
           async (value) => {
             // validate application access
             const applicationAccess =
@@ -96,53 +96,53 @@ export class UpdateUserUseCase {
           },
         );
         // Execute all promises concurrently using Promise.all.
-        await Promise.all(applicationAccessPromises);
+        await Promise.all(application_access_promises);
 
         // validate user existence
-        const userResult = await this.userRepository.findById(id, manager);
-        if (!userResult) {
+        const user_result = await this.userRepository.findById(id, manager);
+        if (!user_result) {
           throw new NotFoundException('User not found');
         }
 
         // use domain model method to update (encapsulates business logic and validation)
-        userResult.update({
+        user_result.update({
           precinct: dto.precinct,
           watcher: dto.watcher,
-          applicationaccess: dto.applicationAccess,
-          userroles: dto.userRoles,
-          updatedby: username,
+          application_access: dto.application_access,
+          user_roles: dto.user_roles,
+          updated_by: user_name,
         });
-        const updateSuccessfull = await this.userRepository.update(
+        const update_successful = await this.userRepository.update(
           id,
-          userResult,
+          user_result,
           manager,
         );
 
-        if (!updateSuccessfull) {
+        if (!update_successful) {
           throw new SomethinWentWrongException('User update failed');
         }
 
-        const updateResult = await this.userRepository.findById(id, manager);
+        const update_result = await this.userRepository.findById(id, manager);
 
         // Log the update
         const log = ActivityLog.create({
           action: USER_ACTIONS.UPDATE,
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
-            id: updateResult.id,
-            userName: updateResult.username,
-            precinct: updateResult.precinct,
-            watcher: updateResult.watcher,
-            applicationAccess: updateResult.applicationaccess,
-            userRoles: updateResult.userroles,
-            updatedBy: username,
-            updatedAt: getPHDateTime(updateResult.updatedat),
+            id: update_result.id,
+            user_name: update_result.user_name,
+            precinct: update_result.precinct,
+            watcher: update_result.watcher,
+            application_access: update_result.application_access,
+            user_roles: update_result.user_roles,
+            updated_by: user_name,
+            updated_at: getPHDateTime(update_result.updated_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return updateResult;
+        return update_result;
       },
     );
   }

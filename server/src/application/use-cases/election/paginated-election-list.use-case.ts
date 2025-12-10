@@ -14,7 +14,7 @@ export class PaginatedElectionListUseCase {
     term: string,
     page: number,
     limit: number,
-    isArchived: boolean,
+    is_archived: boolean,
   ) {
     // Validate input parameters (optional but recommended)
     if (page < 1) {
@@ -28,7 +28,7 @@ export class PaginatedElectionListUseCase {
       term,
       page,
       limit,
-      isArchived,
+      is_archived,
     );
 
     return elections;

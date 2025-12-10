@@ -44,18 +44,18 @@ export class CreateUserUseCase {
     private readonly precinctRepository: PrecinctRepository,
   ) {}
 
-  async execute(dto: CreateUserCommand, username: string): Promise<User> {
+  async execute(dto: CreateUserCommand, user_name: string): Promise<User> {
     return this.transactionHelper.executeTransaction(
       USER_ACTIONS.CREATE,
       async (manager) => {
-        const activeElection =
+        const active_election =
           await this.activeElectionRepository.retrieveActiveElection(manager);
-        if (!activeElection) {
+        if (!active_election) {
           throw new BadRequestException('No Active election');
         }
 
         const election = await this.electionRepository.findById(
-          activeElection.electionid,
+          active_election.election_id,
           manager,
         );
         // Can only add user if election is scheduled
@@ -70,7 +70,7 @@ export class CreateUserUseCase {
         }
 
         /** validate roles if exist */
-        const userRolesPromises = dto.userRoles.map(async (role) => {
+        const user_roles_promises = dto.user_roles.map(async (role) => {
           // validate role
           const userRole = await this.userRoleRepository.findByDesc(
             role.trim(),
@@ -80,9 +80,9 @@ export class CreateUserUseCase {
           }
         });
         // Execute all promises concurrently using Promise.all.
-        await Promise.all(userRolesPromises);
+        await Promise.all(user_roles_promises);
 
-        const applicationAccessPromises = dto.applicationAccess.map(
+        const application_access_promises = dto.application_access.map(
           async (value) => {
             // validate application access
             const applicationAccess =
@@ -95,7 +95,7 @@ export class CreateUserUseCase {
           },
         );
         // Execute all promises concurrently using Promise.all.
-        await Promise.all(applicationAccessPromises);
+        await Promise.all(application_access_promises);
 
         const hassPassword = await this.passwordEncryptionPort.hash(
           dto.password,
@@ -105,15 +105,15 @@ export class CreateUserUseCase {
         const user = User.create({
           precinct: dto.precinct,
           watcher: dto.watcher,
-          applicationaccess: dto.applicationAccess,
-          userroles: dto.userRoles,
-          username: dto.userName,
+          application_access: dto.application_access,
+          user_roles: dto.user_roles,
+          user_name: dto.user_name,
           password: hassPassword,
-          createdby: username,
+          created_by: user_name,
         });
-        const createdUser = await this.userRepository.create(user, manager);
+        const created_user = await this.userRepository.create(user, manager);
 
-        if (!createdUser) {
+        if (!created_user) {
           throw new SomethinWentWrongException('User creation failed');
         }
 
@@ -122,20 +122,20 @@ export class CreateUserUseCase {
           action: USER_ACTIONS.CREATE,
           entity: DATABASE_CONSTANTS.MODELNAME_USER,
           details: JSON.stringify({
-            id: createdUser.id,
-            userName: createdUser.username,
-            precinct: createdUser.precinct,
-            watcher: createdUser.watcher,
-            applicationAccess: createdUser.applicationaccess,
-            userRoles: createdUser.userroles,
-            createdBy: username,
-            createdAt: getPHDateTime(createdUser.createdat),
+            id: created_user.id,
+            user_name: created_user.user_name,
+            precinct: created_user.precinct,
+            watcher: created_user.watcher,
+            application_access: created_user.application_access,
+            user_roles: created_user.user_roles,
+            created_by: user_name,
+            created_at: getPHDateTime(created_user.created_at),
           }),
-          username: username,
+          user_name: user_name,
         });
         await this.activityLogRepository.create(log, manager);
 
-        return createdUser;
+        return created_user;
       },
     );
   }
