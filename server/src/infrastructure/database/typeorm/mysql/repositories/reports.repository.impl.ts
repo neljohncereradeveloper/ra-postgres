@@ -15,6 +15,7 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
         `
           SELECT
             p.desc1 AS position,
+            c.id AS candidate_id,
             c.display_name AS candidate,
             COUNT(cv.id) AS vote_count
           FROM positions p
@@ -48,6 +49,7 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
         `
           SELECT
             p.desc1 AS position,
+            c.id AS candidate_id,
             c.display_name AS candidate
           FROM positions p
           JOIN candidates c ON c.position_id = p.id

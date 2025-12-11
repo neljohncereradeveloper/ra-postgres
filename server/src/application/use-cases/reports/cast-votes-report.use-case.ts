@@ -63,6 +63,7 @@ export class CastVoteReportUseCase {
             });
           }
           position_map.get(row.position).candidates.push({
+            id: row.candidate_id,
             name: row.candidate,
             vote_count: Number(row.vote_count),
           });

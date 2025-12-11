@@ -63,6 +63,7 @@ export class CandidatesReportUseCase {
             });
           }
           position_map.get(row.position).candidates.push({
+            id: row.candidate_id,
             name: row.candidate,
           });
         }

@@ -171,8 +171,6 @@ export class CastVoteUseCase {
               throw new SomethinWentWrongException('Cast vote creation failed');
             }
 
-            console.log('castVote => ', castVote);
-
             current_datetime = castVote.datetime_cast;
 
             // Log the cast vote

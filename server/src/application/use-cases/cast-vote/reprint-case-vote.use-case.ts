@@ -106,8 +106,6 @@ export class ReprintCastVoteUseCase {
             ? [cast_votes]
             : [];
 
-        console.log('cast_votes_array => ', cast_votes_array);
-
         // Group by position_name and precinct, then collect candidates
         const candidates_map = new Map();
         for (const vote of cast_votes_array) {
