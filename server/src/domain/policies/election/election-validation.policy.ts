@@ -20,7 +20,7 @@ export class ElectionValidationPolicy {
    * - Date must be provided and valid
    * - Election status must be a valid enum value
    * - Max attendees must be positive if provided
-   * - Start time and end time must be valid dates if provided
+   * - Start time and end time must be valid time strings (HH:MM:SS format) if provided
    * - End time must be after start time if both are provided
    *
    * @param election - The election to validate
@@ -101,37 +101,41 @@ export class ElectionValidationPolicy {
       );
     }
 
-    // Validate if startTime is a valid date if provided
+    // Validate if startTime is a valid time string if provided (format: HH:MM:SS)
     if (
       election.start_time !== undefined &&
       election.start_time !== null &&
-      (!(election.start_time instanceof Date) ||
-        isNaN(election.start_time.getTime()))
+      election.start_time !== ''
     ) {
-      throw new ElectionBusinessException(
-        'Start time must be a valid date.',
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+      if (!timeRegex.test(election.start_time)) {
+        throw new ElectionBusinessException(
+          'Start time must be a valid time in HH:MM:SS format.',
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
     }
 
-    // Validate if endTime is a valid date if provided
+    // Validate if endTime is a valid time string if provided (format: HH:MM:SS)
     if (
       election.end_time !== undefined &&
       election.end_time !== null &&
-      (!(election.end_time instanceof Date) ||
-        isNaN(election.end_time.getTime()))
+      election.end_time !== ''
     ) {
-      throw new ElectionBusinessException(
-        'End time must be a valid date.',
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+      if (!timeRegex.test(election.end_time)) {
+        throw new ElectionBusinessException(
+          'End time must be a valid time in HH:MM:SS format.',
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
     }
 
     // Validate if endTime is after startTime when both are provided
     if (
       election.start_time &&
       election.end_time &&
-      election.end_time < election.start_time
+      election.end_time <= election.start_time
     ) {
       throw new ElectionBusinessException(
         'End time must be after start time.',

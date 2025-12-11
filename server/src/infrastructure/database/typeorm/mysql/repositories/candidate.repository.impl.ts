@@ -278,7 +278,7 @@ export class CandidateRepositoryImpl
         p.max_candidates,
         p.term_limit,
         p.sort_order,
-        c.id,
+        c.id AS candidate_id,
         c.display_name
       FROM candidates c
       LEFT JOIN positions p ON c.position_id = p.id

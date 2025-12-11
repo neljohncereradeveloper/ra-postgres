@@ -107,7 +107,7 @@ export class StartElectionUseCase {
             date: getPHDateTime(election.date),
             explanation: `Election with ID : ${election.id} started by USER : ${user_name}`,
             started_by: user_name,
-            started_at: getPHDateTime(election.start_time),
+            started_at: election.start_time,
           }),
           user_name: user_name,
         });

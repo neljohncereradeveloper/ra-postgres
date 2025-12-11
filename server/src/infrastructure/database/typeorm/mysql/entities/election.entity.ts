@@ -37,11 +37,11 @@ export class ElectionEntity {
   @Column({ type: 'date', nullable: true })
   date: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  start_time: Date;
+  @Column({ type: 'time', nullable: true })
+  start_time: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  end_time: Date;
+  @Column({ type: 'time', nullable: true })
+  end_time: string;
 
   @Column({ nullable: true })
   max_attendees: number; // Note: Add CHECK constraint in migration: max_attendees > 0 OR max_attendees IS NULL

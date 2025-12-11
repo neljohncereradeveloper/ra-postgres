@@ -10,6 +10,7 @@ import {
   extractRows,
 } from '@shared/utils/query-result.util';
 import { PaginatedResult } from '@domain/interfaces/pagination.interface';
+import { getPHDateString } from '@domain/utils/format-ph-time';
 
 @Injectable()
 export class ElectionRepositoryImpl
@@ -189,7 +190,7 @@ export class ElectionRepositoryImpl
         name,
         desc1,
         address,
-        date,
+        date::text,
         start_time,
         end_time,
         max_attendees,
@@ -214,6 +215,8 @@ export class ElectionRepositoryImpl
       this.dataSource.query(countQuery, queryParams),
     ]);
 
+    console.log('data_rows => ', data_rows);
+
     // Extract total records
     const data_rows_array = extractRows(data_rows);
     const count_row = getFirstRow(count_result);
@@ -223,6 +226,7 @@ export class ElectionRepositoryImpl
       page,
       limit,
     );
+
     // Map raw results to domain models
     const data = data_rows_array.map((row: any) => this.rowToModel(row));
 
@@ -253,7 +257,7 @@ export class ElectionRepositoryImpl
         name,
         desc1,
         address,
-        date,
+        date::text,
         start_time,
         end_time,
         max_attendees,
@@ -284,7 +288,7 @@ export class ElectionRepositoryImpl
         name,
         desc1,
         address,
-        date,
+        date::text,
         start_time,
         end_time,
         max_attendees,
@@ -305,7 +309,7 @@ export class ElectionRepositoryImpl
         name,
         desc1,
         address,
-        date
+        date::text
       FROM elections
       WHERE deleted_at IS NULL AND election_status = $1
       ORDER BY name ASC
@@ -328,7 +332,7 @@ export class ElectionRepositoryImpl
         name,
         desc1,
         address,
-        date,
+        date::text,
         start_time,
         end_time,
         max_attendees,

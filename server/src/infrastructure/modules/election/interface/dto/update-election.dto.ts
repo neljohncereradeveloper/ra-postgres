@@ -7,6 +7,7 @@ import {
   MaxLength,
   Min,
   ValidateIf,
+  Matches,
 } from 'class-validator';
 import { toLowerCase } from '../../../../../shared/utils/dto-transformers.util';
 
@@ -34,13 +35,17 @@ export class UpdateElectionDto {
   @Min(1, { message: 'Maximum attendees must be greater than zero' })
   max_attendees: number;
 
-  @ValidateIf((o) => o.startTime !== null)
-  @Transform(({ value }) => (value ? new Date(value) : null))
-  @IsDate({ message: 'Start time must be a valid date' })
-  start_time: Date | null;
+  // @ValidateIf((o) => o.start_time !== null && o.start_time !== '')
+  // @IsString({ message: 'Start time must be a string' })
+  // @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/, {
+  //   message: 'Start time must be in HH:MM:SS format',
+  // })
+  // start_time: string | null;
 
-  @ValidateIf((o) => o.endTime !== null)
-  @Transform(({ value }) => (value ? new Date(value) : null))
-  @IsDate({ message: 'End time must be a valid date' })
-  end_time: Date | null;
+  // @ValidateIf((o) => o.end_time !== null && o.end_time !== '')
+  // @IsString({ message: 'End time must be a string' })
+  // @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/, {
+  //   message: 'End time must be in HH:MM:SS format',
+  // })
+  // end_time: string | null;
 }

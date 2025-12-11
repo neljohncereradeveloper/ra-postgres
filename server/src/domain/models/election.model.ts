@@ -6,7 +6,7 @@ import { ElectionValidationPolicy } from '@domain/policies/election/election-val
 import { ElectionStatus } from '@domain/enums/index';
 import { ElectionBusinessException } from '../exceptions';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
-import { getPHDateTime } from '@domain/utils/format-ph-time';
+import { getPHDateTime, getPHTimeString } from '@domain/utils/format-ph-time';
 
 export class Election {
   id: number;
@@ -16,8 +16,8 @@ export class Election {
   date: Date;
   max_attendees: number;
   election_status: ElectionStatus;
-  start_time?: Date;
-  end_time?: Date;
+  start_time?: string;
+  end_time?: string;
   deleted_by?: string;
   deleted_at?: Date | null;
   created_by?: string;
@@ -30,8 +30,8 @@ export class Election {
     name?: string;
     desc1?: string;
     address?: string;
-    start_time?: Date;
-    end_time?: Date;
+    start_time?: string;
+    end_time?: string;
     max_attendees?: number;
     election_status?: ElectionStatus;
     date?: Date;
@@ -119,7 +119,7 @@ export class Election {
       candidate_count,
     );
     // set election data
-    this.start_time = getPHDateTime();
+    this.start_time = getPHTimeString();
     this.election_status = ElectionStatus.STARTED;
   }
 
@@ -130,7 +130,7 @@ export class Election {
     // Validate if the election can be closed
     new ElectionClosePolicy().validateElectionClose(this);
     // set election data
-    this.end_time = getPHDateTime();
+    this.end_time = getPHTimeString();
     this.election_status = ElectionStatus.CLOSED;
   }
 
@@ -165,8 +165,6 @@ export class Election {
     address: string;
     date: Date;
     max_attendees: number;
-    start_time: Date | null;
-    end_time: Date | null;
     updated_by: string;
   }): void {
     if (this.deleted_at) {
@@ -184,8 +182,6 @@ export class Election {
       address: dto.address,
       date: dto.date,
       max_attendees: dto.max_attendees,
-      start_time: dto.start_time,
-      end_time: dto.end_time,
       election_status: this.election_status,
     });
     // Validate the new state before applying changes
@@ -197,8 +193,6 @@ export class Election {
     this.address = dto.address;
     this.date = dto.date;
     this.max_attendees = dto.max_attendees;
-    this.start_time = dto.start_time;
-    this.end_time = dto.end_time;
     this.updated_by = dto.updated_by;
     this.updated_at = getPHDateTime();
   }

@@ -4,6 +4,4 @@ export interface UpdateElectionCommand {
   address: string;
   date: Date;
   max_attendees: number;
-  start_time: Date | null;
-  end_time: Date | null;
 }

@@ -30,3 +30,23 @@ export function getPHDateTime(date?: Date): Date {
 
   return phTime;
 }
+
+/**
+ * Get the time portion from a Date object as a string in HH:MM:SS format
+ * @param date Optional date to extract time from. If not provided, current time will be used
+ * @returns Time string in 'HH:MM:SS' format
+ */
+export function getPHTimeString(date?: Date): string {
+  const phDate = date ? new Date(date) : new Date();
+  const phTime = new Date(
+    phDate.toLocaleString('en-US', { timeZone: 'Asia/Manila' }),
+  );
+
+  return (
+    String(phTime.getHours()).padStart(2, '0') +
+    ':' +
+    String(phTime.getMinutes()).padStart(2, '0') +
+    ':' +
+    String(phTime.getSeconds()).padStart(2, '0')
+  );
+}

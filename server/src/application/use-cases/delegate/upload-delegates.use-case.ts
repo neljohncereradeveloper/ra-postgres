@@ -122,21 +122,21 @@ export class UploadDelegatesUseCase {
           const row = rows.rows[index];
           // Create the delegate
           const delegate = new Delegate({
-            branch: row.branch,
+            branch: row.branch.toLowerCase(),
             election_id: election?.id,
-            account_id: row.accountid,
-            account_name: row.name,
+            account_id: row.accountid.toLowerCase(),
+            account_name: row.name.toLowerCase(),
             age: row.age,
             balance: row.balance,
-            loan_status: row.loanstatus,
-            mev_status: row.mevstatus,
-            client_type: row.clienttype,
-            address: row.address,
+            loan_status: row.loanstatus.toLowerCase(),
+            mev_status: row.mevstatus.toLowerCase(),
+            client_type: row.clienttype.toLowerCase(),
+            address: row.address.toLowerCase(),
             tell: row.tell,
             cell: row.cell,
             date_opened: row.dateopened,
             birth_date: row.birthdate,
-            control_number: row.controlnumber,
+            control_number: row.controlnumber.toLowerCase(),
           });
 
           const delegate_result = await this.delegateRepository.create(

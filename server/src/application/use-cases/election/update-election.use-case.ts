@@ -46,8 +46,6 @@ export class UpdateElectionUseCase {
           address: dto.address,
           date: getPHDateTime(dto.date),
           max_attendees: dto.max_attendees,
-          start_time: dto.start_time,
-          end_time: dto.end_time,
           updated_by: user_name,
         });
 

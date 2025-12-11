@@ -28,11 +28,18 @@ export class ElectionClosePolicy {
       );
     }
     // Validate if the start time is before the current time
-    if (election.start_time && new Date() < election.start_time) {
-      throw new ElectionBusinessException(
-        'End time cannot be before the start time.',
-        HTTP_STATUS.BAD_REQUEST,
-      );
+    // Combine election date with start_time to compare with current time
+    if (election.start_time && election.date) {
+      const [hours, minutes, seconds] = election.start_time.split(':').map(Number);
+      const startDateTime = new Date(election.date);
+      startDateTime.setHours(hours, minutes, seconds, 0);
+      
+      if (new Date() < startDateTime) {
+        throw new ElectionBusinessException(
+          'End time cannot be before the start time.',
+          HTTP_STATUS.BAD_REQUEST,
+        );
+      }
     }
   }
 }
