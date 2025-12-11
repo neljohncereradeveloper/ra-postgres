@@ -139,12 +139,10 @@ export class CandidateRepositoryImpl
         c.position_id,
         c.district_id,
         c.delegate_id,
-        c.display_name,
-        d.account_id,
-        d.account_name,
-        p.desc1,
-        dist.desc1,
-        e.name
+        c.display_name AS candidate_name,
+        c.deleted_at,
+        p.desc1 AS position,
+        dist.desc1 AS district
       FROM candidates c
       LEFT JOIN delegates d ON c.delegate_id = d.id
       LEFT JOIN positions p ON c.position_id = p.id

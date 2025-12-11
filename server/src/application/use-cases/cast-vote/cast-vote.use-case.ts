@@ -107,6 +107,8 @@ export class CastVoteUseCase {
           positions_map.set(position.id, position);
         });
 
+        let current_datetime: Date | null;
+
         // Collect all candidates for validation if provided
         if (dto.candidates && dto.candidates.length > 0) {
           for (const candidateDto of dto.candidates) {
@@ -142,7 +144,7 @@ export class CastVoteUseCase {
               ballot_number: ballot.ballot_number,
               election_name: election.name,
               note: 'Empty ballot submitted (no candidates selected)',
-              date_submitted: getPHDateTime(),
+              date_submitted: current_datetime,
             }),
             user_name: user_name,
           });
@@ -169,6 +171,10 @@ export class CastVoteUseCase {
               throw new SomethinWentWrongException('Cast vote creation failed');
             }
 
+            console.log('castVote => ', castVote);
+
+            current_datetime = castVote.datetime_cast;
+
             // Log the cast vote
             const log = ActivityLog.create({
               action: CAST_VOTE_ACTIONS.CAST_VOTE,
@@ -177,7 +183,7 @@ export class CastVoteUseCase {
                 id: castVote.id,
                 election: election.name,
                 ballot_number: castVote.ballot_number,
-                candidate: candidate.display_name,
+                candidate: candidate.candidate_name,
                 datetime_cast: getPHDateTime(castVote.datetime_cast),
                 precinct: precinct,
               }),
@@ -199,6 +205,13 @@ export class CastVoteUseCase {
         return {
           ballot_id: ballot.ballot_number,
           precinct: precinct,
+          datetime_cast: current_datetime,
+          candidates: candidates.map((candidate) => ({
+            id: candidate.id,
+            position: candidate.position,
+            district: candidate.district,
+            name: candidate.candidate_name,
+          })),
           election: election,
         };
       },

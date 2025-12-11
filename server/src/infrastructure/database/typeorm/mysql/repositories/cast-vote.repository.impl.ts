@@ -26,7 +26,7 @@ export class CastVoteRepositoryImpl
           datetime_cast
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *
+        RETURNING id, election_id, ballot_number, precinct, candidate_id, position_id, district_id, datetime_cast::text as datetime_cast
       `;
 
       const result = await context.query(query, [
@@ -43,6 +43,7 @@ export class CastVoteRepositoryImpl
       if (!row) {
         return null;
       }
+
       return this.rowToModel(row);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
