@@ -29,7 +29,7 @@ export class ReportsRepositoryImpl implements ReportsRepository<EntityManager> {
             AND p.election_id = $2
             AND c.election_id = $3
           GROUP BY p.id, c.id
-          ORDER BY p.id, vote_count DESC, c.display_name;
+          ORDER BY p.id, c.display_name, p.sort_order, vote_count DESC;
         `,
         [election_id, election_id, election_id],
       );
