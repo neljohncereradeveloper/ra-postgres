@@ -277,11 +277,13 @@ export class CandidateRepositoryImpl
         p.desc1 AS position,
         p.max_candidates,
         p.term_limit,
+        p.sort_order,
         c.id,
         c.display_name
       FROM candidates c
       LEFT JOIN positions p ON c.position_id = p.id
       WHERE c.deleted_at IS NULL AND c.election_id = $1
+      ORDER BY p.sort_order DESC
     `;
 
     const result = await manager.query(query, [election_id]);

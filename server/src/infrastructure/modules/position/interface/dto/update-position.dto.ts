@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { toLowerCase } from '../../../../../shared/utils/dto-transformers.util';
 
 export class UpdatePositionDto {
@@ -15,4 +15,8 @@ export class UpdatePositionDto {
   @IsNotEmpty()
   @IsString()
   term_limit: string;
+
+  @IsOptional()
+  @IsNumber()
+  sort_order?: number;
 }

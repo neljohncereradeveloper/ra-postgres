@@ -56,13 +56,15 @@ export class GetElectionCandidatesUseCase {
             (g) =>
               g.position === curr.position &&
               g.max_candidates === curr.max_candidates &&
-              g.term_limit === curr.term_limit,
+              g.term_limit === curr.term_limit &&
+              g.sort_order === curr.sort_order,
           );
           if (!group) {
             group = {
               position: curr.position,
               max_candidates: curr.max_candidates,
               term_limit: curr.term_limit,
+              sort_order: curr.sort_order,
               candidates: [],
             };
             acc.push(group);
