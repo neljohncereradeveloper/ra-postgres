@@ -219,7 +219,7 @@ export class CandidateRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(c.id) AS "totalRecords"
+      SELECT COUNT(c.id) AS "total_records"
       FROM candidates c
       ${whereClause}
     `;

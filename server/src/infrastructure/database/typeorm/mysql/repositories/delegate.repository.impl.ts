@@ -268,7 +268,7 @@ export class DelegateRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(d.id) AS "totalRecords"
+      SELECT COUNT(d.id) AS "total_records"
       FROM delegates d
       INNER JOIN elections e ON d.election_id = e.id
       WHERE ${whereClause}

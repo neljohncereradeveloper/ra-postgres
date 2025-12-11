@@ -182,7 +182,7 @@ export class UserRepositoryImpl implements UserRepository<EntityManager> {
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS "totalRecords"
+      SELECT COUNT(id) AS "total_records"
       FROM users
       ${whereClause}
     `;

@@ -184,7 +184,7 @@ export class PositionRepositoryImpl
 
     // Build count query
     const countQuery = `
-      SELECT COUNT(id) AS "totalRecords"
+      SELECT COUNT(id) AS "total_records"
       FROM positions
       ${whereClause}
     `;
