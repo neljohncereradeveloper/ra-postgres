@@ -49,7 +49,7 @@ export class ReprintCastVoteUseCase {
     ballot_id: string;
     precinct: string;
     election: Election;
-    group_candidates: any;
+    votes: any;
   }> {
     return this.transactionHelper.executeTransaction(
       CAST_VOTE_ACTIONS.REPRINT_CAST_VOTE,
@@ -106,6 +106,8 @@ export class ReprintCastVoteUseCase {
             ? [cast_votes]
             : [];
 
+        console.log('cast_votes_array => ', cast_votes_array);
+
         // Group by position_name and precinct, then collect candidates
         const candidates_map = new Map();
         for (const vote of cast_votes_array) {
@@ -114,6 +116,7 @@ export class ReprintCastVoteUseCase {
           if (!candidates_map.has(key)) {
             candidates_map.set(key, {
               position,
+              sort_order: vote.sort_order,
               candidates: [],
             });
           }
@@ -122,7 +125,7 @@ export class ReprintCastVoteUseCase {
             name: vote.candidate_name,
           });
         }
-        const group_candidates = Array.from(candidates_map.values());
+        const votes = Array.from(candidates_map.values());
 
         // Log the cast vote
         const log = ActivityLog.create({
@@ -144,7 +147,7 @@ export class ReprintCastVoteUseCase {
           precinct:
             cast_votes_array.length > 0 ? cast_votes_array[0].precinct : null,
           election: election,
-          group_candidates,
+          votes,
         };
       },
     );

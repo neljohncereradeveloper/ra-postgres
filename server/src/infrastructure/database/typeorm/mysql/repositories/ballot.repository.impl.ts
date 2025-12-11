@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { BallotRepository } from '@domains/repositories/ballot.repository';
 import { Ballot } from '@domain/models/ballot.model';
-import { BALLOT_STATUS_CONSTANTS } from '@domain/constants/ballot/ballot-actions.constants';
 import { getInsertId, getFirstRow } from '@shared/utils/query-result.util';
+import { BallotStatus } from '@domain/enums/index';
 
 @Injectable()
 export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
@@ -25,7 +25,7 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
       ballot_number,
       delegate_id,
       election_id,
-      BALLOT_STATUS_CONSTANTS.ISSUED,
+      BallotStatus.ISSUED,
     ]);
 
     const row = getFirstRow(result);
@@ -43,7 +43,7 @@ export class BallotRepositoryImpl implements BallotRepository<EntityManager> {
     // Update the ballot status
     await context.query(
       `UPDATE ballots SET ballot_status = $1 WHERE ballot_number = $2`,
-      [BALLOT_STATUS_CONSTANTS.SUBMITTED, ballot_number],
+      [BallotStatus.SUBMITTED, ballot_number],
     );
 
     // Retrieve the updated ballot

@@ -68,19 +68,22 @@ export class CastVoteRepositoryImpl
           cv.position_id,
           cv.district_id,
           cv.datetime_cast,
-          cv.deletedat,
+          cv.deleted_at,
+          c.display_name AS candidate_name,
+          p.desc1 AS position_name,
+          p.sort_order,
+          d.desc1 AS district_name
         FROM cast_votes cv
+        LEFT JOIN candidates c ON c.id = cv.candidate_id
+        LEFT JOIN positions p ON p.id = cv.position_id
+        LEFT JOIN districts d ON d.id = cv.district_id
         WHERE cv.ballot_number = $1 AND cv.election_id = $2
-        LIMIT 1
+        ORDER BY p.sort_order ASC
       `;
 
       const result = await context.query(query, [ballot_number, election_id]);
-      const row = getFirstRow(result);
-      if (!row) {
-        return null;
-      }
 
-      return this.rowToModel(row);
+      return result;
     } catch (error) {
       throw error;
     }

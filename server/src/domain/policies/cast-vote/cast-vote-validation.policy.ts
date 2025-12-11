@@ -6,8 +6,7 @@ import { Ballot } from '@domain/models/ballot.model';
 import { Candidate } from '@domain/models/candidate.model';
 import { Position } from '@domain/models/position.model';
 import { CastVoteBusinessException } from '@domains/exceptions/cast-vote/cast-vote-business.exception';
-import { ElectionStatus } from '@domain/enums/index';
-import { BALLOT_STATUS_CONSTANTS } from '@domain/constants/ballot/ballot-actions.constants';
+import { BallotStatus, ElectionStatus } from '@domain/enums/index';
 import { HTTP_STATUS } from '@shared/constants/http-status.constants';
 
 /**
@@ -98,9 +97,9 @@ export class CastVoteValidationPolicy {
     }
 
     // Validate if the ballot is in issued status
-    if (ballot.ballot_status !== BALLOT_STATUS_CONSTANTS.ISSUED) {
+    if (ballot.ballot_status !== BallotStatus.ISSUED) {
       throw new CastVoteBusinessException(
-        `Ballot is in invalid state: ${ballot.ballot_status}. Expected: ${BALLOT_STATUS_CONSTANTS.ISSUED}`,
+        `Ballot is in invalid state: ${ballot.ballot_status}. Expected: ${BallotStatus.ISSUED}`,
         HTTP_STATUS.BAD_REQUEST,
       );
     }
