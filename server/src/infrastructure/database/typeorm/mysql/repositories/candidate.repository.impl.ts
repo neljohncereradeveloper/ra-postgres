@@ -144,7 +144,7 @@ export class CandidateRepositoryImpl
         d.account_name,
         p.desc1,
         dist.desc1,
-        e.name,
+        e.name
       FROM candidates c
       LEFT JOIN delegates d ON c.delegate_id = d.id
       LEFT JOIN positions p ON c.position_id = p.id
@@ -206,7 +206,7 @@ export class CandidateRepositoryImpl
         d.account_name,
         p.desc1,
         dist.desc1,
-        e.name,
+        e.name
       FROM candidates c
       LEFT JOIN delegates d ON c.delegate_id = d.id
       LEFT JOIN positions p ON c.position_id = p.id
@@ -274,11 +274,11 @@ export class CandidateRepositoryImpl
   ): Promise<any[]> {
     const query = `
       SELECT 
-        p.desc1,
+        p.desc1 AS position,
         p.max_candidates,
         p.term_limit,
         c.id,
-        c.display_name,
+        c.display_name
       FROM candidates c
       LEFT JOIN positions p ON c.position_id = p.id
       WHERE c.deleted_at IS NULL AND c.election_id = $1

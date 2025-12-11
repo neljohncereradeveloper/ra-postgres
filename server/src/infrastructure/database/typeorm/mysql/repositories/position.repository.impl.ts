@@ -24,10 +24,11 @@ export class PositionRepositoryImpl
           desc1,
           max_candidates,
           term_limit,
+          sort_order,
           created_by,
           created_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
       `;
 
@@ -36,6 +37,7 @@ export class PositionRepositoryImpl
         position.desc1,
         position.max_candidates || null,
         position.term_limit || null,
+        position.sort_order || null,
         position.created_by || null,
         position.created_at || new Date(),
       ]);
@@ -76,6 +78,11 @@ export class PositionRepositoryImpl
       if (update_fields.term_limit !== undefined) {
         updateParts.push(`term_limit = $${paramIndex++}`);
         values.push(update_fields.term_limit);
+      }
+
+      if (update_fields.sort_order !== undefined) {
+        updateParts.push(`sort_order = $${paramIndex++}`);
+        values.push(update_fields.sort_order);
       }
 
       if (update_fields.updated_by !== undefined) {
@@ -162,6 +169,7 @@ export class PositionRepositoryImpl
         desc1,
         max_candidates,
         term_limit,
+        sort_order,
         deleted_by,
         deleted_at,
         created_by,
@@ -221,6 +229,7 @@ export class PositionRepositoryImpl
         desc1,
         max_candidates,
         term_limit,
+        sort_order,
         deleted_by,
         deleted_at,
         created_by,
@@ -252,12 +261,13 @@ export class PositionRepositoryImpl
         desc1,
         max_candidates,
         term_limit,
+        sort_order,
         deleted_by,
         deleted_at,
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM positions
       WHERE desc1 = $1 AND election_id = $2 AND deleted_at IS NULL
       LIMIT 1
@@ -301,12 +311,13 @@ export class PositionRepositoryImpl
         desc1,
         max_candidates,
         term_limit,
+        sort_order,
         deleted_by,
         deleted_at,
         created_by,
         created_at,
         updated_by,
-        updated_at,
+        updated_at
       FROM positions
       WHERE election_id = $1 AND deleted_at IS NULL
       ORDER BY desc1 ASC
@@ -340,6 +351,7 @@ export class PositionRepositoryImpl
       desc1: row.desc1,
       max_candidates: row.max_candidates,
       term_limit: row.term_limit,
+      sort_order: row.sort_order,
       deleted_by: row.deleted_by,
       deleted_at: row.deleted_at,
       created_by: row.created_by,

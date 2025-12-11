@@ -68,6 +68,7 @@ export class UpdatePositionUseCase {
           desc1: dto.desc1,
           max_candidates: dto.max_candidates,
           term_limit: dto.term_limit,
+          sort_order: dto.sort_order,
           updated_by: user_name,
         });
 
@@ -94,6 +95,7 @@ export class UpdatePositionUseCase {
           details: JSON.stringify({
             id: update_result.id,
             desc1: update_result.desc1,
+            sort_order: update_result.sort_order,
             updated_by: user_name,
             updated_at: getPHDateTime(update_result.updated_at),
           }),

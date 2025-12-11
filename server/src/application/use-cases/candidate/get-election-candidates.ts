@@ -55,14 +55,14 @@ export class GetElectionCandidatesUseCase {
           let group = acc.find(
             (g) =>
               g.position === curr.position &&
-              g.position_max_candidates === curr.position_max_candidates &&
-              g.position_term_limit === curr.position_term_limit,
+              g.max_candidates === curr.max_candidates &&
+              g.term_limit === curr.term_limit,
           );
           if (!group) {
             group = {
               position: curr.position,
-              position_max_candidates: curr.position_max_candidates,
-              position_term_limit: curr.position_term_limit,
+              max_candidates: curr.max_candidates,
+              term_limit: curr.term_limit,
               candidates: [],
             };
             acc.push(group);

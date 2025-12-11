@@ -64,6 +64,7 @@ export class CreatePositionUseCase {
           desc1: dto.desc1,
           max_candidates: dto.max_candidates || 1,
           term_limit: dto.term_limit || '1',
+          sort_order: dto.sort_order,
           created_by: user_name,
         });
         // create the position in the database
@@ -83,6 +84,7 @@ export class CreatePositionUseCase {
           details: JSON.stringify({
             id: created_position.id,
             desc1: created_position.desc1,
+            sort_order: created_position.sort_order,
             created_by: user_name,
             created_at: getPHDateTime(created_position.created_at),
           }),

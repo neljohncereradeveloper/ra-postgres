@@ -15,6 +15,7 @@ export class Position {
   desc1: string;
   max_candidates: number;
   term_limit: string;
+  sort_order?: number;
   deleted_by?: string;
   deleted_at?: Date | null;
   created_by?: string;
@@ -28,6 +29,7 @@ export class Position {
     desc1: string;
     max_candidates: number;
     term_limit: string;
+    sort_order?: number;
     deleted_by?: string;
     deleted_at?: Date | null;
     created_by?: string;
@@ -40,6 +42,7 @@ export class Position {
     this.desc1 = params.desc1;
     this.max_candidates = params.max_candidates;
     this.term_limit = params.term_limit;
+    this.sort_order = params.sort_order;
     this.deleted_by = params.deleted_by;
     this.deleted_at = params.deleted_at;
     this.created_by = params.created_by;
@@ -67,6 +70,7 @@ export class Position {
     desc1: string;
     max_candidates: number;
     term_limit: string;
+    sort_order?: number;
     created_by?: string;
   }): Position {
     const position = new Position({
@@ -74,6 +78,7 @@ export class Position {
       desc1: params.desc1,
       max_candidates: params.max_candidates,
       term_limit: params.term_limit,
+      sort_order: params.sort_order,
       created_by: params.created_by,
       created_at: getPHDateTime(),
     });
@@ -97,6 +102,7 @@ export class Position {
     desc1: string;
     max_candidates: number;
     term_limit: string;
+    sort_order?: number;
     updated_by?: string;
   }): void {
     if (this.deleted_at) {
@@ -121,6 +127,7 @@ export class Position {
     this.desc1 = dto.desc1;
     this.max_candidates = dto.max_candidates;
     this.term_limit = dto.term_limit;
+    this.sort_order = dto.sort_order;
     this.updated_by = dto.updated_by;
     this.updated_at = getPHDateTime();
   }

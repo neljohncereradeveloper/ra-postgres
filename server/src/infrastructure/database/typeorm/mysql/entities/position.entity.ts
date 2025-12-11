@@ -34,6 +34,9 @@ export class PositionEntity {
   @Column({ length: 100, nullable: true })
   term_limit: string;
 
+  @Column({ nullable: true })
+  sort_order?: number;
+
   @Column({
     comment: 'username of the user who deleted the position',
     nullable: true,
