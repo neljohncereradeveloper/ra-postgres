@@ -11,6 +11,8 @@ import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
 import { TransactionAdapter } from '@infrastructure/database/typeorm-mysql/adapters/transaction-helper.adapter';
 import { UserRoleRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/user-role.repository.impl';
 import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/activity-log.repository.impl';
+import { ElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/election.repository.impl';
+import { ActiveElectionRepositoryImpl } from '@infrastructure/database/typeorm-mysql/repositories/active-election.repository.impl';
 
 @Module({
   imports: [MysqlDatabaseModule],
@@ -20,6 +22,14 @@ import { ActivityLogRepositoryImpl } from '@infrastructure/database/typeorm-mysq
     {
       provide: REPOSITORY_TOKENS.TRANSACTIONPORT,
       useClass: TransactionAdapter,
+    },
+    {
+      provide: REPOSITORY_TOKENS.ELECTION,
+      useClass: ElectionRepositoryImpl,
+    },
+    {
+      provide: REPOSITORY_TOKENS.ACTIVE_ELECTION,
+      useClass: ActiveElectionRepositoryImpl,
     },
     { provide: REPOSITORY_TOKENS.USERROLE, useClass: UserRoleRepositoryImpl },
     {
