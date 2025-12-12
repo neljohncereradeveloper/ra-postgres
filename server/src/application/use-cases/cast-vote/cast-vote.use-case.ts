@@ -76,6 +76,8 @@ export class CastVoteUseCase {
             `Election with ID ${active_election.election_id} not found.`,
           );
         }
+        // Use domain model method to validate if election is scheduled
+        election.validateForUpdate();
 
         // retrieve the delegate
         const delegate =

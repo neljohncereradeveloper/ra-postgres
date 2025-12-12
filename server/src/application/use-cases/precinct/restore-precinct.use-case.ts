@@ -5,7 +5,9 @@ import {
   SomethinWentWrongException,
 } from '@domains/exceptions/index';
 import {
+  ActiveElectionRepository,
   ActivityLogRepository,
+  ElectionRepository,
   PrecinctRepository,
 } from '@domains/repositories/index';
 import { PRECINCT_ACTIONS } from '@domain/constants/index';
@@ -23,12 +25,36 @@ export class RestorePrecinctUseCase {
     private readonly precinctRepository: PrecinctRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
+    @Inject(REPOSITORY_TOKENS.ELECTION)
+    private readonly electionRepository: ElectionRepository,
   ) {}
 
   async execute(id: number, user_name: string): Promise<boolean> {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.RESTORE,
       async (manager) => {
+        // retrieve the active election
+        const active_election =
+          await this.activeElectionRepository.retrieveActiveElection(manager);
+        if (!active_election) {
+          throw new NotFoundException('No Active election');
+        }
+
+        // retrieve the election
+        const election = await this.electionRepository.findById(
+          active_election.election_id,
+          manager,
+        );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${active_election.election_id} not found.`,
+          );
+        }
+        // Use domain model method to validate if election is scheduled
+        election.validateForUpdate();
+
         // Find the precinct (including archived)
         const precinct = await this.precinctRepository.findById(id, manager);
         if (!precinct) {

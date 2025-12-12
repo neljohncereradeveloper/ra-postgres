@@ -36,8 +36,6 @@ export class ArchiveElectionUseCase {
         // Use domain method to archive (soft delete)
         election.archive(user_name);
 
-        console.log('election: ', election);
-
         // update the election in the database
         const success = await this.electionRepository.update(
           id,

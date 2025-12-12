@@ -4,13 +4,18 @@ import { ActivityLog, Precinct } from '@domain/models/index';
 import { TransactionPort } from '@domain/ports/index';
 import { getPHDateTime } from '@domain/utils/format-ph-time';
 import {
+  ActiveElectionRepository,
   ActivityLogRepository,
+  ElectionRepository,
   PrecinctRepository,
 } from '@domains/repositories/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CONSTANTS } from '@shared/constants/database.constants';
 import { REPOSITORY_TOKENS } from '@shared/constants/tokens.constants';
-import { SomethinWentWrongException } from '@domains/exceptions/index';
+import {
+  NotFoundException,
+  SomethinWentWrongException,
+} from '@domains/exceptions/index';
 
 @Injectable()
 export class CreatePrecinctUseCase {
@@ -21,6 +26,10 @@ export class CreatePrecinctUseCase {
     private readonly precinctRepository: PrecinctRepository,
     @Inject(REPOSITORY_TOKENS.ACTIVITYLOGS)
     private readonly activityLogRepository: ActivityLogRepository,
+    @Inject(REPOSITORY_TOKENS.ACTIVE_ELECTION)
+    private readonly activeElectionRepository: ActiveElectionRepository,
+    @Inject(REPOSITORY_TOKENS.ELECTION)
+    private readonly electionRepository: ElectionRepository,
   ) {}
 
   async execute(
@@ -30,6 +39,26 @@ export class CreatePrecinctUseCase {
     return this.transactionHelper.executeTransaction(
       PRECINCT_ACTIONS.CREATE,
       async (manager) => {
+        // retrieve the active election
+        const active_election =
+          await this.activeElectionRepository.retrieveActiveElection(manager);
+        if (!active_election) {
+          throw new NotFoundException('No Active election');
+        }
+
+        // retrieve the election
+        const election = await this.electionRepository.findById(
+          active_election.election_id,
+          manager,
+        );
+        if (!election) {
+          throw new NotFoundException(
+            `Election with ID ${active_election.election_id} not found.`,
+          );
+        }
+        // Use domain model method to validate if election is scheduled
+        election.validateForUpdate();
+
         // use domain model factory method to create (encapsulates business logic and validation)
         const precinct = Precinct.create({
           desc1: dto.desc1,
